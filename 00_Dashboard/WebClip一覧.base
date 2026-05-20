@@ -1,0 +1,50 @@
+filters:
+  and:
+    - file.inFolder("06_WebClips")
+    - file.ext == "md"
+    - file.name != "AGENTS"
+    - type == "webclip"
+properties:
+  file.name:
+    displayName: クリップ
+  type:
+    displayName: 種別
+  company:
+    displayName: 企業
+  industry:
+    displayName: 業界
+  source_type:
+    displayName: 出典種別
+  clip_status:
+    displayName: 整理状況
+  clipped:
+    displayName: 取得日
+  url:
+    displayName: URL
+  site:
+    displayName: サイト
+  title:
+    displayName: タイトル
+  use_for:
+    displayName: 用途
+  tags:
+    displayName: タグ
+  file.mtime:
+    displayName: 更新日
+views:
+  - type: table
+    name: WebClip一覧
+    order:
+      - file.name
+      - type
+      - company
+      - industry
+      - source_type
+      - clip_status
+      - clipped
+      - url
+      - site
+      - title
+      - use_for
+      - tags
+      - file.mtime

@@ -1,0 +1,44 @@
+filters:
+  and:
+    - file.inFolder("01_Companies")
+    - file.ext == "md"
+    - file.name != "AGENTS"
+    - type == "company"
+properties:
+  file.name:
+    displayName: 企業
+  type:
+    displayName: 種別
+  industry:
+    displayName: 業界
+  role:
+    displayName: 職種
+  status:
+    displayName: 状況
+  priority:
+    displayName: 優先度
+  deadline:
+    displayName: 直近締切
+  next_action:
+    displayName: 次アクション
+  event:
+    displayName: イベント
+  keywords:
+    displayName: キーワード
+  file.mtime:
+    displayName: 更新日
+views:
+  - type: table
+    name: 企業一覧
+    order:
+      - file.name
+      - type
+      - industry
+      - role
+      - status
+      - priority
+      - deadline
+      - next_action
+      - event
+      - keywords
+      - file.mtime

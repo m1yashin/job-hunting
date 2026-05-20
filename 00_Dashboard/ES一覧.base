@@ -1,0 +1,41 @@
+filters:
+  and:
+    - file.inFolder("02_ES")
+    - file.ext == "md"
+    - file.name != "AGENTS"
+    - type == "es"
+properties:
+  file.name:
+    displayName: ES
+  type:
+    displayName: 種別
+  company:
+    displayName: 企業
+  question_type:
+    displayName: 設問種別
+  word_limit:
+    displayName: 字数
+  status:
+    displayName: 状況
+  deadline:
+    displayName: 提出締切
+  version:
+    displayName: 版
+  related_experience:
+    displayName: 関連経験
+  file.mtime:
+    displayName: 更新日
+views:
+  - type: table
+    name: ES一覧
+    order:
+      - file.name
+      - type
+      - company
+      - question_type
+      - word_limit
+      - status
+      - deadline
+      - version
+      - related_experience
+      - file.mtime
