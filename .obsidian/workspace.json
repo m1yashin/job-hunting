@@ -25,15 +25,42 @@
             "state": {
               "type": "bases",
               "state": {
-                "file": "00_Dashboard/ES一覧.base",
-                "viewName": "ES一覧"
+                "file": "00_Dashboard/企業一覧.base",
+                "viewName": "企業"
               },
               "icon": "lucide-table",
-              "title": "ES一覧"
+              "title": "企業一覧"
+            }
+          },
+          {
+            "id": "660025c86de5a6ff",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "00_Dashboard/企業一覧.base",
+                "viewName": "企業"
+              },
+              "icon": "lucide-table",
+              "title": "企業一覧"
+            }
+          },
+          {
+            "id": "94442df33f99fb27",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "02_Companies/日鉄ソリューションズ/企業概要.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "企業概要"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -207,12 +234,28 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "f58741ffec1c74c8",
+  "active": "660025c86de5a6ff",
   "lastOpenFiles": [
-    "00_Dashboard/WebClip一覧.base",
+    "00_Dashboard/メモ素材一覧.base",
+    "00_Dashboard/面接対策一覧.base",
     "00_Dashboard/企業一覧.base",
-    "00_Dashboard/選考イベント一覧.base",
-    "00_Dashboard/ES一覧.base",
+    "00_Dashboard/企業ログ一覧.base",
+    "02_Companies/日鉄ソリューションズ/ES/ES一覧.md",
+    "99_Templates/ES一覧テンプレ.md",
+    "02_Companies/日立/ES/ES一覧.md",
+    "02_Companies/日本総研/ES/ES一覧.md",
+    "02_Companies/NTTデータ/ES/ES一覧.md",
+    "02_Companies/NRI/ES/ES一覧.md",
+    "02_Companies/日鉄ソリューションズ/ログ",
+    "02_Companies/日立/ログ",
+    "02_Companies/日本総研/ログ",
+    "02_Companies/NTTデータ/ログ",
+    "02_Companies/NRI/ログ/2026-05-25_NRI_一次面接.md",
+    "02_Companies/NRI/ログ",
+    "00_Dashboard/選考ログ一覧.base",
+    "01_Selection/面接/面接ログ/2026-05-25_NRI_一次面接.md",
+    "02_Companies/日鉄ソリューションズ/企業概要.md",
+    "00_Dashboard/GD対策一覧.base",
     "AGENTS.md",
     "06_WebClips/AGENTS.md",
     "05_IndustryResearch/AGENTS.md",
@@ -221,22 +264,13 @@
     "02_ES/AGENTS.md",
     "01_Companies/AGENTS.md",
     "00_Dashboard/AGENTS.md",
-    "06_WebClips",
-    "05_IndustryResearch",
-    "無題のファイル.base",
     "04_SelfAnalysis/志望軸.md",
     "04_SelfAnalysis/強み弱み.md",
-    "04_SelfAnalysis",
     "03_Interview/面接質問集.md",
     "03_Interview/逆質問.md",
-    "03_Interview",
     "02_ES/研究概要.md",
     "02_ES/志望動機テンプレ.md",
     "02_ES/ガクチカ.md",
-    "02_ES",
-    "01_Companies/日本総研.md",
-    "01_Companies/NTTデータ.md",
-    "01_Companies/NRI.md",
-    "ようこそ.md"
+    "01_Companies/日本総研.md"
   ]
 }

@@ -37,7 +37,7 @@ views:
     name: 回答ユニット
     filters:
       and:
-        - 'type == "answer_unit"'
+        - type == "answer_unit"
     order:
       - file.name
       - theme
@@ -51,7 +51,7 @@ views:
     name: 質問Item
     filters:
       and:
-        - 'type == "interview_question"'
+        - type == "interview_question"
     order:
       - file.name
       - question
@@ -62,7 +62,7 @@ views:
     name: 質問マップ
     filters:
       and:
-        - 'type == "interview_questions"'
+        - type == "interview_questions"
     order:
       - file.name
       - category
@@ -72,8 +72,8 @@ views:
     name: 改善中
     filters:
       and:
-        - 'type == "answer_unit"'
-        - 'status == "改善中"'
+        - type == "answer_unit"
+        - status == "改善中"
     order:
       - file.name
       - type

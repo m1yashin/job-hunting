@@ -5,6 +5,7 @@ filters:
     - file.name != "AGENTS"
     - or:
         - type == "company"
+        - type == "es_index"
         - type == "company_analysis"
         - type == "material_summary"
         - type == "interview_company_prep"
@@ -28,6 +29,8 @@ properties:
     displayName: 締切
   next_action:
     displayName: 次アクション
+  es_index:
+    displayName: ES
   question_type:
     displayName: 設問種別
   word_limit:
@@ -43,7 +46,7 @@ views:
     name: 企業
     filters:
       and:
-        - 'type == "company"'
+        - type == "company"
     order:
       - file.name
       - company
@@ -52,13 +55,23 @@ views:
       - priority
       - status
       - deadline
+      - es_index
       - next_action
       - file.mtime
   - type: table
-    name: ES
+    name: ES入口
     filters:
       and:
-        - 'type == "es"'
+        - type == "es_index"
+    order:
+      - file.name
+      - company
+      - file.mtime
+  - type: table
+    name: ES設問
+    filters:
+      and:
+        - type == "es"
     order:
       - file.name
       - company
@@ -72,7 +85,7 @@ views:
     name: 企業分析
     filters:
       and:
-        - 'type == "company_analysis"'
+        - type == "company_analysis"
     order:
       - file.name
       - company
@@ -81,7 +94,7 @@ views:
     name: 素材要約
     filters:
       and:
-        - 'type == "material_summary"'
+        - type == "material_summary"
     order:
       - file.name
       - company
@@ -91,7 +104,7 @@ views:
     name: 企業別面接対策
     filters:
       and:
-        - 'type == "interview_company_prep"'
+        - type == "interview_company_prep"
     order:
       - file.name
       - company

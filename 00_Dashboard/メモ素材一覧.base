@@ -53,7 +53,7 @@ views:
     name: WebClip
     filters:
       and:
-        - 'type == "webclip"'
+        - type == "webclip"
     order:
       - file.name
       - company
@@ -68,7 +68,7 @@ views:
     name: 素材メモ
     filters:
       and:
-        - 'type == "material_note"'
+        - type == "material_note"
     order:
       - file.name
       - theme
@@ -81,9 +81,9 @@ views:
     name: 未整理
     filters:
       or:
-        - 'status == "未整理"'
-        - 'clip_status == "未読"'
-        - 'status.isEmpty()'
+        - status == "未整理"
+        - clip_status == "未読"
+        - status.isEmpty()
     order:
       - file.name
       - type
