@@ -1,4 +1,4 @@
-﻿---
+---
 type: interview_question
 question: なぜNRIなのか？
 category: 企業理解

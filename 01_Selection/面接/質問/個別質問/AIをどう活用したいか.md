@@ -1,4 +1,4 @@
-﻿---
+---
 type: interview_question
 question: AIをどう活用したいか？
 category: 技術関心

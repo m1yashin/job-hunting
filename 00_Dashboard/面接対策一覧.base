@@ -1,12 +1,15 @@
 filters:
   and:
-    - file.inFolder("01_Selection/面接")
+    - or:
+        - file.inFolder("01_Selection/面接")
+        - file.inFolder("02_Companies")
     - file.ext == "md"
     - file.name != "AGENTS"
     - or:
         - type == "answer_unit"
         - type == "interview_question"
         - type == "interview_questions"
+        - type == "interview_company_prep"
 properties:
   file.name:
     displayName: ノート
@@ -18,6 +21,8 @@ properties:
     displayName: 質問
   category:
     displayName: 分類
+  company:
+    displayName: 企業
   priority:
     displayName: 優先度
   status:
@@ -30,6 +35,8 @@ properties:
     displayName: 深掘りタイプ
   use_for:
     displayName: 用途
+  source_clips:
+    displayName: 原典
   file.mtime:
     displayName: 更新日
 views:
@@ -67,6 +74,18 @@ views:
       - file.name
       - category
       - use_for
+      - file.mtime
+  - type: table
+    name: 企業別面接対策
+    filters:
+      and:
+        - type == "interview_company_prep"
+    order:
+      - file.name
+      - company
+      - status
+      - use_for
+      - source_clips
       - file.mtime
   - type: table
     name: 改善中

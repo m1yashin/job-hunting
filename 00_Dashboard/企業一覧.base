@@ -31,6 +31,8 @@ properties:
     displayName: 次アクション
   es_index:
     displayName: ES
+  interview_prep:
+    displayName: 面接対策
   question_type:
     displayName: 設問種別
   word_limit:
@@ -56,6 +58,7 @@ views:
       - status
       - deadline
       - es_index
+      - interview_prep
       - next_action
       - file.mtime
   - type: table

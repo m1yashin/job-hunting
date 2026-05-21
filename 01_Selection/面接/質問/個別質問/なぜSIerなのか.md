@@ -1,4 +1,4 @@
-﻿---
+---
 type: interview_question
 question: なぜSIerなのか？
 category: 業界理解
