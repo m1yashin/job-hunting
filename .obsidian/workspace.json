@@ -1,0 +1,242 @@
+{
+  "main": {
+    "id": "0826627bc4597196",
+    "type": "split",
+    "children": [
+      {
+        "id": "85f614e0b5bfd9c2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7c0e3902984e1cbc",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "graph",
+              "state": {},
+              "pinned": true,
+              "icon": "lucide-git-fork",
+              "title": "グラフビュー"
+            }
+          },
+          {
+            "id": "f58741ffec1c74c8",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "00_Dashboard/ES一覧.base",
+                "viewName": "ES一覧"
+              },
+              "icon": "lucide-table",
+              "title": "ES一覧"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8a6bf27467b12b61",
+    "type": "split",
+    "children": [
+      {
+        "id": "36c859b8c6e145b1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "695252bb5dfb5ff3",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "ファイルエクスプローラ"
+            }
+          },
+          {
+            "id": "e2a117cd659f737d",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "検索"
+            }
+          },
+          {
+            "id": "037e360d48f93d0c",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "ブックマーク"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "6a6b82ef0193e77f",
+    "type": "split",
+    "children": [
+      {
+        "id": "c51a0f5e11742755",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cc5fc6dd17aadd86",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "ようこそ.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "ようこそへのバックリンク"
+            }
+          },
+          {
+            "id": "b579be1add5a25d8",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "ようこそ.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "ようこそからのアウトゴーイングリンク"
+            }
+          },
+          {
+            "id": "9fc22285e37209e9",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "タグ"
+            }
+          },
+          {
+            "id": "7295ed8aa822ce8e",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "すべてのプロパティ"
+            }
+          },
+          {
+            "id": "a39ba5a9bc82c6a7",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "ようこそ.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "ようこそのアウトライン"
+            }
+          },
+          {
+            "id": "23952cdc7f547473",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:クイックスイッチャーを開く": false,
+      "graph:グラフビューを開く": false,
+      "canvas:新規キャンバスを作成": false,
+      "daily-notes:今日のデイリーノートを開く": false,
+      "templates:テンプレートを挿入": false,
+      "command-palette:コマンドパレットを開く": false,
+      "bases:新規ベースを作成": false,
+      "obsidian-git:Open Git source control": false,
+      "templater-obsidian:Templater": false
+    }
+  },
+  "active": "f58741ffec1c74c8",
+  "lastOpenFiles": [
+    "00_Dashboard/WebClip一覧.base",
+    "00_Dashboard/企業一覧.base",
+    "00_Dashboard/選考イベント一覧.base",
+    "00_Dashboard/ES一覧.base",
+    "AGENTS.md",
+    "06_WebClips/AGENTS.md",
+    "05_IndustryResearch/AGENTS.md",
+    "04_SelfAnalysis/AGENTS.md",
+    "03_Interview/AGENTS.md",
+    "02_ES/AGENTS.md",
+    "01_Companies/AGENTS.md",
+    "00_Dashboard/AGENTS.md",
+    "06_WebClips",
+    "05_IndustryResearch",
+    "無題のファイル.base",
+    "04_SelfAnalysis/志望軸.md",
+    "04_SelfAnalysis/強み弱み.md",
+    "04_SelfAnalysis",
+    "03_Interview/面接質問集.md",
+    "03_Interview/逆質問.md",
+    "03_Interview",
+    "02_ES/研究概要.md",
+    "02_ES/志望動機テンプレ.md",
+    "02_ES/ガクチカ.md",
+    "02_ES",
+    "01_Companies/日本総研.md",
+    "01_Companies/NTTデータ.md",
+    "01_Companies/NRI.md",
+    "ようこそ.md"
+  ]
+}
