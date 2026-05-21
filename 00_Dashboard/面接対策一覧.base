@@ -1,0 +1,86 @@
+filters:
+  and:
+    - file.inFolder("01_Selection/面接")
+    - file.ext == "md"
+    - file.name != "AGENTS"
+    - or:
+        - type == "answer_unit"
+        - type == "interview_question"
+        - type == "interview_questions"
+properties:
+  file.name:
+    displayName: ノート
+  type:
+    displayName: 種別
+  theme:
+    displayName: テーマ
+  question:
+    displayName: 質問
+  category:
+    displayName: 分類
+  priority:
+    displayName: 優先度
+  status:
+    displayName: 状況
+  related_answer_unit:
+    displayName: 関連回答ユニット
+  related_questions:
+    displayName: 関連質問
+  deep_dive_type:
+    displayName: 深掘りタイプ
+  use_for:
+    displayName: 用途
+  file.mtime:
+    displayName: 更新日
+views:
+  - type: table
+    name: 回答ユニット
+    filters:
+      and:
+        - 'type == "answer_unit"'
+    order:
+      - file.name
+      - theme
+      - status
+      - priority
+      - use_for
+      - related_questions
+      - deep_dive_type
+      - file.mtime
+  - type: table
+    name: 質問Item
+    filters:
+      and:
+        - 'type == "interview_question"'
+    order:
+      - file.name
+      - question
+      - category
+      - related_answer_unit
+      - file.mtime
+  - type: table
+    name: 質問マップ
+    filters:
+      and:
+        - 'type == "interview_questions"'
+    order:
+      - file.name
+      - category
+      - use_for
+      - file.mtime
+  - type: table
+    name: 改善中
+    filters:
+      and:
+        - 'type == "answer_unit"'
+        - 'status == "改善中"'
+    order:
+      - file.name
+      - type
+      - theme
+      - question
+      - status
+      - priority
+      - related_answer_unit
+      - deep_dive_type
+      - file.mtime

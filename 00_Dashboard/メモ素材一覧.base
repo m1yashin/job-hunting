@@ -1,0 +1,95 @@
+filters:
+  and:
+    - file.inFolder("03_メモ素材")
+    - file.ext == "md"
+    - file.name != "AGENTS"
+    - or:
+        - type == "webclip"
+        - type == "material_note"
+properties:
+  file.name:
+    displayName: メモ
+  type:
+    displayName: 種別
+  theme:
+    displayName: テーマ
+  company:
+    displayName: 企業
+  related_company:
+    displayName: 関連企業
+  industry:
+    displayName: 業界
+  source_type:
+    displayName: 出典種別
+  clip_status:
+    displayName: Clip整理状況
+  status:
+    displayName: 状況
+  use_for:
+    displayName: 用途
+  next_action:
+    displayName: 次アクション
+  clipped:
+    displayName: 取得日
+  url:
+    displayName: URL
+  file.mtime:
+    displayName: 更新日
+views:
+  - type: table
+    name: 全メモ素材
+    order:
+      - file.name
+      - type
+      - theme
+      - company
+      - related_company
+      - status
+      - clip_status
+      - use_for
+      - next_action
+      - file.mtime
+  - type: table
+    name: WebClip
+    filters:
+      and:
+        - 'type == "webclip"'
+    order:
+      - file.name
+      - company
+      - industry
+      - source_type
+      - clip_status
+      - use_for
+      - clipped
+      - url
+      - file.mtime
+  - type: table
+    name: 素材メモ
+    filters:
+      and:
+        - 'type == "material_note"'
+    order:
+      - file.name
+      - theme
+      - related_company
+      - status
+      - use_for
+      - next_action
+      - file.mtime
+  - type: table
+    name: 未整理
+    filters:
+      or:
+        - 'status == "未整理"'
+        - 'clip_status == "未読"'
+        - 'status.isEmpty()'
+    order:
+      - file.name
+      - type
+      - theme
+      - company
+      - status
+      - clip_status
+      - next_action
+      - file.mtime

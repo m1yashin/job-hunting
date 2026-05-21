@@ -1,0 +1,57 @@
+filters:
+  and:
+    - file.inFolder("01_Selection/グループディスカッション")
+    - file.ext == "md"
+    - file.name != "AGENTS"
+    - or:
+        - type == "gd_prep"
+        - type == "selection_log"
+properties:
+  file.name:
+    displayName: ノート
+  type:
+    displayName: 種別
+  category:
+    displayName: 分類
+  company:
+    displayName: 企業
+  event_type:
+    displayName: イベント種別
+  theme:
+    displayName: テーマ
+  date:
+    displayName: 日付
+  next_action:
+    displayName: 次アクション
+  score:
+    displayName: 自己評価
+  use_for:
+    displayName: 用途
+  file.mtime:
+    displayName: 更新日
+views:
+  - type: table
+    name: GDフレーム
+    filters:
+      and:
+        - 'type == "gd_prep"'
+    order:
+      - file.name
+      - category
+      - use_for
+      - file.mtime
+  - type: table
+    name: GDログ
+    filters:
+      and:
+        - 'type == "selection_log"'
+        - 'event_type == "GD"'
+    order:
+      - file.name
+      - company
+      - event_type
+      - theme
+      - date
+      - next_action
+      - score
+      - file.mtime

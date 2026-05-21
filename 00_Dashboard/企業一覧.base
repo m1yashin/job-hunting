@@ -1,44 +1,112 @@
 filters:
   and:
-    - file.inFolder("01_Companies")
+    - file.inFolder("02_Companies")
     - file.ext == "md"
     - file.name != "AGENTS"
-    - type == "company"
+    - or:
+        - type == "company"
+        - type == "company_analysis"
+        - type == "material_summary"
+        - type == "interview_company_prep"
+        - type == "es"
 properties:
   file.name:
-    displayName: 企業
+    displayName: ノート
   type:
     displayName: 種別
+  company:
+    displayName: 企業
   industry:
     displayName: 業界
   role:
     displayName: 職種
-  status:
-    displayName: 状況
   priority:
     displayName: 優先度
+  status:
+    displayName: 状況
   deadline:
-    displayName: 直近締切
+    displayName: 締切
   next_action:
     displayName: 次アクション
-  event:
-    displayName: イベント
-  keywords:
-    displayName: キーワード
+  question_type:
+    displayName: 設問種別
+  word_limit:
+    displayName: 字数
+  version:
+    displayName: 版
+  source_clips:
+    displayName: 原典
   file.mtime:
     displayName: 更新日
 views:
   - type: table
-    name: 企業一覧
+    name: 企業
+    filters:
+      and:
+        - 'type == "company"'
+    order:
+      - file.name
+      - company
+      - industry
+      - role
+      - priority
+      - status
+      - deadline
+      - next_action
+      - file.mtime
+  - type: table
+    name: ES
+    filters:
+      and:
+        - 'type == "es"'
+    order:
+      - file.name
+      - company
+      - question_type
+      - word_limit
+      - status
+      - deadline
+      - version
+      - file.mtime
+  - type: table
+    name: 企業分析
+    filters:
+      and:
+        - 'type == "company_analysis"'
+    order:
+      - file.name
+      - company
+      - file.mtime
+  - type: table
+    name: 素材要約
+    filters:
+      and:
+        - 'type == "material_summary"'
+    order:
+      - file.name
+      - company
+      - source_clips
+      - file.mtime
+  - type: table
+    name: 企業別面接対策
+    filters:
+      and:
+        - 'type == "interview_company_prep"'
+    order:
+      - file.name
+      - company
+      - status
+      - file.mtime
+  - type: table
+    name: 次アクションあり
+    filters:
+      and:
+        - next_action
     order:
       - file.name
       - type
-      - industry
-      - role
+      - company
       - status
-      - priority
       - deadline
       - next_action
-      - event
-      - keywords
       - file.mtime

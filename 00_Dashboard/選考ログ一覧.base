@@ -1,0 +1,81 @@
+filters:
+  and:
+    - file.inFolder("01_Selection")
+    - file.ext == "md"
+    - file.name != "AGENTS"
+    - type == "selection_log"
+properties:
+  file.name:
+    displayName: ログ
+  type:
+    displayName: 種別
+  company:
+    displayName: 企業
+  event_type:
+    displayName: イベント種別
+  round:
+    displayName: 選考回
+  theme:
+    displayName: テーマ
+  date:
+    displayName: 日付
+  result:
+    displayName: 結果
+  next_action:
+    displayName: 次アクション
+  score:
+    displayName: 自己評価
+  file.mtime:
+    displayName: 更新日
+views:
+  - type: table
+    name: 全ログ
+    order:
+      - file.name
+      - company
+      - event_type
+      - round
+      - theme
+      - date
+      - result
+      - next_action
+      - score
+      - file.mtime
+  - type: table
+    name: 面接ログ
+    filters:
+      and:
+        - 'event_type == "面接"'
+    order:
+      - file.name
+      - company
+      - round
+      - date
+      - result
+      - next_action
+      - file.mtime
+  - type: table
+    name: GDログ
+    filters:
+      and:
+        - 'event_type == "GD"'
+    order:
+      - file.name
+      - company
+      - theme
+      - date
+      - result
+      - next_action
+      - file.mtime
+  - type: table
+    name: 次アクションあり
+    filters:
+      and:
+        - next_action
+    order:
+      - file.name
+      - company
+      - event_type
+      - date
+      - next_action
+      - file.mtime
