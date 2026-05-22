@@ -1,6 +1,6 @@
 filters:
   and:
-    - file.inFolder("02_Companies")
+    - file.inFolder("01_選考対策")
     - file.ext == "md"
     - file.name != "AGENTS"
     - or:
@@ -61,6 +61,9 @@ views:
       - interview_prep
       - next_action
       - file.mtime
+    sort:
+      - property: status
+        direction: DESC
   - type: table
     name: ES入口
     filters:

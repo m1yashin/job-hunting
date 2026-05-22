@@ -1,6 +1,6 @@
-filters:
+﻿filters:
   and:
-    - file.inFolder("01_Selection/グループディスカッション")
+    - file.inFolder("01_選考対策/共通_GD")
     - file.ext == "md"
     - file.name != "AGENTS"
     - type == "gd_prep"
@@ -26,3 +26,4 @@ views:
       - category
       - use_for
       - file.mtime
+

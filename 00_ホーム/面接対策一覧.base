@@ -1,8 +1,8 @@
-filters:
+﻿filters:
   and:
     - or:
-        - file.inFolder("01_Selection/面接")
-        - file.inFolder("02_Companies")
+        - file.inFolder("01_選考対策/共通_面接")
+        - file.inFolder("01_選考対策")
     - file.ext == "md"
     - file.name != "AGENTS"
     - or:
@@ -103,3 +103,4 @@ views:
       - related_answer_unit
       - deep_dive_type
       - file.mtime
+
