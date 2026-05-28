@@ -1,0 +1,1499 @@
+// 全体的にfindする回数が多いので、参照保存させて回数を減らす努力をした方がいいかもです。
+// 全体エラー吐き出す順番を、対象オブジェクトの高さでソートして出すように修正してください。
+(function ($, undefined) {
+
+  // ここから、全フォーム共通バリデーション
+  $.axolFormBuilder = {};
+  $.axolFormBuilder = {
+    config: {
+      'feedbackClosestSelector': '.fb_checkpoint',
+      'feedbackCheckedAddClass': 'fb_checked',
+      'feedbackSuccessAddClass': 'fb_success',
+      'feedbackErrorAddClass': 'fb_alert',
+      'allAlertBoxSelector': '.fb_allAlertStrs',
+      'allAlertBoxWrapperClass': 'fb_allAlertBox',
+      'ownAlertBoxSelector': '.fb_ownAlertStrs',
+      'ownAlertBoxWrapperClass': 'fb_ownAlertBox',
+      'changedDataAddClass': 'fb_changeData',
+      'fileErrorClass': 'fb_fileError',
+      'fileHiddenClass': 'fb_fileHidden',
+      'skipAllValidate': false,
+      'enableOwnValidate': true
+    },
+    formBuilderIdSeed: 0,
+    crateNewUniqueId: function () {
+      $.axolFormBuilder.formBuilderIdSeed++;
+      return axol.sprintf('axol_formbuilder_id_%d', $.axolFormBuilder.formBuilderIdSeed);
+    },
+    clearErrorAriaRelation: function ($targetParent) {
+      if (!$targetParent) return;
+
+      const clearDescrivedBy = function($itm) {
+        $itm.removeAttr('aria-invalid');
+        const remainAttrs = ($itm.attr('aria-describedby') || '')
+            .split(' ')
+            .map(i => i.trim())
+            .filter(i => !!i.length && !i.startsWith('axol_formbuilder_id_'));
+        if (!remainAttrs.length) {
+          $itm.removeAttr('aria-describedby');
+        } else {
+          $itm.attr('aria-describedby', remainAttrs.join(' '));
+        }
+      };
+
+      $targetParent.find('input').each((key, itm) => {
+        clearDescrivedBy($(itm));
+      });
+      $targetParent.find('select').each((key, itm) => {
+        clearDescrivedBy($(itm));
+      });
+      $targetParent.find('textarea').each((key, itm) => {
+        clearDescrivedBy($(itm));
+      });
+    },
+    setErrorAriaRelation: function ($alertArea) {
+      if (!$alertArea || !$alertArea.length) return;
+      const $targetParent = $alertArea.closest($.axolFormBuilder.config.feedbackClosestSelector);
+      if (!$targetParent.length) return;
+
+      const $alertBox = $alertArea.find('ul');
+      const alertItmLength = $alertBox.find('li').length;
+
+      if (!$alertBox.length || !alertItmLength) {
+        $.axolFormBuilder.clearErrorAriaRelation($targetParent);
+        return;
+      }
+
+      const appendIds = [];
+      $alertBox.each((key, itm) => {
+        const $itm = $(itm);
+        let itmId = $itm.attr('id');
+        if (!itmId) {
+          itmId = $.axolFormBuilder.crateNewUniqueId();
+          $itm.attr('id', itmId);
+        }
+        appendIds.push(itmId);
+      });
+
+      const appendDescribedBy = function ($itm) {
+        $itm.attr('aria-invalid', 'true');
+        const remainAttrs = ($itm.attr('aria-describedby') || '')
+            .split(' ')
+            .map(i => i.trim())
+            .filter(i => !!i.length && !i.startsWith('axol_formbuilder_id_'));
+        $itm.attr('aria-describedby', remainAttrs.concat(appendIds).join(' '));
+      };
+
+      $targetParent.find('input').each((key, itm) => {
+        const $itm = $(itm);
+        if (($itm.attr('type') + '').toLowerCase() === 'hidden') return;
+        appendDescribedBy($itm);
+      });
+      $targetParent.find('select').each((key, itm) => {
+        appendDescribedBy($(itm));
+      });
+      $targetParent.find('textarea').each((key, itm) => {
+        appendDescribedBy($(itm));
+      });
+    },
+    extraValidation: {}, // '*validationName*': {'validationType':'multi|single', 'function':*****}
+    registeredItems: {},
+    register: function (name, parentSelector, preFuncs, defaultStrings, items, answeredFileNames, useJsAlert, firstValidateType, isDoubleSendBreak, checkChange) { // jsValidateionを登録します。
+      var $parent = $(parentSelector);
+      if (!$parent.length) {
+        return false;
+      }
+      var onChangeCallback = function (e) {
+        var registeredName = e.data['registeredName'];
+        if (!axol.array_key_exists(registeredName, $.axolFormBuilder.registeredItems)) {
+          return true;
+        }
+        var $me = $(this);
+        var myname = $me.attr('name');
+        var alias = $me.attr('namealias');
+        if (alias) {
+          $.axolFormBuilder.validate(name, e, alias);
+        }
+        $.axolFormBuilder.validate(name, e, myname);
+        return false;
+      };
+      var obj = new FormBuilderObj($parent, items, preFuncs, defaultStrings);
+      var checkChangeFlag = checkChange ? true : false;
+      $.axolFormBuilder.registeredItems[name] = {'object':obj, 'useJsAlert':useJsAlert, 'isDoubleSendBreak':isDoubleSendBreak, 'submitted':false, 'callbackFunc':null, 'checkChange':checkChangeFlag, 'preDatas':{}};
+      if ($.axolFormBuilder.config.enableOwnValidate) {
+        var $objs = obj.formObj.getAllObjects();
+        var rcs = $objs.filter("[type='radio'], [type='checkbox'], [type='file'], select").on('change.validate', {'registeredName':name}, onChangeCallback);
+        $objs.not(rcs).on('focusout.validate keyup.validate', {'registeredName':name}, onChangeCallback);
+      }
+      obj.$parent.find('.fb_datePicker').on('click', function(e) {
+        var $me = $(this);
+        var dateObj = new axol.class.axolDate();
+        var $dParent = $me.parent('span');
+        var $y = $dParent.find('input.fb_textdateElement_Y');
+        var $m = $dParent.find('input.fb_textdateElement_m');
+        var $d = $dParent.find('input.fb_textdateElement_d');
+        var yTxt = $y.val();
+        var mTxt = $m.val();
+        var dTxt = $d.val();
+        yTxt = yTxt.match(/^[0-9]{4}$/) ? yTxt : dateObj.year();
+        mTxt = mTxt.match(/^[0-9]{1,2}$/) ? mTxt : dateObj.month();
+        dTxt = dTxt.match(/^[0-9]{1,2}$/) ? dTxt : dateObj.day();
+        dateObj = new axol.class.axolDate([yTxt, mTxt, dTxt]);
+        var picker = new axol.class.axolDateTimePicker(
+          function(axolDateObj){
+            $y.val(axolDateObj.year());
+            $m.val(axolDateObj.month());
+            $d.val(axolDateObj.day());
+          }, dateObj);
+        picker.changeStartDayOfWeek(0); //週の始めの曜日を決める。 default:false;
+        picker.render($me, e);
+      });
+      obj.$parent.on('submit.validate', {'registeredName':name}, function (e) {
+        var registeredName = e.data['registeredName'];
+        if (!axol.array_key_exists(registeredName, $.axolFormBuilder.registeredItems)) {
+          return;
+        }
+        $.axolFormBuilder.clearErrorAriaRelation(obj.$parent);
+        if ($.axolFormBuilder.config.skipAllValidate) {
+          return;
+        }
+        var ret = $.axolFormBuilder.validate(name);
+        if (!ret) {
+          e.preventDefault();
+          return false;
+        }
+        if ($.axolFormBuilder.registeredItems[registeredName]['isDoubleSendBreak']) {
+          if ($.axolFormBuilder.registeredItems[registeredName]['submitted']) {
+            var msg = $.axolFormBuilder.getErrFormat('', 'FB_SentMsg', defaultStrings);
+            if (msg) {
+              window.alert(msg);
+            }
+            e.preventDefault();
+            return false;
+          }
+          $.axolFormBuilder.registeredItems[registeredName]['submitted'] = true;
+          setTimeout(function(){
+            $.axolFormBuilder.registeredItems[registeredName]['submitted'] = false;
+          }, 3000);
+        }
+        if (!axol.is_null_undefined($.axolFormBuilder.registeredItems[registeredName]['callbackFunc'])) {
+          e.preventDefault();
+          return $.axolFormBuilder.registeredItems[registeredName]['callbackFunc'](e);
+        }
+        return ret;
+      });
+      if (answeredFileNames.length) {
+        $.axolFormBuilder.fileSkipChange(answeredFileNames);
+      }
+      switch(firstValidateType) {
+        case 1:
+          $.axolFormBuilder.registeredItems[name]['useJsAlert'] = false;
+          $.axolFormBuilder.validate(name);
+          $.axolFormBuilder.registeredItems[name]['useJsAlert'] = useJsAlert;
+          break;
+        case 2:
+          $.axolFormBuilder.registeredItems[name]['useJsAlert'] = false;
+          $.axolFormBuilder.validate(name, null, null, true);
+          $.axolFormBuilder.registeredItems[name]['useJsAlert'] = useJsAlert;
+          break;
+      }
+      if (checkChangeFlag) {
+        $.axolFormBuilder.registeredItems[name]['preDatas'] = obj.getValues();
+      }
+    },
+    setCallBackFunc: function (name, callback){
+      if (axol.array_key_exists(name, $.axolFormBuilder.registeredItems)) {
+        $.axolFormBuilder.registeredItems[name]['callbackFunc'] = callback;
+      }
+    },
+    unregister: function (name) {
+      if (!axol.array_key_exists(name, $.axolFormBuilder.registeredItems)) {
+        return;
+      }
+      var obj = $.axolFormBuilder.registeredItems[name]['object'];
+      var $allTargets = obj.$parent
+        .find($.axolFormBuilder.config.feedbackClosestSelector);
+      $allTargets.filter('.' + $.axolFormBuilder.config.feedbackSuccessAddClass)
+        .removeClass($.axolFormBuilder.config.feedbackSuccessAddClass);
+      $allTargets.filter('.' + $.axolFormBuilder.config.feedbackErrorAddClass)
+        .removeClass($.axolFormBuilder.config.feedbackErrorAddClass);
+      $allTargets.find($.axolFormBuilder.config.ownAlertBoxSelector).html('');
+      $($.axolFormBuilder.config.allAlertBoxSelector).html('');
+
+      if ($.axolFormBuilder.config.enableOwnValidate) {
+        var $objs = obj.formObj.getAllObjects();
+        $objs.off('.validate');
+      }
+      obj.$parent.off('.validate');
+      delete($.axolFormBuilder.registeredItems[name]);
+    },
+    serverValidate: function (parentSelector, errors) { // serverParse情報をアラートとして整形して出力します。
+      var $parent = $(parentSelector);
+      if (!$parent.length) {
+        return false;
+      }
+      var resultObj = new ValidateResult();
+      resultObj.addErrorfromArray(errors);
+      if (resultObj.hasError()) {
+        $.axolFormBuilder.renderAllErrors(resultObj, $parent);
+      }
+    },
+    validate: function (registeredName, e, objName, notShowAlert) {
+      if (!axol.array_key_exists(registeredName, $.axolFormBuilder.registeredItems)) {
+        return true;
+      }
+      var dataObj = $.axolFormBuilder.registeredItems[registeredName]['object'];
+      var resultObj = dataObj.validate(objName);
+      if ($.axolFormBuilder.registeredItems[registeredName]['checkChange']) {
+        $.axolFormBuilder.renderChangeFlag(objName, dataObj, $.axolFormBuilder.registeredItems[registeredName]['preDatas']);
+      }
+      if (notShowAlert) {
+        return true;
+      }
+      if (objName) {
+        $.axolFormBuilder.renderOwnErrors(resultObj, dataObj.$parent, e, objName, dataObj.getDependNames(objName));
+        return true;
+      } else {
+        $.axolFormBuilder.renderAllErrors(resultObj, dataObj.$parent);
+        return !resultObj.hasError();
+      }
+    },
+    renderChangeFlag: function(objName, dataObj, preDatas) {
+      var $parent = dataObj.$parent;
+      var $target = $parent.find('[name="' + objName + '"]');
+      if (!$target.length) {
+        return;
+      }
+      var keyName = $target.attr('namealias');
+      keyName = keyName ? keyName : objName;
+      var $showHideWrap = $target.closest('[old_display]');
+      if ($showHideWrap.length && $showHideWrap.css('display') === 'none') {
+        return;
+      }
+      var $checkPoint = $target.closest($.axolFormBuilder.config.feedbackClosestSelector);
+      var curValue = dataObj.getValues(keyName);
+      curValue = axol.array_key_exists(keyName, curValue) ? curValue[keyName] : '';
+      var preValue = axol.array_key_exists(keyName, preDatas) ? preDatas[keyName] : '';
+      var isSame = false;
+      if (axol.is_array(curValue)) {
+        isSame = true;
+        $.each(curValue, function(key,val) {
+          if (key == 'err' || key == 'empty') {
+            return true; // continue
+          }
+          if (!axol.array_key_exists(key, preValue)) {
+            isSame = false;
+            return false; // break;
+          }
+          if (val != preValue[key]) {
+            isSame = false;
+            return false; // break;
+          }
+        });
+      } else {
+        isSame = (curValue == preValue);
+      }
+      if (isSame) {
+        $checkPoint.removeClass($.axolFormBuilder.config.changedDataAddClass);
+      } else {
+        if (!$checkPoint.hasClass($.axolFormBuilder.config.changedDataAddClass)) {
+          $checkPoint.addClass($.axolFormBuilder.config.changedDataAddClass);
+        }
+      }
+    },
+    renderOwnErrors: function (resultObj, $parent, e, objName, dependNames) {
+      if (!axol.is_array(dependNames) || !axol.count(dependNames)) {
+        dependNames = {};
+        dependNames[objName] = '';
+      }
+
+      // calc checkePoint name-hash
+      var checkPoints = {};
+      $.each(dependNames, function (key) {
+        var $target = $parent.find('[name="' + key + '"]');
+        if (!$target.length) {
+          $target = $parent.find('[namealias="' + key + '"]');
+        }
+        if ($target.length) {
+          // hideルールによって非表示になっているものはエラー描画させない
+          var $showHideWrap = $target.closest('[old_display]');
+          if ($showHideWrap.length && $showHideWrap.css('display') === 'none') {
+            return true;  // break;
+          }
+          checkPoints[key] = {};
+          checkPoints[key]['self'] = $target.closest($.axolFormBuilder.config.feedbackClosestSelector);
+          checkPoints[key]['errors'] = checkPoints[key]['self'].find($.axolFormBuilder.config.ownAlertBoxSelector);
+          checkPoints[key]['type'] = $target.attr('type');
+        }
+      });
+      if (!axol.array_key_exists(objName, checkPoints)) {
+        return;
+      }
+
+      // add checked flag
+      var eventName = e.type;
+      if (eventName !== 'keyup') {
+        checkPoints[objName]['self'].addClass($.axolFormBuilder.config.feedbackCheckedAddClass);
+      } else {
+        var keyCode = axol.array_key_exists('keyCode', e) ? e.keyCode : '';
+        if (keyCode == 9) {  // keyCode=9 : tab
+          return;
+        }
+      }
+      $.axolFormBuilder._renderErrorsCommon(resultObj, checkPoints);
+    },
+    renderAllErrors: function (resultObj, $parent) {
+      // get DefaultStrings
+      var defaultStrings = {};
+      var registeredName = $parent.attr('name');
+      var useJsAlert = true;
+      if (axol.array_key_exists(registeredName, $.axolFormBuilder.registeredItems)) {
+        var dataObj = $.axolFormBuilder.registeredItems[registeredName]['object'];
+        defaultStrings = dataObj.defaultStrings;
+        useJsAlert = $.axolFormBuilder.registeredItems[registeredName]['useJsAlert'];
+      }
+      // calc checkePoint name-hash
+      var checkPoints = {};
+      $parent.find($.axolFormBuilder.config.feedbackClosestSelector).each(function () {
+        var $self = $(this);
+        $self.find('[name]').each(function () {
+          var $me = $(this);
+          var name = $me.attr('namealias') ? $me.attr('namealias') : $me.attr('name');
+          checkPoints[name] = {};
+          checkPoints[name]['self'] = $self;
+          checkPoints[name]['type'] = $me.attr('type');
+          checkPoints[name]['errors'] = $self.find($.axolFormBuilder.config.ownAlertBoxSelector);
+        });
+        // add checked flag
+        $self.addClass($.axolFormBuilder.config.feedbackCheckedAddClass);
+      });
+      $.axolFormBuilder._renderErrorsCommon(resultObj, checkPoints, true, defaultStrings, useJsAlert);
+    },
+    _renderErrorsCommon: function (resultObj, checkPoints, allValidate, defaultStrings, useJsAlert) {
+      // error summary manage
+      var $alertBox = $($.axolFormBuilder.config.allAlertBoxSelector);
+      var $allWrapper = $();
+      var renderErrorSummary = false;
+      if ($alertBox.length) {
+        $alertBox.html('');  // remove error summary
+        $allWrapper = $('<ul>').addClass($.axolFormBuilder.config.allAlertBoxWrapperClass);
+        if (allValidate) {
+          renderErrorSummary = true;
+        }
+      }
+
+      // define set flag function.
+      var setFlags = function (checkPoints) {
+        $.each(checkPoints, function (name, checkPoint) {
+          if (!checkPoint['self'].hasClass($.axolFormBuilder.config.feedbackCheckedAddClass) || checkPoint['type'] === 'submit') {
+            return true;  // continue
+          }
+          var error_cnt = checkPoint['errors'].children('ul').find('li').length;
+          if (error_cnt) {
+            checkPoint['self']
+              .removeClass($.axolFormBuilder.config.feedbackSuccessAddClass)
+              .addClass($.axolFormBuilder.config.feedbackErrorAddClass);
+          } else {
+            checkPoint['self']
+              .removeClass($.axolFormBuilder.config.feedbackErrorAddClass)
+              .addClass($.axolFormBuilder.config.feedbackSuccessAddClass);
+          }
+        });
+      };
+
+      // if no result, set success flag and return.
+      if (!resultObj.datas.length) {
+        setFlags(checkPoints);
+        return;
+      }
+
+      // set results
+      var need_group_check = !allValidate;
+      var isAlert = false;
+      $.each(resultObj.datas, function (key, data) {
+        if (need_group_check) {
+          // check group all checked
+          var group_all_checked = true;
+          $.each(data['names'], function (key2, name) {
+            if (axol.array_key_exists(name, checkPoints) && !checkPoints[name]['self'].hasClass($.axolFormBuilder.config.feedbackCheckedAddClass) && !axol.array_key_exists(name, data['exceptNames'])) {
+              group_all_checked = false;
+              return false;  // break
+            }
+          });
+          if (!group_all_checked) {
+            return true;  // continue
+          }
+        }
+        // set errors
+        var namesStr = data['names'].join(',');
+        var type = data['type'];
+        var result = data['result'];
+        var errStr = (axol.array_key_exists('str', data) && axol.is_string(data['str'])) ? axol.nl2br(data['str']) : '';
+        $.each(data['names'], function (key2, name) {
+          if (axol.array_key_exists(name, data['exceptNames'])) {
+            return true; // continue
+          }
+
+          if (!result) {
+            // set error summary
+            if (renderErrorSummary && !$allWrapper.find('li[names="' + namesStr + '"][type="' + type + '"]').length) {
+              $allWrapper.append($('<li>').attr('names', namesStr).attr('type', type).html(errStr));
+            }
+          }
+
+          // manage own error string
+          var $errors = axol.array_key_exists(name, checkPoints) ? checkPoints[name]['errors'] : $();  // wrapper obj
+          if (!$errors.length) {
+            return true; // continue
+          }
+          var $ul = $errors.children('ul');
+
+          // remove server errors
+          if ($ul.length) {
+            $ul.find('li[type="server"]').remove();
+          }
+
+          if (result) {
+            if (!$ul.length) {
+              return true;  // continue
+            }
+            $ul.find('li[names="' + namesStr + '"][type="' + type + '"]').remove();
+          } else {
+            if (!$ul.length) {
+              $ul = $('<ul>').addClass($.axolFormBuilder.config.ownAlertBoxWrapperClass);
+              $errors.html($ul);
+            }
+            var $li = $ul.find('li[names="' + namesStr + '"][type="' + type + '"]');
+            if (!$li.length) {
+              $ul.append($('<li>').attr('names', namesStr).attr('type', type).html(errStr));
+            } else if ($li.html() !== errStr) {
+              $li.html(errStr);
+            }
+            // set js-alert error
+            if (allValidate && useJsAlert) {
+              isAlert = true;
+            }
+          }
+          if (!$ul.find('li').length) {
+            $ul.remove();
+          }
+          $.axolFormBuilder.setErrorAriaRelation($errors);
+        });
+      });
+
+      // error summary add
+      if (renderErrorSummary && $allWrapper.find('li').length) {
+        $alertBox.html($allWrapper);
+      }
+
+      // set flag to checkpoint
+      setFlags(checkPoints);
+
+      // display js-alert errors
+      if (isAlert) {
+        var msg = $.axolFormBuilder.getErrFormat('', 'FB_AlertMsg', defaultStrings);
+        if (msg) {
+          window.alert(msg);
+        }
+      }
+    },
+    isMergeable: function (type) {
+      switch (type) {
+        case 'regex':
+        case 'containValue':
+        case 'noneed':
+        case 'require':
+        case 'choiceRange':
+        case 'numDigit':
+        case 'numRange':
+        case 'dateRange':
+        case 'validDate':
+        case 'strLength':
+        case 'multimail':
+          return true;
+          break;
+        case 'show':
+        case 'hide':
+        case 'compare':
+        case 'orRequire':
+        case 'ifcase':
+        case 'fileajax':
+        case 'custom':
+          return false;
+          break;
+      }
+      if (axol.array_key_exists(type, $.axolFormBuilder.extraValidation)) {
+        return $.axolFormBuilder.extraValidation[type]['validationType'];
+      }
+    },
+    singleValidate: function (item, values, defaultStrings, target, validateObj, forceSuccess) {
+      var resultObj = new ValidateResult();
+      switch (item['type']) {
+        case 'require':
+          resultObj = $.axolFormBuilder.requireValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'noneed':
+          resultObj = $.axolFormBuilder.noneedValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'containValue':
+          resultObj = $.axolFormBuilder.containValueValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'validDate':
+          resultObj = $.axolFormBuilder.validDateValidate(item, values, defaultStrings, forceSuccess);
+          break;
+
+        case 'regex':
+          resultObj = $.axolFormBuilder.regexValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'multimail':
+          resultObj = $.axolFormBuilder.multimailValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'compare':
+          resultObj = $.axolFormBuilder.compareValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'orRequire':
+          resultObj = $.axolFormBuilder.orRequireValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'fileRequire':
+          resultObj = $.axolFormBuilder.fileRequireValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'ifcase':
+          resultObj = $.axolFormBuilder.ifCaseValidate(item, values, defaultStrings, forceSuccess, target, validateObj); // ifcaseは子どもがあるかもなので、すべて渡す。
+          break;
+        case 'fileajax':
+          resultObj = $.axolFormBuilder.fileAjaxValidate(item, values, defaultStrings, target, validateObj); // ajax通信時にformObjが必要。
+          break;
+        case 'custom':
+          resultObj = $.axolFormBuilder.customValidate(item, values, target, forceSuccess);
+          break;
+
+        case 'choiceRange':
+          resultObj = $.axolFormBuilder.choiceRangeValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'numDigit':
+          resultObj = $.axolFormBuilder.numDigitRangeValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'numRange':
+          resultObj = $.axolFormBuilder.numericRangeValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'strLength':
+          resultObj = $.axolFormBuilder.strLengthRangeValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'dateRange':
+          resultObj = $.axolFormBuilder.dateRangeValidate(item, values, defaultStrings, forceSuccess);
+          break;
+
+
+        case 'show':
+          resultObj = $.axolFormBuilder.showValidate(item, values, defaultStrings, forceSuccess);
+          break;
+        case 'hide':
+          resultObj = $.axolFormBuilder.hideValidate(item, values, defaultStrings, forceSuccess);
+          break;
+      }
+      if (axol.array_key_exists(item['type'], $.axolFormBuilder.extraValidation)) {
+        resultObj = $.axolFormBuilder.extraValidation[type]['function'](item, values, defaultStrings, forceSuccess, target, validateObj);
+      }
+      return resultObj;
+    },
+    getErrFormat: function (override, key, defaultFormats) { // エラーの際のフォーマット文字列を返します。
+      if (override.length) {
+        return override;
+      }
+      if (axol.array_key_exists(key, defaultFormats)) {
+        return defaultFormats[key];
+      }
+      return null;
+    }
+  };
+
+  // 各validation
+  // require/noneed/containValue/validDateの内部
+  $.axolFormBuilder.commonValidate = function (item, values, defaultStrings, defaultFormatKey, forceSuccess, callback) {
+    var resultObj = new ValidateResult();
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], defaultFormatKey, defaultStrings);
+    if (!errformat) {
+      return resultObj;
+    }
+    $.each(item['names'], function (name, title) {
+      var val = values[name];
+      var result = forceSuccess ? true : callback(val);
+      resultObj.setResult(name, item['type'], axol.sprintf(errformat, title), result);
+    });
+    return resultObj;
+  };
+  $.axolFormBuilder.requireValidate = function (item, values, defaultStrings, forceSuccess) {
+    return $.axolFormBuilder.commonValidate(item, values, defaultStrings, 'FB_RequiredRuleFmt', forceSuccess, function (value) {
+      return axol.hasValidValue(value);
+    });
+  };
+  $.axolFormBuilder.noneedValidate = function (item, values, defaultStrings, forceSuccess) {
+    return $.axolFormBuilder.commonValidate(item, values, defaultStrings, 'FB_NoNeedRuleFmt', forceSuccess, function (value) {
+      return !axol.hasValidValue(value);
+    });
+  };
+  $.axolFormBuilder.containValueValidate = function (item, values, defaultStrings, forceSuccess) {
+    return $.axolFormBuilder.commonValidate(item, values, defaultStrings, 'FB_BadValueFmt', forceSuccess, function (value) {
+      // 未回答ならルール適用外(=通す)
+      if (!item['isNullError']) {
+        if (axol.is_array(value) && !axol.count(value)) {
+          return true;
+        }
+        if (!axol.isValidValue(value)) {
+          return true;
+        }
+      }
+
+      const formValues = axol.is_array(value) ? value : [value];
+      if (item['isOrOk']) {
+        let isContain = false;
+        $.each(formValues, function(key, val) {
+          if (axol.in_array(val, item['values'])) {
+            isContain = true;
+            return false; // break;
+          }
+        });
+        return isContain;
+      } else {
+        let isContain = true;
+        $.each(formValues, function(key, val) {
+          if (!axol.in_array(val, item['values'])) {
+            isContain = false;
+            return false; // break;
+          }
+        });
+        return isContain;
+      }
+    });
+  };
+  $.axolFormBuilder.getDateArray = function (datas, fmtMode) {
+    var ret = {'Y': 0, 'm': 1, 'd': 1, 'H': 0, 'i': 0, 's': 0, 'err': false, 'empty': true};
+    var ymd = [{'key': 'Y', 'mode': 1}, {'key': 'm', 'mode': 2}, {'key': 'd', 'mode': 3}];
+    for (var i = 0; i < ymd.length; i++) {
+      var _key = ymd[i]['key'];
+      var _mode = ymd[i]['mode'];
+      if (fmtMode >= _mode) {
+        if (axol.empty(datas[_key])) {
+          ret['err'] = true;
+        } else {
+          ret['empty'] = false;
+          ret[_key] = parseInt(datas[_key], 10);
+        }
+      }
+    }
+    var his = [{'key': 'H', 'mode': 4}, {'key': 'i', 'mode': 5}, {'key': 's', 'mode': 6}];
+    for (i = 0; i < his.length; i++) {
+      _key = his[i]['key'];
+      _mode = his[i]['mode'];
+      if (fmtMode >= _mode) {
+        if (!axol.array_key_exists(_key, datas) || !axol.isValidValue(datas[_key])) {
+          ret['err'] = true;
+        } else {
+          ret['empty'] = false;
+          ret[_key] = parseInt(datas[_key], 10);
+        }
+      }
+    }
+    return ret;
+  };
+  $.axolFormBuilder.validDateValidate = function (item, values, defaultStrings, forceSuccess) {
+    var minYear = parseInt(item['minYear'], 10);
+    var maxYear = parseInt(item['maxYear'], 10);
+    return $.axolFormBuilder.commonValidate(item, values, defaultStrings, 'FB_DateRuleFmt', forceSuccess, function (value) {
+      if (axol.empty(value)) {
+        return true;
+      }
+      if (value['err'] || value['Y'] < minYear || value['Y'] > maxYear) {
+        return false;
+      }
+      const summerTimeStartDates = [
+        [1948, 5, 2],
+        [1949, 4, 3],
+        [1950, 5, 7],
+        [1951, 5, 6],
+      ];
+      summerTimeStartDates.forEach(function (summerTimeStartDate) {
+        if (value['Y'] === summerTimeStartDate[0] && value['m'] === summerTimeStartDate[1] && value['d'] === summerTimeStartDate[2]) {
+          if (value['H'] === 0) {
+            value['H'] = 1;
+          }
+        }
+      });
+      var date = new Date(value['Y'], value['m'] - 1, value['d'], value['H'], value['i'], value['s']);
+      return (date.getFullYear().toString() === value['Y'].toString()
+      && (date.getMonth() + 1).toString() === value['m'].toString()
+      && date.getDate().toString() === value['d'].toString()
+      && date.getHours().toString() === value['H'].toString()
+      && date.getMinutes().toString() === value['i'].toString()
+      && date.getSeconds().toString() === value['s'].toString());
+    });
+  };
+
+  // choiceRange/numDigitRange/numericRange/strLengthRangeの内部
+  $.axolFormBuilder.getRangeType = function (min, max) {
+    if (axol.isNumeric(max) && axol.isNumeric(min)) {
+      return (max == min) ? 'equal' : 'maxmin';
+    } else if (axol.isNumeric(min)) {
+      return 'min';
+    } else if (axol.isNumeric(max)) {
+      return 'max';
+    }
+    return '';
+  };
+  $.axolFormBuilder.rangeValidate = function (item, values, min, max, defaultStrings, forceSuccess, defaultFormatKeyCallback, getValueCallback) {
+    var resultObj = new ValidateResult();
+    var rangeType = $.axolFormBuilder.getRangeType(min, max);
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], defaultFormatKeyCallback(rangeType), defaultStrings);
+    if (!rangeType || !errformat) {
+      return resultObj;
+    }
+    $.each(item['names'], function (name, title) {
+      var val = values[name];
+      var result = true;
+      if (axol.isValidValue(val) && !forceSuccess) {  // 空値でないときのみ判定を実施(空なら本ルールは適用外(=通す))
+        val = getValueCallback(val);
+        var errstr = '';
+        switch (rangeType) {
+          case 'min':
+            if (val === false || val < min) {
+              result = false;
+              errstr = axol.sprintf(errformat, title, min);
+            }
+            break;
+          case 'max':
+            if (val === false || val > max) {
+              result = false;
+              errstr = axol.sprintf(errformat, title, max);
+            }
+            break;
+          case 'maxmin':
+          case 'equal':
+            if (val === false || val < min || val > max) {
+              result = false;
+              errstr = axol.sprintf(errformat, title, min, max);
+            }
+            break;
+        }
+      }
+      resultObj.setResult(name, item['type'], errstr, result);
+    });
+    return resultObj;
+  };
+  $.axolFormBuilder.choiceRangeValidate = function (item, values, defaultStrings, forceSuccess) {
+    var max = axol.isNumeric(item['max']) ? parseInt(item['max'], 10) : '';
+    var min = axol.isNumeric(item['min']) ? parseInt(item['min'], 10) : '';
+    return $.axolFormBuilder.rangeValidate(item, values, min, max, defaultStrings, forceSuccess,
+      function (rangeType) {
+        switch (rangeType) {
+          case 'min':
+            return 'FB_ChoiceRangeMinRuleFmt';
+          case 'max':
+            return 'FB_ChoiceRangeMaxRuleFmt';
+          case 'maxmin':
+            return 'FB_ChoiceRangeMaxMinRuleFmt';
+          case 'equal':
+            return 'FB_ChoiceRangeEqualRuleFmt';
+        }
+        return '';
+      },
+      function (value) {
+        return axol.getValidValueCount(value);  // 空値でない要素数を計算
+      }
+    );
+  };
+  $.axolFormBuilder.numDigitRangeValidate = function (item, values, defaultStrings, forceSuccess) {
+    var max = axol.isNumeric(item['max']) ? parseInt(item['max'], 10) : '';
+    var min = axol.isNumeric(item['min']) ? parseInt(item['min'], 10) : '';
+    return $.axolFormBuilder.rangeValidate(item, values, min, max, defaultStrings, forceSuccess,
+      function (rangeType) {
+        switch (rangeType) {
+          case 'min':
+            return 'FB_NumDigitMinRuleFmt';
+          case 'max':
+            return 'FB_NumDigitMaxRuleFmt';
+          case 'maxmin':
+            return 'FB_NumDigitMinMaxRuleFmt';
+          case 'equal':
+            return 'FB_NumDigitEqualRuleFmt';
+        }
+        return '';
+      },
+      function (value) {
+        value = value.toString().replace(/(\.|,)/g, '');
+        return axol.isNumeric(value) ? value.length : false;
+      }
+    );
+  };
+  $.axolFormBuilder.numericRangeValidate = function (item, values, defaultStrings, forceSuccess) {
+    var max = axol.isNumeric(item['max']) ? parseFloat(item['max']) : '';
+    var min = axol.isNumeric(item['min']) ? parseFloat(item['min']) : '';
+    return $.axolFormBuilder.rangeValidate(item, values, min, max, defaultStrings, forceSuccess,
+      function (rangeType) {
+        switch (rangeType) {
+          case 'min':
+            return 'FB_NumRangeMinRuleFmt';
+          case 'max':
+            return 'FB_NumRangeMaxRuleFmt';
+          case 'maxmin':
+          case 'equal':
+            return 'FB_NumRangeMinMaxRuleFmt';
+        }
+        return '';
+      },
+      function (value) {
+        return axol.isNumeric(value) ? parseFloat(value) : false;
+      }
+    );
+  };
+  $.axolFormBuilder.strLengthRangeValidate = function (item, values, defaultStrings, forceSuccess) {
+    var max = axol.isNumeric(item['max']) ? parseInt(item['max'], 10) : '';
+    var min = axol.isNumeric(item['min']) ? parseInt(item['min'], 10) : '';
+    return $.axolFormBuilder.rangeValidate(item, values, min, max, defaultStrings, forceSuccess,
+      function (rangeType) {
+        switch (rangeType) {
+          case 'min':
+            return 'FB_StrLengthMinRuleFmt';
+          case 'max':
+            return 'FB_StrLengthMaxRuleFmt';
+          case 'maxmin':
+            return 'FB_StrLengthMinMaxRuleFmt';
+          case 'equal':
+            return 'FB_StrLengthEqualRuleFmt';
+        }
+        return '';
+      },
+      function (value) {
+        return axol.strlen_nobr(value.toString().trim());
+      }
+    );
+  };
+  $.axolFormBuilder.dateRangeValidate = function (item, values, defaultStrings, forceSuccess) {
+    var resultObj = new ValidateResult();
+    var rangeType = '';
+    var fmtKey = '';
+    if (item['min'] instanceof Date && item['max'] instanceof Date) {
+      rangeType = 'maxmin';
+      fmtKey = 'FB_DateRangeMinMaxRuleFmt'; // '%1$s は %2$s年%3$s月%4$s日以降, %5$s年%6$s月%7$s日以前でなければなりません', // QAlertmaxdate
+    } else if (item['min'] instanceof Date) {
+      rangeType = 'min';
+      fmtKey = 'FB_DateRangeMinRuleFmt'; // '%1$s は %2$s年%3$s月%4$s日以降でなければなりません', // QAlertmaxdate
+    } else if (item['max'] instanceof Date) {
+      rangeType = 'max';
+      fmtKey = 'FB_DateRangeMaxRuleFmt'; // '%1$s は %2$s年%3$s月%4$s日以降でなければなりません', // QAlertmaxdate
+    }
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], fmtKey, defaultStrings);
+    if (!errformat) {
+      return resultObj;
+    }
+    $.each(item['names'], function (name, title) {
+      var val = values[name];
+      var result = true;
+      if (axol.count(val) && !forceSuccess) {  // 空値でないときのみ判定する(空値のときは本ルール適用外(=通す))
+        var valDate = new Date(val['Y'], val['m'] - 1, val['d'], val['H'], val['i'], val['s']);
+        var chk = (function () {
+          if (item['min'] instanceof Date && valDate < item['min']) {
+            return false;
+          } else if (item['max'] instanceof Date && valDate > item['max']) {
+            return false;
+          }
+          return true;
+        })();
+
+        if (!chk) {
+          result = false;
+          var errstr = '';
+          switch (rangeType) {
+            case 'min':
+              errstr = axol.sprintf(errformat, title, item['min'].getFullYear(), item['min'].getMonth() + 1, item['min'].getDate());
+              break;
+            case 'max':
+              errstr = axol.sprintf(errformat, title, item['max'].getFullYear(), item['max'].getMonth() + 1, item['max'].getDate());
+              break;
+            case 'maxmin':
+            case 'equal':
+              errstr = axol.sprintf(errformat, title
+                , item['min'].getFullYear(), item['min'].getMonth() + 1, item['min'].getDate()
+                , item['max'].getFullYear(), item['max'].getMonth() + 1, item['max'].getDate());
+              break;
+          }
+        }
+      }
+      resultObj.setResult(name, item['type'], errstr, result);
+    });
+    return resultObj;
+  };
+  $.axolFormBuilder.showValidate = function (item, values, defaultStrings, forceSuccess) {
+    if (forceSuccess) {
+      return new ValidateResult();
+    }
+    var targetSelector = axol.array_key_exists('selector', item) ? item['selector'] : '';
+    var $tmpTarget = $(targetSelector);
+    if ($tmpTarget.length) {
+      var currentDisplayType = $tmpTarget.css('display');
+      if (currentDisplayType == 'none') {
+        var oldDisplayType = $tmpTarget.attr('old_display');
+        $tmpTarget.css('display', oldDisplayType);
+        $tmpTarget.find('input[type="file"]').removeClass($.axolFormBuilder.config.fileHiddenClass);
+      }
+    }
+    return new ValidateResult();
+  };
+  $.axolFormBuilder.hideValidate = function (item, values, defaultStrings, forceSuccess) {
+    if (forceSuccess) {
+      return new ValidateResult();
+    }
+    var targetSelector = axol.array_key_exists('selector', item) ? item['selector'] : '';
+    var $tmpTarget = $(targetSelector);
+    if ($tmpTarget.length) {
+      var currentDisplayType = $tmpTarget.css('display');
+      if (currentDisplayType != 'none') {
+        $tmpTarget.attr('old_display', currentDisplayType).css('display', 'none');
+        var formItems = new axol.class.FormValuesObject($tmpTarget);
+        formItems.clearAll(true);
+        $tmpTarget.find($.axolFormBuilder.config.ownAlertBoxSelector).html('');
+        $tmpTarget.find('input[type="file"]')
+          .addClass($.axolFormBuilder.config.fileHiddenClass)
+          .removeClass($.axolFormBuilder.config.fileErrorClass);
+      }
+    }
+    return new ValidateResult();
+  };
+  // その他
+  $.axolFormBuilder.regexSet = {
+    'alphabet': {'regex': /^[a-zA-Z]+$/, 'key': 'FB_RegexAlphabetRuleFmt'},
+    'alphabetname': {'regex': /^[a-zA-Z \.=\-,']+$/, 'key': 'FB_RegexAlphaNameRuleFmt'},
+    'alphabetaddr': {'regex': /^[a-zA-Z0-9 \.=\-,'_#@"\?!\*\+:;\(\)<>{}\[\]]+$/, 'key': 'FB_RegexAlphaAddrRuleFmt'},
+    'alphanumeric': {'regex': /^[a-zA-Z0-9]+$/, 'key': 'FB_RegexAlphaNumericRuleFmt'},
+    'daytime': {
+      'regex': /^([0-9]|1[0-9]|2[0-3]|0[0-9]):[0-5]?[0-9]:[0-5]?[0-9]$/,
+      'key': 'FB_RegexDayTimeRuleFmt'
+    },
+    'numeric': {'regex': /(^0$)|(^-?[1-9]\d*$)|(^-?\d+\.\d+$)/, 'key': 'FB_RegexNumericRuleFmt'},
+    'int': {'regex': /(^0$)|(^-?[1-9]\d*$)/, 'key': 'FB_RegexIntRuleFmt'},
+    'uint': {'regex': /(^0$)|(^[1-9]\d*$)/, 'key': 'FB_RegexUIntRuleFmt'},
+    'nosymbol': {'regex': /^[^\.=,'_#@"\?!\*\+:;\(\)<>{}\[\]\^\$%&~\|\/]+$/, 'key': 'FB_RegexNoSymbolRuleFmt'},
+    'nonzeroint': {'regex': /^-?[1-9][0-9]*$/, 'key': 'FB_RegexNonzeroIntRuleFmt'},
+    'nonzerouint': {'regex': /^[1-9][0-9]*$/, 'key': 'FB_RegexNonzeroUIntRuleFmt'},
+    'katakana': {'regex': /^[ァ-ヶー　]*$/, 'key': 'FB_RegexKanaRuleFmt'},
+    'kana': {'regex': /^[ぁ-んァ-ヶー　]*$/, 'key': 'FB_RegexKanaRuleFmt'},
+    'postal': {'regex': /^[0-9a-zA-Z\-]{0,20}$/, 'key': 'FB_RegexPostalRuleFmt'},
+    'jpPostal': {'regex': /^[0-9]{3}\-[0-9]{4}$/, 'key': 'FB_RegexPostalRuleFmt'},
+    'tel': {'regex': /^[0-9\-\+]{0,30}$/, 'key': 'FB_RegexTelRuleFmt'},
+    'jptel': {
+      'regex': /^(0[1-9]0\-[0-9]{4}|0[0-9]\-[0-9]{4}|0[0-9]{2}\-[0-9]{3}|0[0-9]{3}\-[0-9]{2}|0[0-9]{4}\-[0-9])\-[0-9]{4}$/,
+      'key': 'FB_RegexTelRuleFmt'
+    },
+    'email': {
+      'regex': /^[a-zA-Z0-9\.=\-'_#\?!\*\+\^\$%~\/{}&`\|]+@[a-zA-Z0-9-]+(\.[-a-zA-Z0-9]+)*\.[a-zA-Z0-9]{2,20}$/,
+      'key': 'FB_RegexEmailRuleFmt'
+    },
+    'domain': {
+      'regex': /^([a-zA-Z0-9\-]+\.)+[a-zA-Z0-9]+$/,
+      'key': 'FB_RegexDomainRuleFmt'
+    }
+  };
+  $.axolFormBuilder.regexValidate = function (item, values, defaultStrings, forceSuccess) {
+    var resultObj = new ValidateResult();
+    if (!axol.array_key_exists(item['opt'], $.axolFormBuilder.regexSet)) {
+      return resultObj; // 判定しない。
+    }
+    var regex = $.axolFormBuilder.regexSet[item['opt']];
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], regex['key'], defaultStrings);
+    if (!errformat) {
+      return resultObj;
+    }
+    var reg = new RegExp(regex['regex']);
+    $.each(item['names'], function (name, title) {
+      var val = values[name];
+      var result = true;
+      if (axol.isValidValue(val) && !forceSuccess && !reg.exec(val)) {  // 空値でないときのみ判定する(空値のときは本ルール適用外(=通す))
+        result = false;
+      }
+      resultObj.setResult(name, item['type'] + '-' + item['opt'], axol.sprintf(errformat, title), result);
+    });
+    return resultObj;
+  };
+  $.axolFormBuilder.multimailValidate = function (item, values, defaultStrings, forceSuccess) {
+    var resultObj = new ValidateResult();
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_RegexEmailRuleFmt', defaultStrings);
+    if (!errformat) {
+      return resultObj;
+    }
+    var reg = new RegExp(/^[a-zA-Z0-9\.=\-'_#\?!\*\+\^\$%~\/{}&`\|]+@[a-zA-Z0-9-]+(\.[-a-z0-9]+)*\.[a-zA-Z0-9]{2,6}$/);
+    $.each(item['names'], function (name, title) {
+      var val = values[name];
+      var result = true;
+      if (axol.isValidValue(val) && !forceSuccess) {  // 空値でないときのみ判定する(空値のときは本ルール適用外(=通す))
+        var _lines = val.split(/\r\n|\r|\n/);
+        $.each(_lines, function(tmpkey, tmpval){
+          if (!reg.exec(tmpval)) {
+            result = false;
+            return false;
+          }
+        });
+      }
+      resultObj.setResult(name, item['type'] + '-' + item['opt'], axol.sprintf(errformat, title), result);
+    });
+    return resultObj;
+  };
+  $.axolFormBuilder.compareValidate = function (item, values, defaultStrings, forceSuccess) {
+    var resultObj = new ValidateResult();
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_CompareRuleFmt', defaultStrings);
+    if (!errformat) {
+      return resultObj;
+    }
+    var result = true;
+    var errstr = '';
+    if (!forceSuccess && values[item['name1']] !== values[item['name2']]) {
+      result = false;
+      errstr = axol.sprintf(errformat, item['names'][item['name1']], item['names'][item['name2']]);
+    }
+    resultObj.setResult(item['names'], item['type'], errstr, result);
+    return resultObj;
+  };
+  $.axolFormBuilder.orRequireValidate = function (item, values, defaultStrings, forceSuccess) {
+    var resultObj = new ValidateResult();
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_OrRequireRuleFmt', defaultStrings);
+    if (!errformat) {
+      return resultObj;
+    }
+    var is_set = false;
+    $.each(item['names'], function (name) {
+      var val = values[name];
+      if (axol.isValidValue(val)) {
+        is_set = true;
+        return false; // break
+      }
+    });
+    var errStr = '';
+    var result = true;
+    if (!is_set && !forceSuccess) {
+      result = false;
+      var titles = [];
+      $.each(item['names'], function (name, title) {
+        titles.push(title);
+      });
+      errStr = axol.sprintf(errformat, titles.join(', '));
+    }
+    resultObj.setResult(item['names'], item['type'], errStr, result);
+    return resultObj;
+  };
+  $.axolFormBuilder.ifCaseValidate = function (item, values, defaultStrings, forceSuccess, target, validateObj) {
+    var resultObj = new ValidateResult();
+    item['trigger']['errformat'] = ' ';
+    var trigger = $.axolFormBuilder.singleValidate(item['trigger'], values, defaultStrings, target, validateObj, forceSuccess);
+    var targetChecks = null;
+    var notTargetChecks = null;
+    if (trigger.hasError()) {
+      targetChecks = item['caseError'];
+      notTargetChecks = item['caseSuccess'];
+    } else {
+      targetChecks = item['caseSuccess'];
+      notTargetChecks = item['caseError'];
+    }
+
+    var exceptNames = (function () {
+      var usedNames = {};
+      var i;
+      for (i = 0; i < item['caseSuccess'].length; i++) {
+        $.each(item['caseSuccess'][i]['names'], function (key) {
+          usedNames[key] = key;
+        });
+      }
+      for (i = 0; i < item['caseError'].length; i++) {
+        $.each(item['caseError'][i]['names'], function (key) {
+          usedNames[key] = key;
+        });
+      }
+      var ret = {};
+      $.each(item['trigger']['names'], function (key) {
+        if (!axol.array_key_exists(key, usedNames)) {
+          ret[key] = key;
+        }
+      });
+      return ret;
+    });
+
+    $.each(targetChecks, function (key, _item) {
+      var _itemClone = $.extend(true, {}, _item);
+      var _names = {};
+      $.each(_item['names'], function (key) {
+        _names[key] = item['names'][key];
+      });
+      _itemClone['names'] = _names;
+      var tmpResultObj = $.axolFormBuilder.singleValidate(_itemClone, values, defaultStrings, target, validateObj, forceSuccess);
+      // 子ルールで使用されていない親は、エラー表示から除外する
+      tmpResultObj.addExceptErrorNames(exceptNames);
+      resultObj.mergeResult(tmpResultObj);
+    });
+    $.each(notTargetChecks, function (key, _item) {  // すべて成功扱いでVaridationResultをセットする
+      var _itemClone = $.extend(true, {}, _item);
+      var tmpResultObj = $.axolFormBuilder.singleValidate(_itemClone, values, defaultStrings, target, validateObj, true);
+      // 子ルールで使用されていない親は、エラー表示から除外する
+      tmpResultObj.addExceptErrorNames(exceptNames);
+      resultObj.mergeResult(tmpResultObj);
+    });
+    return resultObj;
+  };
+  $.axolFormBuilder.fileAjaxValidate = function (item, values, defaultStrings, target, validateObj) {
+    var resultObj = new ValidateResult();
+    if (!window.FormData) { // formDataに対応していない場合は判定不能
+      return resultObj;
+    }
+    var errClass = $.axolFormBuilder.config.fileErrorClass;
+    var formObj = validateObj.formObj;
+    if (!target) {
+      $.each(item['names'], function (key, val) {
+        var $target = formObj.getObject(key);
+        if ($target && !$target.hasClass($.axolFormBuilder.config.fileHiddenClass) && $target.hasClass(errClass)) {
+          resultObj.setResult(item['names'], item['type'], axol.sprintf($.axolFormBuilder.getErrFormat('', 'FB_FileErrorFmt', defaultStrings), val), false);
+        }
+      });
+      return resultObj;
+    }
+
+    if (!axol.array_key_exists(target, item['names'])) {
+      return resultObj;
+    }
+    var $parent = validateObj.$parent;
+    var $target = formObj.getObject(target);
+
+    var csrfName = 'fb_csrf';
+    var csrfValue = '';
+    if (axol.array_key_exists('csrf_token_name', item) && item['csrf_token_name']) {
+      var _tmp = $parent.find('input[type="hidden"][name="' + item['csrf_token_name'] + '"]');
+      if (_tmp.length) {
+        csrfName = item['csrf_token_name'];
+        csrfValue = _tmp.val();
+      }
+    }
+    if (!csrfValue) {
+      $target.addClass(errClass);
+      resultObj.setResult(item['names'], item['type'], axol.sprintf(
+        $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_FileErrorFmt', defaultStrings),
+        item['names'][target]), false);
+      return resultObj;
+    }
+
+    var addResetBtn = function(){
+      var $checkpointObj = $target.closest($.axolFormBuilder.config.feedbackClosestSelector);
+      var btnValue = $.axolFormBuilder.getErrFormat('', 'FB_FileCancelBtn', defaultStrings);
+      if ($checkpointObj.find('input[type="button"][value="'+btnValue+'"]').length) {
+        return;
+      }
+      var $alertBox = $checkpointObj.find($.axolFormBuilder.config.ownAlertBoxSelector);
+      var $resetBtn = $('<input>').attr({'type': 'button', 'value': btnValue, 'aria-label' : 'アップロードをキャンセル'}).on('click', function () {
+        $target.val('').removeClass(errClass);
+        $alertBox.empty();
+        $checkpointObj.removeClass($.axolFormBuilder.config.feedbackCheckedAddClass).removeClass($.axolFormBuilder.config.feedbackErrorAddClass);
+        $resetBtn.off().remove();
+      });
+      $target.after($resetBtn);
+    };
+
+    var removeResetBtn = function(){
+      var $checkpointObj = $target.closest($.axolFormBuilder.config.feedbackClosestSelector);
+      var btnValue = $.axolFormBuilder.getErrFormat('', 'FB_FileCancelBtn', defaultStrings);
+      var $resetBtn = $checkpointObj.find('input[type="button"][value="'+btnValue+'"]')
+      if ($resetBtn.length) {
+        $resetBtn.off().remove();
+      }
+    };
+    removeResetBtn();
+
+    var sizeCheck = function (maxSizeByte, $fileObj) {
+      var files = $fileObj.prop('files');
+      var size = 0;
+      if (files && (0 in files) && files.length) {
+        size = files[0].size;
+      }
+      if (size <= 0) {
+        return axol.sprintf(
+          $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_FileSizeRuleZeroFmt', defaultStrings),
+          item['names'][target]);
+      }
+      if (maxSizeByte > 0 && size > maxSizeByte) {
+        return axol.sprintf(
+          $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_FileSizeRuleFmt', defaultStrings),
+          item['names'][target],
+          axol.toDataSizeString(maxSize));
+      }
+      return '';
+    };
+    var $sizeObj = $target.prev('input[type="hidden"][name="MAX_FILE_SIZE"]');
+    if ($sizeObj.length) {
+      var maxSize = parseInt($sizeObj.val(), 10);
+      var errMsg = sizeCheck(maxSize, $target);
+      if (errMsg) {
+        $target.addClass(errClass);
+        resultObj.setResult(item['names'], item['type'], errMsg, false);
+        addResetBtn();
+        return resultObj;
+      }
+    }
+
+    var addPosts = {};
+    addPosts[csrfName] = csrfValue;
+    formObj.postFile(target, item['posturl'], addPosts, function () {
+        // successHandler
+        var resultObj = new ValidateResult();
+        resultObj.setResult(item['names'], item['type'], '', true);
+        $.axolFormBuilder.renderOwnErrors(resultObj, $parent, 'change', target);
+        var btnValue = $.axolFormBuilder.getErrFormat('', 'FB_FileChangeBtn', defaultStrings);
+        var $changeBtn = $('<input>').attr({'type': 'button', 'value': btnValue, 'aria-label' : 'アップロードファイルを変更'}).on('click', function () {
+          $target.prop('disabled', false);
+          $changeBtn.off().remove();
+        });
+        $target.prop('disabled', true).removeClass(errClass).after($changeBtn);
+      },
+      function (text) {
+        // errorHandler
+        var resultObj = new ValidateResult();
+        if (!text) {
+          var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_FileErrorFmt', defaultStrings);
+          text = axol.sprintf(errformat, item['names'][target]);
+        }
+        resultObj.setResult(item['names'], item['type'], text, false);
+        $target.addClass(errClass);
+        addResetBtn();
+        $.axolFormBuilder.renderOwnErrors(resultObj, $parent, 'change', target);
+      });
+    var errformat = $.axolFormBuilder.getErrFormat('', 'FB_FileAjaxCheck', defaultStrings);
+    resultObj.setResult(item['names'], item['type'], axol.sprintf(errformat, item['names'][target]), false);
+    return resultObj;
+  };
+  $.axolFormBuilder.fileRequireValidate = function (item, values, defaultStrings, forceSuccess) {
+    var resultObj = new ValidateResult();
+    var errformat = $.axolFormBuilder.getErrFormat(item['errformat'], 'FB_RequiredRuleFmt', defaultStrings);
+    if (!errformat) {
+      return resultObj;
+    }
+    var is_set = false;
+    $.each(item['names'], function (name) {
+      var val = values[name];
+      if (axol.isValidValue(val)) {
+        is_set = true;
+        return false; // break
+      }
+    });
+    var errStr = '';
+    var result = true;
+    if (!is_set && !forceSuccess) {
+      result = false;
+      $.each(item['names'], function (name, title) {
+        errStr = axol.sprintf(errformat, title);
+        return false; // break
+      });
+    }
+    // チェック状態に応じてrequiredを操作する
+    $.each(item['names'], function (name) {
+      if (is_set) {
+        $('input[type="file"][name="' + name + '"]').prop('required', false);
+      } else {
+        $('input[type="file"][name="' + name + '"]').prop('required', true);
+      }
+      return false; // break
+    });
+    resultObj.setResult(item['names'], item['type'], errStr, result);
+    return resultObj;
+  };
+  $.axolFormBuilder.customValidate = function (item, values, target, forceSuccess) {
+    var resultObj = new ValidateResult();
+    if (!axol.array_key_exists('custom', item)) {
+      return resultObj;
+    }
+    if (target) {
+      if (!axol.array_key_exists('onlySubmit', item) || !item['onlySubmit']) {
+        return resultObj;
+      }
+    }
+    var ret = item['custom'](values, resultObj, forceSuccess); // retはresultObj
+    if (ret instanceof ValidateResult) {
+      return ret;
+    }
+    return resultObj;
+  };
+
+  $.axolFormBuilder.fileSkipChange = function(names) {
+    var hdls = {
+      onChange: function(){
+        var $me = $(this);
+        var $fileElm = $me.closest($.axolFormBuilder.config.feedbackClosestSelector).find('input[type="file"]');
+        if (!$fileElm.length) {
+          return;
+        }
+        var $subBtn = $fileElm.next('input[type="button"]');
+        if ($me.prop('checked')) {
+          if ($subBtn.length) {
+            $subBtn.trigger('click');
+          }
+          $fileElm.prop('disabled', true);
+        } else {
+          if ($subBtn.length) {
+            $subBtn.trigger('click');
+          }
+          $fileElm.prop('disabled', false);
+        }
+      }
+    };
+    if (names.length) {
+      for (var i=0; i<names.length; i++) {
+        $('input[type="checkbox"][name='+names[i]+']').on('change', hdls.onChange).trigger('change');
+      }
+    }
+  };
+  var FormBuilderObj = (function () {
+    var _skelton = function ($parent, items, preFuncs, defaultStrings) {
+      // define property
+      this.$parent = $parent;
+      this.items = items;
+      this.depends = this._parseDepends(items);
+      this.preFuncs = preFuncs;
+      this.defaultStrings = defaultStrings;
+      this.formObj = new axol.class.FormValuesObject($parent);
+    };
+    // define methods
+    _skelton.prototype = {
+      _parseDepends: function (items) { // その対象をバリデートするのに必要なものをまとめる。
+        var _me = this;
+        var ret = {};
+        $.each(items, function (a, item) {
+          $.each(item['names'], function (name, title) {
+            if (!axol.array_key_exists(name, ret)) {
+              ret[name] = {'names': {}, 'items': []};
+            }
+            var tmpNames = {};
+            if ($.axolFormBuilder.isMergeable(item['type'])) {
+              ret[name]['names'][name] = name;
+              tmpNames[name] = title;
+            } else {
+              $.each(item['names'], function (name2, title2) {
+                ret[name]['names'][name2] = name2;
+                tmpNames[name2] = title2;
+              });
+            }
+            ret[name]['items'].push(_me._cloneItem(tmpNames, item));
+          });
+        });
+        return ret;
+      },
+      _cloneItem: function (names, item) {
+        var ret = {};
+        $.each(item, function (key, val) {
+          if (key === 'names') {
+            ret['names'] = names;
+          } else {
+            ret[key] = val;
+          }
+        });
+        return ret;
+      },
+      getDependNames: function (name) {
+        return (name && axol.array_key_exists(name, this.depends)) ? this.depends[name]['names'] : {};
+      },
+      getValues: function (name) {
+        var ret = {};
+        if (!name || !axol.array_key_exists(name, this.depends)) {
+          ret = this.formObj.getAll();
+        } else {
+          ret = this.formObj.getValues(this.getDependNames(name));
+        }
+        for (var i = 0; i < this.preFuncs.length; i++) {
+          var adds = this.preFuncs[i](ret);
+          $.each(adds, function (key, val) {
+            ret[key] = val;
+          });
+        }
+        return ret;
+      },
+      validate: function (targetName) {
+        var values = this.getValues(targetName);
+        var searchItems = [];
+        if (!targetName) {
+          searchItems = this.items;
+        } else {
+          searchItems = axol.array_key_exists(targetName, this.depends) ? this.depends[targetName]['items'] : [];
+        }
+        var resultObj = new ValidateResult();
+        for (var i = 0; i < searchItems.length; i++) {
+          if (targetName && !axol.array_key_exists(targetName, searchItems[i]['names'])) {
+            continue;
+          }
+          var tmpResultObj = this._itemValidate(values, searchItems[i], targetName);
+          resultObj.mergeResult(tmpResultObj);
+        }
+        return resultObj;
+      },
+      _itemValidate: function (values, item, targetName) {
+        var checkValues = {};
+        $.each(item['names'], function (_name) {
+          checkValues[_name] = axol.array_key_exists(_name, values) ? values[_name] : null;
+        });
+        return $.axolFormBuilder.singleValidate(item, checkValues, this.defaultStrings, targetName, this);
+      }
+    };
+    return _skelton;
+  })();
+
+  var ValidateResult = (function () {
+    var _skelton = function () {
+      this.datas = [];
+    };
+    _skelton.prototype = {
+      addErrorfromArray: function (errors) {
+        if (!axol.is_array(errors)) {
+          return;
+        }
+        var _me = this;
+        $.each(errors, function (key, vals) {
+          var names = axol.array_key_exists('names', vals) ? axol.getValidArray(vals['names']) : [];
+          var type = (axol.array_key_exists('type', vals) && axol.is_string(vals['type'])) ? vals['type'] : '';
+          var str = (axol.array_key_exists('str', vals) && axol.is_string(vals['str'])) ? vals['str'] : '';
+          var excepts = axol.array_key_exists('exceptNames', vals) ? axol.getValidHash(vals['exceptNames']) : {};
+          _me.datas.push({'names': names, 'type': type, 'str': str, 'exceptNames': excepts, 'result': false});
+        });
+      },
+      setResult: function (names, type, errStr, result) {  // [type: validation type str. ex)require], [result: success -> true, error -> false]
+        this.datas.push({
+          'names': axol.getValidArray(names, true),
+          'type': type,
+          'str': axol.is_string(errStr) ? errStr : '',
+          'exceptNames': {},
+          'result': result
+        });
+      },
+      addExceptErrorNames: function (names) {
+        var _me = this;
+        $.each(_me.datas, function (key) {
+          $.each(names, function (name) {
+            if (!axol.in_array(name, _me.datas[key]['names'])) {
+              _me.datas[key]['names'].push(name);
+            }
+            _me.datas[key]['exceptNames'][name] = name;
+          });
+        })
+      },
+      mergeResult: function (resultObject) {
+        var _me = this;
+        $.each(resultObject.datas, function (key, val) {
+          _me.datas.push(val);
+        });
+      },
+      hasError: function () {
+        if (axol.count(this.datas) <= 0) {
+          return false;
+        }
+        var hasError = false;
+        $.each(this.datas, function (key, val) {
+          if (!val['result']) {
+            hasError = true;
+            return false;  // break
+          }
+        });
+        return hasError;
+      }
+    };
+    return _skelton;
+  })();
+
+})(jQuery);

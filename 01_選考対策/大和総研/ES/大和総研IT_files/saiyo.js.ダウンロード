@@ -1,0 +1,1639 @@
+(function($, undefined ) {
+
+  //////////////////////////////////////////////////
+  // saiyo20_common.js(old) ---from---
+
+  // IEかどうか判定。IE6かどうか判定。どちらも$.uiに入ります。
+  $.axol = $.axol || {};
+  $.extend( $.axol, {'ie': false, 'ie6': false});
+  (function() {
+    var uaMatch = /msie ([\w.]+)/.exec( navigator.userAgent.toLowerCase() ) || [];
+    $.axol.ie = uaMatch.length ? true : false;
+    $.axol.ie6 = parseFloat( uaMatch[ 1 ], 10 ) === 6;
+  })();
+
+
+  // 先祖要素で、relative要素なものを探す。
+  // スクロールが可能なもっとも近い祖先を見つけます。
+  $.extend($.fn, {
+    scrollparent: function() {
+      var scrollParent;
+      if (($.axol.ie && (/(static|relative)/).test(this.css('position'))) || (/absolute/).test(this.css('position'))) {
+        scrollParent = this.parents().filter(function() {
+          return (/(relative|absolute|fixed)/).test($.css(this,'position')) && (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
+        }).eq(0);
+      } else {
+        scrollParent = this.parents().filter(function() {
+          return (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
+        }).eq(0);
+      }
+      return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
+    },
+    relativeparent: function() {
+      var relParent;
+      if ((/absolute/).test(this.css('position'))) {
+        return this.parents().filter(function() {
+          return (/relative/).test($.css(this,'position'));
+        }).eq(0);
+      } else {
+        return $('body');
+      }
+    }
+  });
+
+
+  // onselectstartが使用できるか確認
+  $(function() {
+    var body = document.body,
+      div = body.appendChild( div = document.createElement( "div" ) );
+    div.offsetHeight;
+    $.extend( div.style, {
+      minHeight: "100px",
+      height: "auto",
+      padding: 0,
+      borderWidth: 0
+    });
+    $.support.minHeight = div.offsetHeight === 100;
+    $.support.selectstart = "onselectstart" in div;
+    body.removeChild( div ).style.display = "none";
+  });
+
+  $.fn.escapeHtml = function (value) {
+    if (typeof value !== 'string') {
+      return value;
+    }
+    return value.replace(/[&<>"']/g, function (match) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      }[match]
+    });
+  }
+
+
+  // event controlls
+  $.fn.noRightClick = function(opts) {
+    var conf = $.extend({
+      errMsgContext: '右クリックはできません。'+"\n"+'Can not right click.',
+      errMsgCopy: 'コピーはできません。'+"\n"+'Can not copy.',
+      errMsgPaste: '貼り付けはできません。'+"\n"+'Can not paste.'
+    }, opts);
+    var $_me = $(this);
+    $_me.on('contextmenu', function(e){
+      alert(conf.errMsgContext);
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    $_me.on('copy', function (e) {
+      alert(conf.errMsgCopy);
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    $_me.on('paste', function (e) {
+      alert(conf.errMsgPaste);
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  };
+
+
+  var array_key_exists = function(key, search) {
+    if(!search || (search.constructor !== Array && search.constructor !== Object)){
+      return false;
+    }
+    return key in search;
+  };
+
+  $.fn.axolAjaxPostDataGetSubmit = function(opts) {
+    var conf = $.extend({
+      ajax_url : '',
+      ajax_token : '',
+      ajax_posts : {},
+      value_set_class : 'send_data',
+      submit_form_id : 'form1',
+      err_alert : '接続に失敗しました。再度ログインしてやり直してください。',
+      enable_change_action : false,
+      action_attr : 'action_url'
+    }, opts);
+
+
+    var ajax_pdgs_handlers = {
+      h_click: function(e) {
+        var click_obj = $(this);
+        if (!conf.ajax_url.length || !conf.ajax_token.length) {
+          alert(conf.err_alert);
+          return false;
+        }
+        $('#'+conf.submit_form_id).find('input.'+conf.value_set_class).each(function(){
+          $(this).val('');
+        });
+        $.ajax({
+          url : conf.ajax_url,
+          type: 'post',
+          async : false,
+          data : $.extend({fb_csrf : conf.ajax_token}, conf.ajax_posts),
+          success : function(data) {
+            var ans = '';
+            try {
+              ans = $.parseJSON(data);
+            } catch(e) {
+              alert(conf.err_alert);
+              return false;
+            }
+            if (!array_key_exists('status', ans)) {
+              ans['status'] = 2;
+            }
+            if (ans['status'] != '1') {
+              alert((array_key_exists('err_str', ans) && ans['err_str'].length) ? ans['err_str'] : conf.err_alert);
+              return false;
+            }
+            if (!array_key_exists('posts', ans)) {
+              ans['posts'] = {};
+            }
+            $('#'+conf.submit_form_id).find('input.'+conf.value_set_class).each(function(){
+              var _me = $(this);
+              var _name = _me.attr('name');
+              if (array_key_exists(_name, ans['posts'])) {
+                _me.val(ans['posts'][_name]);
+              }
+            });
+            if (conf.enable_change_action) {
+              $('#'+conf.submit_form_id).attr('action', click_obj.attr(conf.action_attr));
+            }
+            $('#'+conf.submit_form_id).submit();
+          },
+          error: function(data) {
+            alert(conf.err_alert);
+            return false;
+          }
+        });
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    return this.each(function() {
+      $(this).on('click', ajax_pdgs_handlers.h_click);
+    });
+  };
+
+
+  $.fn.axolAjaxGetJobDetail = function(opts) {
+    var conf = $.extend({
+      ajax_token : '',
+      ajax_url : '',
+      ajax_posts : {},
+      err_alert : '接続に失敗しました。再度ログインしてやり直してください。',
+      id_box_summary : '',
+      id_box_detail : '',
+      id_btn : '',
+      token_tag: 'input[name="_qf_token"]',
+      enable_search_filter: 0,
+      search_input_box : '',
+      targets : []
+    }, opts);
+
+    var handler_click = function(e){
+      var me = $(this);
+      e.preventDefault();
+
+      var tmp_id = me.attr('id');
+      var regex = tmp_id.match(new RegExp('^'+conf.id_btn+'([0-9]+)$'));
+      if (!regex) {
+        alert(conf.err_alert);
+        return false;
+      }
+      var job_id = regex[1];
+      var summary_obj = $('#'+conf.id_box_summary+job_id);
+      var detail_obj = $('#'+conf.id_box_detail+job_id);
+
+      var tbl = detail_obj.find('table');
+      if (tbl.length <= 0) {
+        if (!conf.ajax_url.length || !conf.ajax_token.length) {
+          alert(conf.err_alert);
+          return false;
+        }
+        $.ajax({
+          url : conf.ajax_url,
+          type: 'post',
+          async : false,
+          data : $.extend({'token' : conf.ajax_token, 'job_id' : job_id}, conf.ajax_posts),
+          success : function(ret) {
+            var ans = '';
+            try {
+              ans = $.parseJSON(ret);
+            } catch(e) {
+              alert(conf.err_alert);
+              return false;
+            }
+            if (!array_key_exists('status', ans) || !array_key_exists('token', ans)) {
+              ans['status'] = 2;
+            } else if (ans['job_id'] != job_id) {
+              ans['status'] = 2;
+            }
+            if (ans['status'] != '1') {
+              alert((array_key_exists('err_str', ans) && ans['err_str']) ? ans['err_str'] : conf.err_alert);
+              return false;
+            }
+            conf.ajax_token = ans['token'];
+            $(conf.token_tag).attr('value', ans['token']);
+            summary_obj.css('display', 'none');
+            detail_obj.find('table').remove();
+            detail_obj.append(ans['data']);
+            detail_obj.css({'opacity':0,'display':'block'}).animate({opacity:'1'}, 500);
+            detail_obj.find('span.change_list_button').on('click', function(){
+              detail_obj.animate({opacity:'0'}, 200, 'linear', function(){
+                detail_obj.css('display', 'none');
+                summary_obj.css({'opacity':1,'display':'block'});
+              });
+            });
+            if (conf.enable_search_filter) {
+              $.axolMarkerSearchStrs({
+                search_input_box : conf.search_input_box,
+                target_box : '.shokushubox #jobdetail_'+job_id,
+                targets : conf.targets
+              });
+            }
+          },
+          error : function(data) {
+            alert(conf.err_alert);
+          }
+        });
+      } else {
+        summary_obj.css('display', 'none');
+        detail_obj.css({'opacity':0,'display':'block'}).animate({opacity:'1'}, 500);
+      }
+      return false;
+    };
+
+    return this.each(function() {
+      $(this).on('click', handler_click);
+    });
+  };
+
+
+  $.axolMarkerSearchStrs = function(opts) {
+    var conf = $.extend({
+      search_input_box : '',
+      target_box : '',
+      targets : []
+    }, opts);
+
+    var _getSearchAryFromStr = function(str) {
+      var tmp = str.split(/\s/);
+      if (tmp.length <= 0) {
+        return {};
+      }
+      var tmp2 = {};
+      for (var i = 0; i < tmp.length; i++) {
+        tmp2[tmp[i]] = tmp[i].length;
+      }
+      var ret = [];
+      for (var str in tmp2) {
+        ret.push(str);
+      }
+      return ret;
+    };
+
+    var _getSearchTreeFromAry = function(ary) {
+      if (ary.length == 0) {
+        return {};
+      }
+      var ret = {};
+      var str = '';
+      var last_obj = {};
+      for (var i = 0; i < ary.length; i++) {
+        str = ary[i];
+        last_obj = ret;
+        for (var j = 0; j < str.length; j++) {
+          var chr = str.charAt(j).toLowerCase();
+          if (!(chr in last_obj)) {
+            last_obj[chr] = {};
+          }
+          last_obj = last_obj[chr];
+          if (j == str.length - 1) {
+            last_obj['ok'] = {};
+          }
+        }
+      }
+      return ret;
+    };
+
+    //検索文字列を変換するための変換文字列配列
+    var kana_list1 = {'ｧ':'ァ','ｨ':'ィ','ｩ':'ゥ','ｪ':'ェ','ｫ':'ォ','ｬ':'ャ','ｭ':'ュ','ｮ':'ョ','ｯ':'ッ','ｰ':'ー',
+      'ｱ':'ア','ｲ':'イ','ｳ':'ウ','ｴ':'エ','ｵ':'オ','ｶ':'カ','ｷ':'キ','ｸ':'ク','ｹ':'ケ','ｺ':'コ',
+      'ｻ':'サ','ｼ':'シ','ｽ':'ス','ｾ':'セ','ｿ':'ソ','ﾀ':'タ','ﾁ':'チ','ﾂ':'ツ','ﾃ':'テ','ﾄ':'ト',
+      'ﾅ':'ナ','ﾆ':'ニ','ﾇ':'ヌ','ﾈ':'ネ','ﾉ':'ノ','ﾊ':'ハ','ﾋ':'ヒ','ﾌ':'フ','ﾍ':'ヘ','ﾎ':'ホ',
+      'ﾏ':'マ','ﾐ':'ミ','ﾑ':'ム','ﾒ':'メ','ﾓ':'モ','ﾔ':'ヤ','ﾕ':'ユ','ﾖ':'ヨ',
+      'ﾗ':'ラ','ﾘ':'リ','ﾙ':'ル','ﾚ':'レ','ﾛ':'ロ','ﾜ':'ワ','ｦ':'ヲ','ﾝ':'ン'};
+    var kana_list2 = {'ｶﾞ':'ガ','ｷﾞ':'ギ','ｸﾞ':'グ','ｹﾞ':'ゲ','ｺﾞ':'ゴ','ｻﾞ':'ザ','ｼﾞ':'ジ','ｽﾞ':'ズ','ｾﾞ':'ゼ','ｿﾞ':'ゾ',
+      'ﾀﾞ':'ダ','ﾁﾞ':'ヂ','ﾂﾞ':'ヅ','ﾃﾞ':'デ','ﾄﾞ':'ド','ﾊﾞ':'バ','ﾋﾞ':'ビ','ﾌﾞ':'ブ','ﾍﾞ':'ベ','ﾎﾞ':'ボ',
+      'ﾊﾟ':'パ','ﾋﾟ':'ピ','ﾌﾟ':'プ','ﾍﾟ':'ペ','ﾎﾟ':'ポ'};
+    var _getHalfChr = function(str) {
+      var ret = str;
+      if (ret in kana_list2) {
+        ret = kana_list2[ret];
+      } else if (ret in kana_list1) {
+        ret = kana_list1[ret];
+      }
+      ret = ret.replace(/[Ａ-Ｚａ-ｚ０-９！]/g, function(s){
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+      });
+      return ret.toLowerCase();
+    };
+
+    var _getReplacedHtml = function(search_tree, html) {
+      if (Object.keys(search_tree).length == 0 || html.length == 0) {
+        return false;
+      }
+      var ret = '';
+      var chr = '';
+      var chk_chr = '';
+      var tmp = '';
+      var buff_str = '';
+      var append_str = '';
+      var searcher = search_tree;
+      var is_recursive = false;
+      var is_tag_inner = false;
+      var is_hit = false;
+      for (var i = 0; i < html.length; i++) {
+        chr = html.charAt(i);
+        if (i + 1 < html.length) {
+          tmp = html.charAt(i + 1);
+          if (tmp == 'ﾞ' || tmp == 'ﾟ') {
+            tmp = chr+tmp;
+            if (tmp in kana_list2) {
+              chr = tmp;
+              i++;
+            }
+          }
+        }
+        chk_chr = _getHalfChr(chr);
+        if (chk_chr == '<') {
+          if (buff_str) {
+            if (is_hit) {
+              append_str = '<span style="background-color:#ff0; color:#000">'+buff_str+'</span>';
+            } else {
+              append_str = buff_str;
+            }
+            buff_str = '';
+          }
+          is_hit = false;
+          is_tag_inner = true;
+        } else if (chk_chr == '>') {
+          append_str = chr;
+          is_tag_inner = false;
+        }
+        if (is_tag_inner) {
+          append_str += chr;
+        } else if (chk_chr in searcher) {
+          searcher = searcher[chk_chr];
+          is_recursive = true;
+          buff_str += chr;
+        } else if (is_recursive) {
+          is_recursive = false;
+          if (is_hit) {
+            append_str = '<span style="background-color:#ff0; color:#000">'+buff_str+'</span>';
+          } else {
+            append_str = buff_str;
+          }
+          buff_str = '';
+          searcher = search_tree;
+          is_hit = false;
+          if (chk_chr in searcher) {
+            searcher = searcher[chk_chr];
+            is_recursive = true;
+            buff_str += chr;
+          } else {
+            append_str += chr;
+          }
+        } else {
+          append_str = chr;
+        }
+        if (!is_tag_inner && !is_hit) {
+          if ('ok' in searcher) {
+            is_hit = true;
+          }
+        }
+        if (append_str) {
+          ret += append_str;
+          append_str = '';
+        }
+        if (i == html.length - 1) {
+          if (!append_str) {
+            append_str = buff_str;
+          }
+          if (is_hit) {
+            ret += '<span style="background-color:#ff0; color:#000">'+append_str+'</span>';
+          } else {
+            ret += append_str;
+          }
+        }
+      }
+      return ret;
+    };
+
+
+    (function() {
+      var search_str_obj = $(conf.search_input_box);
+      if (search_str_obj.length <= 0) {
+        return false;
+      }
+      var search_word = search_str_obj.val();
+      if (search_word.length == 0) {
+        return false;
+      }
+      var search_ary = _getSearchAryFromStr(search_word);
+      var search_tree = _getSearchTreeFromAry(search_ary);
+      var target_box_obj = $(conf.target_box);
+      for (var i = 0; i < conf.targets.length; i++) {
+        target_box_obj.find(conf.targets[i]).each(function(){
+          //$(this).html(_getReplacedHtml(search_tree, $(this).html()));
+          $(this).html(_getReplacedHtml(search_tree, $(this).html()));
+        });
+      }
+    })();
+
+  };
+
+
+  $.fn.axolOneLineTextFitter = function(opts) {
+    var conf = $.extend({
+      min_font_px : 6,
+      default_font_px : 16
+    }, opts);
+
+    var _createSizeObj = function(target){
+      var _text = target.text();
+      var _setobj = $('<div>').addClass('__axol_test_fit__').css({'height':'0px', 'position':'relative'});
+      var _innerobj = $('<div>').css({'height':'50px', 'position':'absolute', 'width':'3000px'});
+      _innerobj.append($('<span>').addClass('__axol_test_fit_inner__').css({'color':'transparent'}).text(_text));
+      target.prepend(_setobj.append(_innerobj));
+      return target.find('.__axol_test_fit_inner__');
+    };
+    var _removeSizeObj = function(target){
+      target.find('.__axol_test_fit__').remove();
+    };
+    var _me = $(this);
+    var fontsize = _me.css('font-size');
+    if (!fontsize || fontsize.length == 0) {
+      fontsize = conf.default_font_px;
+    } else {
+      if (fontsize.match(new RegExp('^([0-9]+)'))) {
+        fontsize = RegExp.$1;
+      } else {
+        fontsize = conf.default_font_px;
+      }
+    }
+    var _width = _me.width();
+    var _tester = _createSizeObj(_me);
+    _tester.css('font-size', fontsize+'px');
+    var _chk_width = _tester.width();
+    if (_chk_width < _width) {
+      _removeSizeObj(_me);
+      return true;
+    }
+    var _now_font = fontsize;
+    while (_chk_width >= _width) {
+      _now_font--;
+      if (_now_font == conf.min_font_px) {
+        break;
+      }
+      _tester.css('font-size', _now_font+'px');
+      _chk_width = _tester.width();
+    }
+    _removeSizeObj(_me);
+    _me.css('font-size', _now_font+'px');
+    return true;
+  };
+
+  // saiyo20_common.js(old) ---to---
+  //////////////////////////////////////////////////
+
+
+  //////////////////////////////////////////////////
+  // Jusho search
+  $.fn.axolJushoSearch = function(ajaxUrl, $postal1, $postal2, $ken, $jusho1, errStr){
+    var obj = new AxolJushoSearchClass(ajaxUrl, $postal1, $postal2, $ken, $jusho1, errStr);
+    this.on('click.jushosearch', obj, obj.jushoget);
+  };
+  var AxolJushoSearchClass = (function(){
+    var _skelton = function(ajaxUrl, $postal1, $postal2, $ken, $jusho1, errStr) {
+      // define property
+      this.ajaxUrl_ = ajaxUrl;
+      this.$postal1_ = $postal1;
+      this.$postal2_ = $postal2;
+      this.$ken_ = $ken;
+      this.$jusho1_ = $jusho1;
+      this.errStr = errStr;
+    };
+    // define methods
+    _skelton.prototype.jushoget = function(e){
+      var _self = e.data;
+      var posts = {};
+      posts['yubin1'] = _self.$postal1_.val();
+      posts['yubin2'] = _self.$postal2_.val();
+      if (!posts['yubin1'] || !posts['yubin2']) {
+        alert(_self.errStr);
+        return false;
+      }
+      axol.axolAjax(_self.ajaxUrl_, posts, '', function(data){
+        _self.$ken_.val(data['ken']).trigger('change');
+        _self.$jusho1_.val(data['jusho1']).trigger('change').trigger('focusout');  // focusout : for validation
+      });
+    };
+    return _skelton;
+  })();
+
+
+  //////////////////////////////////////////////////
+  // Jusho foreign toggle
+  $.axolJushoForeignToggle = function($kaigai, $ken, $foreigns, $jps, isRequired, isRequiredTel){
+    var obj = new AxolJushoForeignToggleClass($kaigai, $ken, $foreigns, $jps, isRequired, isRequiredTel);
+    obj.init(obj);
+  };
+  var AxolJushoForeignToggleClass = (function(){
+    var _skelton = function($kaigai, $ken, $foreigns, $jps, isRequired, isRequiredTel){
+      this.$kaigai_ = $kaigai;
+      this.$ken_ = $ken;
+      this.$foreigns_ = $foreigns;
+      this.$jps_ = $jps;
+      this.isRequired_ = isRequired;
+      this.isRequiredTel_ = isRequiredTel;
+    };
+
+    _skelton.prototype.init = function(_self){
+      _self.$kaigai_.on('change.foreignCheck', _self, _self.onCheckHdl);
+      if (_self.$ken_.length) {
+        _self.$ken_.on('change.foreignCheck', _self, _self.onChangeHdl);
+      }
+      _self.onCheckHdl({data:_self});
+      _self.onChangeHdl({data:_self});
+    };
+    _skelton.prototype.onCheckHdl = function(e){
+      var _self = e.data;
+      if (_self.$ken_.length) {
+        _self.$ken_.off('change.foreignCheck');
+      }
+      if (_self.$kaigai_.prop('checked')) {
+        _self.turnForeign(_self);
+        if (_self.$ken_.length) {
+          _self.$ken_.prop('disabled',true).val('99').trigger('change');
+        }
+      } else {
+        _self.turnJp(_self);
+        if (_self.$ken_.length) {
+          _self.$ken_.prop('disabled', false);
+          if (_self.$ken_.val() == 99) {
+            _self.$ken_.val('').trigger('change');
+          }
+        }
+      }
+      _self.$ken_.on('change.foreignCheck', _self, _self.onChangeHdl);
+    };
+    _skelton.prototype.onChangeHdl = function(e){
+      var _self = e.data;
+      if (_self.$ken_.val() == '99') {
+        _self.$kaigai_.off('change.foreignCheck');
+        _self.$ken_.prop('disabled', true);
+        _self.turnForeign(_self);
+        _self.$kaigai_.prop('checked', true);
+        _self.$kaigai_.on('change.foreignCheck', _self, _self.onCheckHdl);
+      }
+    };
+    _skelton.prototype.turnForeign = function(_self){
+      _self.$jps_.css('display','none');
+      _self.$foreigns_.css('display','flex');
+      // 項目が必須の場合、国内のrequiredを外し、海外にrequiredをつける
+      if (_self.isRequired_ || _self.isRequiredTel_) {
+        _self.$jps_.find('span input').each(function() {
+          const namealias = $(this).attr('namealias');
+          const shouldRemove = (_self.isRequired_ && namealias !== 'telg' && namealias !== 'keitai') ||
+              (_self.isRequiredTel_ && (namealias === 'telg' || namealias === 'keitai'));
+          if (shouldRemove) {
+            $(this).prop('required', false);
+          }
+        });
+        _self.$foreigns_.find('input').each(function() {
+          const name = $(this).attr('name');
+          const shouldAdd = (_self.isRequired_ && name !== 'telg_kaigai' && name !== 'keitai_kaigai') ||
+              (_self.isRequiredTel_ && (name === 'telg_kaigai' || name === 'keitai_kaigai'));
+          if (shouldAdd) {
+            $(this).prop('required', true);
+          }
+        });
+      }
+      var formItems = new axol.class.FormValuesObject(_self.$jps_);
+      formItems.clearAll(true);
+    };
+    _skelton.prototype.turnJp = function(_self){
+      _self.$jps_.css('display','flex');
+      _self.$foreigns_.css('display','none');
+      // 項目が必須の場合、海外のrequiredを外し、国内にrequiredをつける
+      if (_self.isRequired_ || _self.isRequiredTel_) {
+        _self.$jps_.find('span input').each(function() {
+          const namealias = $(this).attr('namealias');
+          const shouldAdd = (_self.isRequired_ && namealias !== 'telg' && namealias !== 'keitai') ||
+              (_self.isRequiredTel_ && (namealias === 'telg' || namealias === 'keitai'));
+          if (shouldAdd) {
+            $(this).prop('required', true);
+          }
+        });
+        _self.$foreigns_.find('input').each(function() {
+          const name = $(this).attr('name');
+          const shouldRemove = (_self.isRequired_ && name !== 'telg_kaigai' && name !== 'keitai_kaigai') ||
+              (_self.isRequiredTel_ && (name === 'telg_kaigai' || name === 'keitai_kaigai'));
+          if (shouldRemove) {
+            $(this).prop('required', false);
+          }
+        });
+      }
+      var formItems = new axol.class.FormValuesObject(_self.$foreigns_);
+      formItems.clearAll(true);
+    };
+    return _skelton;
+  })();
+
+
+  //////////////////////////////////////////////////
+  // Jusho same toggle
+  $.fn.axolJushoSameToggle = function($target, isRequired) {
+    var $_self = $(this);
+    $_self.on('change.jushosame', function(){
+      var formItems = new axol.class.FormValuesObject($target);
+      if ($_self.prop('checked')) {
+        $target.css('display','none');
+        formItems.clearAll(true);
+        // 項目が必須でチェック状態の場合、requiredを外す
+        if (isRequired) {
+          formItems.toggleRequired(true);
+        }
+      } else {
+        $target.css('display','flex');
+        // 項目が必須でチェック状態でない場合、requiredを付与
+        if (isRequired) {
+          formItems.toggleRequired(false);
+        }
+      }
+    }).trigger('change.jushosame');
+  };
+
+
+  //////////////////////////////////////////////////
+  // Univ search
+  $.axolSchoolManage = {
+    config: {
+      selector_wrap: '.jsAxolSchool_wrap', // closest 'selector_search_btn'
+      selector_search_btn: '#jsAxolSchool_dcd_search',
+      selector_reset_btn: '#jsAxolSchool_dcd_search_edit',
+      selector_search_params:{
+        kubun: 'input[name="kubun"]',
+        kokushi: 'input[name="kokushi"]',
+        degree: 'input[name="degree"]',
+        initial: 'input[name="initial"]',
+        schoolken: 'select[name="schoolken"]'
+      },
+      selector_search_params_active: '.jsAxolSchool_search_params_active',
+      selector_d_line: '.jsAxolSchool_d_line',
+      selector_d_line_active: '.jsAxolSchool_d_line_active',
+      selector_d_list: 'select[name="dcd"]',
+      selector_bk_list_wrap: '.jsAxolSchool_bk_wrap', // closest 'selector_b_list', 'selector_k_list'
+      selector_degree_wrap: '.jsAxolSchool_degree_wrap',
+      selector_b_list: 'select[name="bcd"]',
+      selector_k_list: 'select[name="paxcd"]',
+      selector_d_text: 'input[type="text"][name="dname"]',
+      selector_b_text: 'input[type="text"][name="bname"]',
+      selector_k_text: 'input[type="text"][name="kname"]',
+      selector_dbk_select_wrap: '.jsAxolSchool_dbk_select_wrap',
+      selector_dbk_text_wrap: '.jsAxolSchool_dbk_text_wrap',
+      selector_scroll_top: '.jsAxolSchool_scroll_top',
+      selector_scroll_kubun: '.jsAxolSchool_scroll_kubun',
+      selector_freeze_scroll_top: '.jsAxolSchool_freeze_scroll_top',
+      selector_kubun_caption: '.jsAxolSchool_kubun_caption',
+      selector_degree_caption: '.jsAxolSchool_degree_caption',
+      selector_gakkeiself: 'select[name="gakkei_self"]',
+      selector_gakkeiself_auto: '.jsAxolSchool_gakkei_auto',
+      school_url: '',
+      bk_url: '',
+      k_default_msg: '',
+      kubun_str: '',
+      kokushi_str: '',
+      degree_str: '',
+      require_msg: '',
+      selector_gakkei_label: '.jsTitleGakkeiSelf',
+      selector_gakkei_label_en: '.jsTitleGakkeiSelfEn',
+      gakkei_label: '',
+      gakkei_label_en: '',
+      gakkei_senmon_label: '',
+      gakkei_senmon_label_en: '',
+      addPosts:{}
+    },
+    objs: {
+    },
+    enableScroll: false,
+    register: function(opts){
+      $.extend($.axolSchoolManage.config, opts);
+      $.axolSchoolManage._initializeObjs();
+      $.axolSchoolManage._setHandlers();
+      $.axolSchoolManage._render();
+      $.axolSchoolManage.enableScroll = true;
+    },
+    _initializeObjs: function(){
+      var config = $.axolSchoolManage.config;
+      var objs = $.axolSchoolManage.objs;
+      objs.search_btn = $(config.selector_search_btn);
+      objs.wrap = objs.search_btn.closest(config.selector_wrap);
+      // find from wrap
+      objs.reset_btn = objs.wrap.find(config.selector_reset_btn);
+      objs.search_params = {};
+      objs.search_params.kubun = objs.wrap.find(config.selector_search_params.kubun);
+      objs.search_params.kokushi = objs.wrap.find(config.selector_search_params.kokushi);
+      objs.search_params.initial = objs.wrap.find(config.selector_search_params.initial);
+      objs.search_params.schoolken = objs.wrap.find(config.selector_search_params.schoolken);
+      objs.search_params.degree =  objs.wrap.find(config.selector_search_params.degree);
+      objs.search_params_active = objs.wrap.find(config.selector_search_params_active);
+      objs.d_list = objs.wrap.find(config.selector_d_list);
+      objs.d_line_active = objs.wrap.find(config.selector_d_line_active);
+      objs.d_line = objs.wrap.find(config.selector_d_line);
+      objs.b_list = objs.wrap.find(config.selector_b_list);
+      objs.k_list = objs.wrap.find(config.selector_k_list);
+      objs.d_text = objs.wrap.find(config.selector_d_text);
+      objs.b_text = objs.wrap.find(config.selector_b_text);
+      objs.k_text = objs.wrap.find(config.selector_k_text);
+      objs.gakkei_list = $(config.selector_gakkeiself);
+      objs.gakkei_auto = $(config.selector_gakkeiself_auto);
+      objs.gakkei_label = $(config.selector_gakkei_label);
+      objs.gakkei_label_en = $(config.selector_gakkei_label_en);
+      objs.b_list_wrap = objs.b_list.closest(config.selector_bk_list_wrap);
+      objs.k_list_wrap = objs.k_list.closest(config.selector_bk_list_wrap);
+      objs.dbk_text_wrap = objs.wrap.find(config.selector_dbk_text_wrap);
+      objs.dbk_select_wrap = objs.wrap.find(config.selector_dbk_select_wrap);
+      objs.scroll_top = objs.wrap.find(config.selector_scroll_top);
+      objs.scroll_kubun = objs.wrap.find(config.selector_scroll_kubun);
+      objs.scroll_degree = objs.wrap.find(config.selector_degree_wrap);
+      objs.freeze_scroll_top = objs.wrap.find(config.selector_freeze_scroll_top);
+      objs.kubun_caption = objs.wrap.find(config.selector_kubun_caption);
+      objs.degree_wrap = objs.search_params.degree.closest('.jsAxolSchool_search_params_active');
+      objs.degree_caption = objs.wrap.find(config.selector_degree_caption);
+      objs.paxcds = {};
+      objs.preSearchValues = {};
+      objs.defGakkei = undefined;
+    },
+    _setHandlers: function(){
+      var objs = $.axolSchoolManage.objs;
+      var hdls = $.axolSchoolManage.hdls;
+      objs.search_btn.on('click', hdls.onSchoolSearch);
+      objs.reset_btn.on('click', hdls.onReset);
+      objs.search_params.kubun.on('change', hdls.onKubunSelect);
+      objs.search_params.kokushi.on('change', hdls.onKubunSelect);
+      objs.d_list.on('change', hdls.onSchoolSelect);
+      objs.b_list.on('change', hdls.onBuSelect);
+      objs.k_list.on('change', hdls.onKaSelect);
+      hdls.onKubunSelect();
+      if (!objs.gakkei_list || !objs.gakkei_list.length) return;
+      objs.gakkei_auto.on('click', hdls.onGakkeiSearch);
+      var cnt = 0;
+      objs.gakkei_list.find('option').each(function(){
+        if ($(this).attr('value') == '') { return; }
+        cnt++;
+      });
+      if (cnt) {
+        objs.defGakkei = objs.gakkei_list.val();
+        var _paxcd = objs.k_list.val();
+        var _paxGakkei = _paxcd ? objs.k_list.find('option[value='+_paxcd+']').data('gakkei') : null;
+        if (_paxGakkei == objs.defGakkei) {
+          objs.defGakkei = undefined;
+        }
+      }
+      hdls.checkGakkei(true);
+    },
+    _render: function(){
+      var config = $.axolSchoolManage.config;
+      var objs = $.axolSchoolManage.objs;
+      var hdls = $.axolSchoolManage.hdls;
+      var kokushiKubun = hdls.loadKokushiKubun();
+
+      if (objs.d_list.val() && !kokushiKubun.errors.length) {
+        hdls.searchboxFreeze();
+        if (objs.d_list.find('option:last').prop('selected')) {
+          objs.dbk_text_wrap.css('display', '');
+          objs.dbk_select_wrap.css('display', 'none');
+        } else {
+          if (objs.b_list.closest('td').hasClass('fb_alert')) {
+            hdls.onSchoolSelect();
+          }
+          objs.dbk_text_wrap.css('display', 'none');
+          objs.dbk_text_wrap.find('input').val('').trigger('change');
+          objs.dbk_select_wrap.css('display', '');
+          if (!objs.b_list.val()) {
+            objs.k_list.find('option').remove();
+            objs.k_list.append('<option value="">'+config.k_default_msg+'</option>').trigger('change').prop('disabled', true);
+          }
+        }
+      } else if (objs.d_list.val()) {
+        hdls.onReset();
+        hdls.fbAlertKokushiKubun();
+      } else {
+        hdls.onReset();
+      }
+    },
+    hdls: {
+      loadKokushiKubun: function () {
+        var config = $.axolSchoolManage.config;
+        var objs = $.axolSchoolManage.objs;
+        var errs = [];
+        var data = {kubun: null, kokushi: null, degree: null};
+        var hasDegree = false;
+        if (objs.search_params.kubun.prop("tagName") === 'SELECT') {
+          data.kubun = objs.search_params.kubun.val();
+        } else {
+          data.kubun = objs.search_params.kubun.filter(':checked').val();
+        }
+        if (!data.kubun) { errs.push(config.kubun_str); }
+        if (objs.search_params.kokushi.prop("tagName") === 'SELECT') {
+          data.kokushi = objs.search_params.kokushi.val();
+        } else {
+          data.kokushi = objs.search_params.kokushi.filter(':checked').val();
+        }
+        if (!data.kokushi) { errs.push(config.kokushi_str); }
+        if (data.kubun == 1 && (data.kokushi == 1 || data.kokushi == 2 || data.kokushi == 3)) {
+          hasDegree = true;
+          if (objs.search_params.degree.prop("tagName") === 'SELECT') {
+            data.degree = objs.search_params.degree.val();
+          } else {
+            data.degree = objs.search_params.degree.filter(':checked').val();
+          }
+          if (!data.degree) { errs.push(config.degree_str); }
+        }
+        return {'data': data, 'errors': errs, 'hasDegree': hasDegree};
+      },
+      fbAlertKokushiKubun: function () {
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+        if (objs.search_params.kubun.length) {
+          objs.search_params.kubun.off('change', hdls.onKubunSelect);
+          objs.search_params.kubun.trigger('change');
+          objs.search_params.kubun.on('change', hdls.onKubunSelect);
+        }
+        if (objs.search_params.kokushi.length) {
+          objs.search_params.kokushi.off('change', hdls.onKubunSelect);
+          objs.search_params.kokushi.trigger('change');
+          objs.search_params.kokushi.on('change', hdls.onKubunSelect);
+        }
+        if (objs.search_params.degree.length) {
+          objs.search_params.degree.trigger('change');
+        }
+      },
+      onSchoolSearch: function(){
+        var config = $.axolSchoolManage.config;
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+        var data = $.extend({}, config.addPosts);
+        var kokushiKubun = hdls.loadKokushiKubun();
+        data.kokushi = kokushiKubun.data.kokushi;
+        data.kubun = kokushiKubun.data.kubun;
+
+        if (kokushiKubun.errors.length > 0) {
+          hdls.fbAlertKokushiKubun();
+          alert(config.require_msg.replace('%1$s', kokushiKubun.errors.join(', ')));
+          return;
+        }
+        data.initial = objs.search_params.initial.val();
+        data.schoolken = objs.search_params.schoolken.val();
+        axol.axolAjax(config.school_url, data, '', function(data){
+          if (!data) { return; }
+          if (data.status_str) {
+            return false;
+          }
+          hdls.searchboxFreeze(true);
+          hdls.clearAll();
+          var _cnt = data.gakkeis ? data.gakkeis.length : 0;
+          if (_cnt && objs.gakkei_list && objs.gakkei_list.length) {
+            for (var i=0; i<_cnt; i++) {
+              objs.gakkei_list.append('<option value="'+data.gakkeis[i].value+'">'+data.gakkeis[i].label+'</option>');
+            }
+          }
+          hdls.checkGakkei(true);
+          var _cnt = data.dcd.length;
+          if (!_cnt || _cnt === undefined) { return; }
+          var hitDcd = null;
+          for (var i=0; i<_cnt; i++) {
+            if (objs.preSearchValues.dcd == data.dcd[i].dcd) {
+              hitDcd = data.dcd[i].dcd;
+            }
+            objs.d_list.append('<option value="'+data.dcd[i].dcd+'">'+data.dcd[i].dname+'</option>');
+          }
+
+          // 復元
+          if (hitDcd) {
+            objs.d_list.off('change', hdls.onSchoolSelect);
+            objs.d_list.val(hitDcd);
+            objs.d_list.trigger('change');
+            objs.d_list.on('change', hdls.onSchoolSelect);
+
+            var checkGakkei = function() {
+              var hitGakkei = null;
+              if (!objs.gakkei_list.length) return;
+              objs.gakkei_list.children('option').each(function(el) {
+                var meObj = $(this);
+                if (meObj.val() == objs.preSearchValues.gakkei) {
+                  hitGakkei = meObj.val();
+                }
+              });
+              if (hitGakkei) {
+                objs.gakkei_list.val(objs.preSearchValues.gakkei);
+              }
+            };
+            $.axolSchoolManage.hdls.schoolSelectHandler(function() {
+              if (objs.dbk_text_wrap.css('display') != 'none') {
+                objs.d_text.val(objs.preSearchValues.dname);
+                objs.b_text.val(objs.preSearchValues.bname);
+                objs.k_text.val(objs.preSearchValues.kname);
+                objs.d_list.off('change', hdls.onSchoolSelect);
+                objs.d_list.trigger('change');
+                objs.d_list.on('change', hdls.onSchoolSelect);
+                checkGakkei();
+                objs.preSearchValues = {};
+              } else {
+                var hitbcd = null;
+                objs.b_list.children('option').each(function() {
+                  var meObj = $(this);
+                  if (meObj.val() == objs.preSearchValues.bcd) {
+                    hitbcd = meObj.val();
+                  }
+                });
+                if (hitbcd) {
+                  objs.b_list.val(objs.preSearchValues.bcd)
+                  $.axolSchoolManage.hdls.onBuSelect();
+                  $.axolSchoolManage.hdls.buSelectHandler(function() {
+                    var hitPaxcd = null;
+                    objs.k_list.children('option').each(function() {
+                      var meObj = $(this);
+                      if (meObj.val() == objs.preSearchValues.paxcd) {
+                        hitPaxcd = meObj.val();
+                      }
+                    });
+                    if (hitPaxcd) {
+                      objs.k_list.val(objs.preSearchValues.paxcd)
+                    }
+                    checkGakkei();
+                    objs.preSearchValues = {};
+                  });
+                }
+              }
+            });
+          }
+
+        }, '', function(){
+          objs.reset_btn.prop('disabled', false);
+          $('.type__school').find('.fb_ownAlertStrs').css('display', '');
+          $('.jsAxolSchool_gakkeiself').find('.fb_ownAlertStrs').css('display', '');
+        });
+      },
+      onKubunSelect: function(){
+        var objs = $.axolSchoolManage.objs;
+        var config = $.axolSchoolManage.config;
+        var kubunVal = (objs.search_params.kubun.prop("tagName") === 'SELECT')
+            ? objs.search_params.kubun.val() : objs.search_params.kubun.filter(':checked').val();
+        var kokushiVal = (objs.search_params.kokushi.prop("tagName") === 'SELECT')
+            ? objs.search_params.kokushi.val() : objs.search_params.kokushi.filter(':checked').val();
+        if (kubunVal == 1 && kokushiVal && kokushiVal != 4) {
+          objs.scroll_degree.attr('role', 'radiogroup');
+          objs.scroll_degree.find('.need__item strong').css('display', '');
+          objs.degree_caption.css('display', 'none');
+          objs.degree_caption.attr('aria-hidden', 'true');
+          objs.degree_wrap.css('display', '');
+          objs.degree_wrap.removeAttr('aria-hidden');
+          objs.degree_wrap.find('input').each(function(){
+            $(this).prop('required', true);
+          });
+        } else {
+          objs.scroll_degree.removeAttr('role');
+          objs.scroll_degree.find('.need__item strong').css('display', 'none');
+          objs.degree_caption.css('display', '');
+          objs.degree_caption.removeAttr('aria-hidden');
+          objs.degree_wrap.css('display', 'none');
+          objs.degree_wrap.attr('aria-hidden', 'true');
+          objs.degree_wrap.find('input').each(function(){
+            if ($(this).prop('checked')) {
+              $(this).removeAttr('checked').prop('checked', false).change();
+            }
+            $(this).prop('required', false);
+          });
+        }
+        if (objs.gakkei_label.length) {
+          objs.gakkei_label.text(kubunVal == 5 ? config.gakkei_senmon_label : config.gakkei_label);
+          if (objs.gakkei_label_en.length) {
+            objs.gakkei_label_en.text(kubunVal == 5 ? config.gakkei_senmon_label_en : config.gakkei_label_en);
+          }
+        }
+      },
+      searchboxFreeze: function(fromClick){
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+        hdls.onKubunSelect();
+        $('span._search_param_label').remove();
+        for (var _key in objs.search_params) {
+          if (!objs.search_params[_key]) { continue; }
+          var _name = '';
+          switch (_key) {
+            case 'initial':
+              _name = objs.search_params[_key].val(); break;
+            case 'kubun':
+            case 'kokushi':
+            case 'degree':
+              if (objs.search_params[_key].prop("tagName") == 'SELECT') {
+                _name = objs.search_params[_key].find('option:selected').text();
+              } else {
+                _name = objs.search_params[_key].filter(':checked').closest('label').text();
+              }
+              break;
+            case 'schoolken':
+              _name = objs.search_params[_key].find('option:selected').text(); break;
+          }
+          _name = $.fn.escapeHtml(_name);
+          if (_name.length == 0) { continue; }
+          objs.search_params[_key].closest(objs.search_params_active).after('<span class="_search_param_label">'+_name+'</span>');
+        }
+        objs.search_params_active.css('display', 'none');
+        objs.search_btn.css('display', 'none');
+        objs.reset_btn.css('display', '');
+        objs.d_line.css('display', 'none');
+        objs.d_line_active.css('display', '');
+        objs.d_line_active.find('span select').prop('required', true);
+        objs.kubun_caption.css('display', '');
+        objs.scroll_top.removeAttr('role');
+        objs.scroll_kubun.removeAttr('role');
+        objs.scroll_degree.removeAttr('role');
+        if ($.axolSchoolManage.enableScroll) {
+          var offsetTop = objs.freeze_scroll_top.length ? objs.freeze_scroll_top.offset().top : undefined;
+          if (offsetTop !== undefined) {
+            $('body, html').animate({scrollTop: offsetTop}, 500);
+          }
+        }
+        var dcdSelect = $('select[name="dcd"]');
+        dcdSelect.prop('required', true);
+        // クリックイベントから呼ばれた場合のみフォーカスを設定
+        if (fromClick) {
+          dcdSelect.focus();
+        }
+      },
+      onReset: function(){
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+
+        objs.preSearchValues.dcd = objs.d_list.val();
+        objs.preSearchValues.dname = objs.d_text.val();
+        objs.preSearchValues.bcd = objs.b_list.val();
+        objs.preSearchValues.bname = objs.b_text.val();
+        objs.preSearchValues.paxcd = objs.k_list.val();
+        objs.preSearchValues.kname = objs.k_text.val();
+        objs.preSearchValues.gakkei = objs.gakkei_list.val();
+
+        $('span._search_param_label').remove();
+        objs.search_params_active.css('display', '');
+        objs.search_btn.css('display', '');
+        objs.reset_btn.css('display', 'none');
+        hdls.clearAll();
+        objs.d_line.css('display', '');
+        objs.d_line_active.css('display', 'none');
+        objs.d_line_active.find('span select').prop('required', false);
+        objs.kubun_caption.css('display', 'none');
+        objs.scroll_top.attr('role', 'radiogroup');
+        objs.scroll_kubun.attr('role', 'radiogroup');
+        hdls.onKubunSelect();
+        if ($.axolSchoolManage.enableScroll) {
+          var offsetTop = objs.scroll_top.length.length ? objs.scroll_top.offset().top : undefined;
+          if (offsetTop !== undefined) {
+            $('body, html').animate({scrollTop: offsetTop}, 500);
+          }
+        }
+        objs.gakkei_list.find('option').each(function(){
+          if ($(this).attr('value') == '') { return; }
+          $(this).remove();
+        });
+        hdls.checkGakkei();
+        $('.type__school').find('.fb_ownAlertStrs').css('display', 'none');
+        $('.jsAxolSchool_gakkeiself').find('.fb_ownAlertStrs').css('display', 'none');
+        if ($('input[name="initial"]').val().length > 0) {
+          $('input[name="initial"]').focus();
+        }
+        $('select[name="dcd"]').prop('required', false);
+      },
+      clearAll: function(){
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+        objs.d_list.off('change', hdls.onSchoolSelect);
+        objs.d_list.find('option').each(function(){
+          if ($(this).attr('value') == '') { return; }
+          $(this).remove();
+        });
+        objs.d_list.trigger('change');
+        objs.d_list.on('change', hdls.onSchoolSelect);
+        hdls.clearBK();
+      },
+      clearBK: function(){
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+        objs.b_list_wrap.css('display','none');
+        objs.k_list_wrap.css('display','none');
+        objs.dbk_text_wrap.css('display', 'none');
+        objs.dbk_text_wrap.find('input').val('');
+        objs.b_list.off('change', hdls.onBuSelect);
+        objs.b_list.find('option').each(function(){
+          if ($(this).attr('value') == '') { return; }
+          $(this).remove();
+        });
+        objs.b_list.trigger('change');
+        objs.b_list.on('change', hdls.onBuSelect);
+        objs.k_list.find('option').each(function(){
+          if ($(this).attr('value') == '') { return; }
+          $(this).remove();
+        });
+        objs.k_list.trigger('change');
+        objs.k_list.on('change', hdls.onKaSelect);
+        objs.paxcds = {};
+      },
+      onSchoolSelect: function() {
+        $.axolSchoolManage.hdls.schoolSelectHandler(null);
+      },
+      schoolSelectHandler: function(cb){
+        var config = $.axolSchoolManage.config;
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+        if (objs.d_line_active.css('display') == 'none') {
+          if (cb) { cb(); }
+          return;
+        }
+        hdls.clearBK();
+        var data = $.extend({}, config.addPosts);
+        data.dcd = objs.d_list.val();
+        if (!data.dcd) {
+          if (cb) { cb(); }
+          return;
+        }
+        if (objs.search_params.kubun.prop("tagName") == 'SELECT') {
+          data.kubun = objs.search_params.kubun.val();
+        } else {
+          data.kubun = objs.search_params.kubun.filter(':checked').val();
+        }
+        objs.k_list.find('option').remove();
+        objs.k_list.append('<option value="">'+config.k_default_msg+'</option>').trigger('change').prop('disabled', true);
+        axol.axolAjax(config.bk_url, data, '', function(data){
+          if (!data) {
+            if (cb) { cb(); }
+            return;
+          }
+          hdls.checkGakkei();
+          objs.b_list_wrap.css('display', '');
+          objs.k_list_wrap.css('display', '');
+          if (data['is_nulldcd']) {
+            objs.dbk_text_wrap.css('display', '');
+            objs.dbk_text_wrap.find('input').prop('required', true);
+            objs.dbk_select_wrap.css('display', 'none');
+            objs.dbk_select_wrap.find('select').prop('required', false);
+            if (cb) { cb(); }
+            return;
+          }
+          objs.dbk_text_wrap.css('display', 'none');
+          var noListInput = objs.dbk_text_wrap.find('input');
+          noListInput.prop('required', false);
+          noListInput.val('');
+          objs.dbk_select_wrap.css('display', '');
+          objs.dbk_select_wrap.find('select').prop('required', true);
+          var _cnt = data.bcd.length;
+          if (_cnt > 0 && _cnt != undefined) {
+            for (var i=0; i<_cnt; i++) {
+              objs.b_list.append('<option value="'+data.bcd[i].bcd+'">'+data.bcd[i].bname+'</option>');
+            }
+          }
+          objs.paxcds = data.paxcd;
+          if (cb) { cb(); }
+        });
+      },
+      onBuSelect: function(){
+        $.axolSchoolManage.hdls.buSelectHandler(null);
+      },
+      buSelectHandler: function(cb) {
+        var config = $.axolSchoolManage.config;
+        var objs = $.axolSchoolManage.objs;
+        var hdls = $.axolSchoolManage.hdls;
+        if (!axol.count(objs.paxcds)) {
+          var data = {};
+          data.dcd = objs.d_list.val();
+          data.kubun = objs.search_params.kubun.filter(':checked').val();
+          if (!data.dcd || !data.kubun) { hdls.clearAll(); }
+          axol.axolAjax(config.bk_url, data, '', function(data){
+            if (!data) { hdls.clearAll(); }
+            objs.paxcds = data.paxcd;
+            hdls.makeKList();
+            hdls.checkGakkei();
+            if (cb) { cb(); }
+          });
+        } else {
+          hdls.makeKList();
+          hdls.checkGakkei();
+          if (cb) { cb(); }
+        }
+      },
+      onKaSelect: function() {
+        var hdls = $.axolSchoolManage.hdls;
+        hdls.checkGakkei();
+      },
+      makeKList: function(){
+        var config = $.axolSchoolManage.config;
+        var objs = $.axolSchoolManage.objs;
+        var _setk = objs.b_list.val();
+        objs.k_list.find('option').each(function(){
+          $(this).remove();
+        });
+        var _cnt = (!axol.count(objs.paxcds[_setk])) ? 0 : objs.paxcds[_setk].length;
+        if (_cnt > 0 && _cnt != undefined) {
+          for (var i=0; i<_cnt; i++) {
+            let itm = objs.paxcds[_setk][i];
+            objs.k_list.append('<option value="'+itm.paxcd+'" data-gakkei="' + itm.keito + '">'+itm.kname+'</option>');
+          }
+          objs.k_list.trigger('change').prop('disabled', false);
+        } else {
+          objs.k_list.append('<option value="" data-gakkei="">'+config.k_default_msg+'</option>').trigger('change').prop('disabled', true);
+        }
+      },
+      checkGakkei: function(selectDefGakkei){
+        var objs = $.axolSchoolManage.objs;
+        if (!objs.gakkei_list || !objs.gakkei_list.length) return;
+        var cnt = 0;
+        var hasDefGakkei = false;
+        objs.gakkei_list.find('option').each(function(){
+          var val = $(this).attr('value');
+          if (val == '') { return; }
+          if (val == objs.defGakkei) { hasDefGakkei = true; }
+          cnt++;
+        });
+        if (!cnt) {
+          objs.gakkei_list.val('');
+          objs.gakkei_auto.prop('disabled', true);
+          return;
+        }
+        if (selectDefGakkei && hasDefGakkei) {
+          objs.gakkei_list.val(objs.defGakkei);
+        }
+        var isNullDcd = objs.d_list.find('option:last').prop('selected');
+        if (isNullDcd) {
+          objs.gakkei_auto.prop('disabled', true);
+          return;
+        }
+        var _paxcd = objs.k_list.val();
+        var _paxGakkei = _paxcd ? objs.k_list.find('option[value='+_paxcd+']').data('gakkei') : null;
+        var paxTarget = _paxGakkei ? objs.gakkei_list.find('option[value='+_paxGakkei+']') : null;
+        if (paxTarget && paxTarget.length) {
+          objs.gakkei_auto.prop('disabled', false);
+        } else {
+          objs.gakkei_auto.prop('disabled', true);
+        }
+      },
+      onGakkeiSearch: function() {
+        var objs = $.axolSchoolManage.objs;
+        if (!objs.gakkei_list || !objs.gakkei_list.length) return;
+        var _paxcd = objs.k_list.val();
+        var _paxGakkei = _paxcd ? objs.k_list.find('option[value='+_paxcd+']').data('gakkei') : null;
+        var paxTarget = _paxGakkei ? objs.gakkei_list.find('option[value='+_paxGakkei+']') : null;
+        if (paxTarget && paxTarget.length) {
+          objs.gakkei_list.val(_paxGakkei);
+          objs.gakkei_list.trigger('change');
+        }
+      }
+    }
+  };
+
+
+  //////////////////////////////////////////////////
+  // High School search
+  $.axolKokoManage = {
+    config: {
+      selector_search_ken: 'select[name="koko_ken"]',
+      selector_search_word: 'input[name="koko_word"]',
+      selector_search_btn: 'input[name="koko_search"]',
+      selector_search_reset: 'input[name="koko_search_reset"]',
+      selector_kokocd: 'select[name="kokocd"]',
+      selector_kokoname: 'input[name="koko_name"]',
+      search_freeze_class: 'search_freeze',
+      null_kokocd: 999999,
+      url: '',
+      ken_str: '都道府県',
+      word_str: '高校名の一部(カナ可)',
+      require_msg: '%1$s は必須です',
+      required: false,
+      addPosts:{}
+    },
+    objs: {
+    },
+    register: function(opts){
+      $.extend($.axolKokoManage.config, opts);
+      $.axolKokoManage._initializeObjs();
+      $.axolKokoManage._setHandlers();
+      $.axolKokoManage._render();
+    },
+    _initializeObjs: function(){
+      var $objs = $.axolKokoManage.objs;
+      var config = $.axolKokoManage.config;
+      $objs['search_ken'] = $(config.selector_search_ken);
+      $objs['search_word'] = $(config.selector_search_word);
+      $objs['search_btn'] = $(config.selector_search_btn);
+      $objs['search_reset'] = $(config.selector_search_reset);
+      $objs['kokocd'] = $(config.selector_kokocd);
+      $objs['kokoname'] = $(config.selector_kokoname);
+    },
+    _setHandlers: function(){
+      var $objs = $.axolKokoManage.objs;
+      var hdls = $.axolKokoManage.hdls;
+      $objs['search_btn'].on('click', hdls.onKokoSearch);
+      $objs['search_reset'].on('click', hdls.onReset);
+      $objs['kokocd'].on('change', hdls.onKokoSelect);
+    },
+    _render: function(){
+      var hdls = $.axolKokoManage.hdls;
+      var $objs = $.axolKokoManage.objs;
+      var kokocd = $objs['kokocd'].val();
+      if (kokocd) {
+        hdls.searchFreeze();
+      } else {
+        hdls.onReset();
+      }
+    },
+    hdls: {
+      onKokoSearch: function(){
+        var $objs = $.axolKokoManage.objs;
+        var config = $.axolKokoManage.config;
+        var hdls = $.axolKokoManage.hdls;
+        var post = $.extend({}, config.addPosts);
+        var errs = [];
+        post['kencd'] = $objs['search_ken'].val();
+        if (!post['kencd']) { errs.push(config.ken_str); }
+        post['word'] = $objs['search_word'].val();
+        if (!post['word'] && post['kencd'] != 99) { errs.push(config.word_str); }
+        if (errs.length > 0) {
+          alert(config.require_msg.replace('%1$s', errs.join(', ')));
+          return;
+        }
+        axol.axolAjax(config.url, post, '', function(data){
+          if (!data) { return; }
+          if (data['status_str']) {
+            return false;
+          }
+          hdls.clearList();
+          hdls.searchFreeze(true);
+          var _cnt = data['kokos'].length;
+          if (!_cnt || _cnt === undefined) { return; }
+          for (var i=0; i<_cnt; i++) {
+            $objs['kokocd'].append('<option value="'+data['kokos'][i].kokocd+'">'+data['kokos'][i].kokoname+'</option>');
+          }
+          $objs['search_reset'].css('display', '');
+          $('.type__koko').find('.fb_ownAlertStrs').css('display', '');
+        });
+      },
+      clearList: function(){
+        var $objs = $.axolKokoManage.objs;
+        $objs['kokocd'].find('option').each(function(){
+          var $_me = $(this);
+          if ($_me.attr('value') === '') { return; }
+          $_me.remove();
+        });
+      },
+      searchFreeze: function(fromClick){
+        var config = $.axolKokoManage.config;
+        var hdls = $.axolKokoManage.hdls;
+        var $objs = $.axolKokoManage.objs;
+        var freeze_class = config.search_freeze_class;
+        $('.jsAxolHighSchool_wrap').find('span.'+freeze_class).remove();
+        $objs['search_ken'].after('<span class="'+freeze_class+'">'+$objs['search_ken'].find('option:selected').text()+'</span>');
+        $objs['search_ken'].css('display', 'none');
+        const escapedWord = $.fn.escapeHtml($objs['search_word'].val());
+        $objs['search_word'].after('<span class="'+freeze_class+'">'+escapedWord+'</span>');
+        $objs['search_word'].css('display', 'none');
+        $objs['search_btn'].css('display', 'none');
+        $objs['search_reset'].css('display', '');
+        $('.jsAxolHighSchool_search_msg').css('display', 'none');
+        $('.jsAxolHighSchool_search_results').css('display', '');
+        var kokoSelect = $('select[name="kokocd"]');
+        if (config.required) {
+          kokoSelect.prop('required', true);
+        }
+        $('.jsAxolHighSchool_ken_caption').css('display', '');
+        $objs['kokocd'].css('display', '');
+        hdls.onKokoSelect();
+        // クリックイベントから呼ばれた場合のみフォーカスを設定
+        if (fromClick) {
+          kokoSelect.focus();
+        }
+      },
+      onReset: function(){
+        var config = $.axolKokoManage.config;
+        var $objs = $.axolKokoManage.objs;
+        var hdls = $.axolKokoManage.hdls;
+        var freeze_class = config.search_freeze_class;
+        $('.jsAxolHighSchool_wrap').find('span.'+freeze_class).remove();
+        $objs['search_ken'].css('display', '');
+        $objs['search_word'].css('display', '');
+        $objs['search_btn'].css('display', '');
+        $objs['search_reset'].css('display', 'none');
+        $('.jsAxolHighSchool_search_msg').css('display', '');
+        $('.jsAxolHighSchool_ken_caption').css('display', 'none');
+        $('.type__koko').find('.fb_ownAlertStrs').css('display', 'none');
+        hdls.clearSearchResults();
+        if ($('input[name="koko_word"]').val().length > 0) {
+          $('input[name="koko_word"]').focus();
+        }
+      },
+      clearSearchResults: function(){
+        var hdls = $.axolKokoManage.hdls;
+        $('.jsAxolHighSchool_search_results').css('display', 'none');
+        if ($.axolKokoManage.config.required) {
+          $('select[name="kokocd"]').prop('required', false);
+        }
+        hdls.clearList();
+        hdls.onKokoSelect();
+      },
+      onKokoSelect: function(){
+        var config = $.axolKokoManage.config;
+        var $objs = $.axolKokoManage.objs;
+        var kokocd = $objs['kokocd'].val();
+        if (parseInt(kokocd, 10) === config.null_kokocd) {
+          $objs['kokoname'].css('display', '');
+          if (config.required) {
+            $objs['kokoname'].prop('required', true);
+          }
+        } else {
+          $objs['kokoname'].css('display', 'none');
+          if (config.required) {
+            $objs['kokoname'].prop('required', false);
+          }
+        }
+      }
+    }
+  };
+
+
+  //////////////////////////////////////////////////
+  // Session time manage
+  $.fn.sessionLifetimeUpdate = function(opts) {
+    var conf = $.extend({
+      ajax_url: '',
+      err_txt: "セッションの有効期限が切れています。\nお手数ですがログインし直してください。",
+      err_txt2: "有効期限を延長できません。",
+      dateObjSelector: 'span.jsSessionLimitTime',
+      success_txt: "セッションの有効期限を延長しました。"
+    }, opts);
+    var $dateObj = $(conf.dateObjSelector);
+    var hdls = {
+      onClick: function () {
+        var preStr = $dateObj.text();
+        axol.axolAjax(conf.ajax_url, {}, '',
+          function (data) {
+            if ($dateObj.length && axol.array_key_exists('dateStr', data)) {
+              $dateObj.text(data['dateStr']);
+              if (data['dateStr'] === preStr) {
+                alert(conf.err_txt2);
+              } else {
+                alert(conf.success_txt);
+              }
+            }
+          },
+          function(){
+            alert(conf.err_txt);
+          }
+        );
+      }
+    };
+    $(this).on('click', hdls.onClick);
+  };
+
+  // TODO stickyで対応したため、要不要の判断
+  $.fn.scrollMoveAtHideAbove = function(opts) {
+    var conf = $.extend({
+      parentObjSelector: '.position_wrapper'
+    }, opts);
+    var $parent = $(conf.parentObjSelector);
+    var $obj = $(this);//$('.flow_fix');
+    // $parent.css('position', 'sticky'); //邪魔していたので一旦消してます
+    $(window).on('scroll', function(){
+      var defTop = $parent.offset().top;
+      var scrollY = $(this).scrollTop();
+      var margin = 20;
+      if (scrollY > (defTop - margin)) {
+        var width = $obj.width();
+        $obj.css('width', width+'px');
+        $obj.css('position', 'absolute');
+        $obj.css('top', (scrollY - defTop + margin).toString()+'px');
+        $obj.css('right', '0');
+      } else {
+        $obj.css('width', 'auto');
+        $obj.css('position', 'static');
+        $obj.css('top', '');
+        $obj.css('right', '');
+      }
+    });
+  };
+
+
+$(document).ready(function(){
+
+  // 画像拡大 (モーダル表示)
+  $("a.img_show_wide").on('click', function(e){
+    var $me = $(this);
+    var href = $me.attr('href');
+    var alt = $me.find('img').attr('alt');
+    var $img = $('<img>').attr('src', href).attr('alt', alt || 'アップロードした画像');
+    var modalDialogObj = new axol.modalDialog();
+    modalDialogObj.doModal($img);
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  });
+
+  // 画像拡大 (モーダル表示)(base64)
+  $("a.img_show_wide_b64jpg").on('click', function(e){
+    var $me = $(this);
+    var href = $me.attr('href');
+    axol.imgAjaxGet(href, function(isOK, results){
+      if(!isOK || axol.is_null_undefined(results) || !axol.isset(results['status'])){
+        return false;
+      }
+      if (results['status'] == 9 && axol.isset(results['errMsg'])) {
+        window.alert(results['errMsg']);
+        return false;
+      }
+      if (results['status'] !=  1) {
+        return false;
+      }
+      var $img = $('<img src="data:image/jpeg;base64,'+results['contents']+'">');
+      var modalDialogObj = new axol.modalDialog();
+      modalDialogObj.doModal($img);
+    });
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  });
+
+
+  // logout
+  $('span.jsAxolLogout').on('click', function(){
+    var $me = $(this);
+    var url = $me.attr('url');
+    var msg = $me.attr('msg').replace(/\\n/, "\n");
+    if (url.length && confirm(msg)) {
+      location.href = url;
+    }
+  });
+  $('button.jsAxolLogout2').on('click', function(){
+    const $me = $(this);
+    const msg = $me.data('msg').replace(/\\n/, "\n");
+    if (!confirm(msg)) {
+      return false;
+    }
+    return true;
+  });
+
+  // memo counter
+  $('.jsAxolStrCnt').on('click', function(){
+    var $me = $(this);
+    var areaName = $me.attr('areaName');
+    var msgSuffix = $me.attr('suffix');
+    if (axol.is_null_undefined(msgSuffix) || typeof(msgSuffix) !== 'string' || msgSuffix.length === 0) {
+      msgSuffix = ' 文字です。';
+    }
+    var $target = $('[name="'+areaName+'"]');
+    if ($target.length) {
+      var total = axol.strlen_nobr(($target.val()+'').replace(/^[\s\u3000]+|[\s\u3000]+$/g, ''));
+      window.alert(axol.sprintf(msgSuffix, total));
+    }
+  });
+
+  // pagetitle fitter
+  $('div#menu_contents_wrapper div#pagetitle').axolOneLineTextFitter();
+
+  // video control
+  $('video').noRightClick();
+
+
+  // emoji switch → webアクセシビリティの観点でdetails/summaryタグに変更
+  // $('.jsAxolEmj_switch').on('click', function(){
+  //   $(this).nextAll(".jsAxolEmj_dialog").toggle();
+  // });
+
+  // emoji click
+  $('.jsAxolEmj_item').on('click', function(){
+    var $me = $(this);
+    var $targetObj = $($me.data('target'));
+    if ($targetObj.length) {
+      var item = $(this).data('item');
+      $targetObj.axolInsertAtCaret('<emj:'+item+'>', $.axol.ie);
+    }
+  });
+
+});
+
+})( jQuery );
+
