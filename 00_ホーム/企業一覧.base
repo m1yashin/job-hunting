@@ -63,7 +63,7 @@ views:
       - file.mtime
     sort:
       - property: status
-        direction: DESC
+        direction: ASC
   - type: table
     name: ES入口
     filters:

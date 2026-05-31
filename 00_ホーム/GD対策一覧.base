@@ -1,4 +1,4 @@
-﻿filters:
+filters:
   and:
     - file.inFolder("01_選考対策/共通_GD")
     - file.ext == "md"
@@ -26,4 +26,3 @@ views:
       - category
       - use_for
       - file.mtime
-
