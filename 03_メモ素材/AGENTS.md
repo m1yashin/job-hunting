@@ -8,7 +8,7 @@
 
 このフォルダには、まだ企業研究や選考対策に入れる前の素材メモを置く。
 
-Web Clipperで保存した原典、収集メモ、口コミ・OB訪問メモ、草案、ガクチカの母艦メモ、思考メモ、あとで使うかもしれない材料を扱う。
+Web Clipperで保存した原典、ワンキャリアなどの収集メモ、Deep Researchの原稿、口コミ・OB訪問メモ、草案、ガクチカの母艦メモ、思考メモ、あとで使うかもしれない材料を扱う。
 
 ## 役割
 
@@ -23,20 +23,21 @@ Web Clipperで保存した原典、収集メモ、口コミ・OB訪問メモ、�
 ```text
 03_メモ素材/
   WebClip/
-    業界/企業/YYYY-MM-DD_資料名.md
-  口コミ_OB訪問/
-    企業名_OB訪問メモ.md
-  草案/
-    志望動機_断片.md
-    逆質問メモ.md
-  母艦/
-    ガクチカ_大学祭_母艦.md
-    研究説明_母艦.md
-  思考メモ/
-    迷っていること.md
+    NRI/
+      NRI_テーマ_収集.md
+      NRI_選考段階_抽出質問リスト.md
+    日鉄ソリューションズ/
+      日鉄ソリューションズ_テーマ_収集.md
+      日鉄ソリューションズ_選考段階_抽出質問リスト.md
+  deep-research-report/
+    企業名_テーマ_deep-research-report.md
 ```
 
+口コミ_OB訪問、草案、母艦、思考メモのフォルダは、必要になった時点で作る。現時点では `WebClip/企業名/` と `deep-research-report/` を中心に運用する。
+
 ## WebClip Properties
+
+単発のWebClipや資料メモは以下を使う。
 
 ```yaml
 ---
@@ -53,6 +54,36 @@ use_for: []
 tags:
   - 就活
   - webclip
+---
+```
+
+複数ページをまとめた収集メモは、既存ファイルに合わせて以下を使ってよい。
+
+```yaml
+---
+type: webclip_collection
+company:
+source:
+theme:
+stage:
+created:
+confirmed:
+target_roles: []
+related_extract:
+---
+```
+
+面接質問やGDテーマだけを抽出したリストは、既存ファイルに合わせて以下を使ってよい。
+
+```yaml
+---
+type: question_extract
+company:
+stage:
+source_clip:
+source:
+created:
+target_roles: []
 ---
 ```
 
@@ -92,6 +123,8 @@ next_action:
 
 - 原典本文は大きく編集しない。
 - 出典URLと取得日または確認日は必ず残す。
+- `WebClip/` 配下は企業別フォルダに分ける。新規作成時は `WebClip/企業名/企業名_テーマ_収集.md` を基本にする。
+- `deep-research-report/` はAI調査や長文調査の原稿置き場にする。事実として使う内容は `02_企業研究/`、選考で使う示唆は `01_選考対策/企業名/` に切り出す。
 - 事実として使える情報は `02_企業研究/` に反映する。
 - 選考で使う解釈、自分との接点、志望理由、逆質問は `01_選考対策/企業名/` に反映する。
 - 反映後は `status: 反映済み`、`clip_status: 企業研究反映済み`、または `clip_status: 選考対策反映済み` にする。

@@ -1,18 +1,28 @@
 filters:
   and:
-    - file.inFolder("01_選考対策/共通_GD")
+    - file.inFolder("01_選考対策")
     - file.ext == "md"
     - file.name != "AGENTS"
-    - type == "gd_prep"
+    - or:
+        - type == "gd_prep"
+        - type == "gd_company_prep"
 properties:
   file.name:
     displayName: ノート
   type:
     displayName: 種別
+  company:
+    displayName: 企業
   category:
     displayName: 分類
   use_for:
     displayName: 用途
+  source_clips:
+    displayName: 原典
+  created:
+    displayName: 作成日
+  confirmed:
+    displayName: 確認日
   file.mtime:
     displayName: 更新日
 views:
@@ -25,4 +35,16 @@ views:
       - file.name
       - category
       - use_for
+      - file.mtime
+  - type: table
+    name: 企業別GD対策
+    filters:
+      and:
+        - type == "gd_company_prep"
+    order:
+      - file.name
+      - company
+      - source_clips
+      - created
+      - confirmed
       - file.mtime

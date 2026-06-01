@@ -10,6 +10,7 @@ filters:
         - type == "material_summary"
         - type == "interview_company_prep"
         - type == "es"
+        - type == "gd_company_prep"
 properties:
   file.name:
     displayName: ノート
@@ -33,6 +34,8 @@ properties:
     displayName: ES
   interview_prep:
     displayName: 面接対策
+  gd_prep:
+    displayName: GD対策
   question_type:
     displayName: 設問種別
   word_limit:
@@ -41,6 +44,10 @@ properties:
     displayName: 版
   source_clips:
     displayName: 原典
+  created:
+    displayName: 作成日
+  confirmed:
+    displayName: 確認日
   file.mtime:
     displayName: 更新日
 views:
@@ -59,6 +66,7 @@ views:
       - deadline
       - es_index
       - interview_prep
+      - gd_prep
       - next_action
       - file.mtime
     sort:
@@ -115,6 +123,18 @@ views:
       - file.name
       - company
       - status
+      - file.mtime
+  - type: table
+    name: 企業別GD対策
+    filters:
+      and:
+        - type == "gd_company_prep"
+    order:
+      - file.name
+      - company
+      - source_clips
+      - created
+      - confirmed
       - file.mtime
   - type: table
     name: 次アクションあり

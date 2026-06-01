@@ -19,7 +19,10 @@
   企業比較/
     SIer主要企業比較.md
   企業別/
-    企業名/
+    NRI/
+    NTTデータ/
+    富士通/
+    日立/
       企業概要.md
       事業分析.md
       中期経営計画要約.md
@@ -31,6 +34,8 @@
 
 ## 置き場所のルール
 
+- `業界研究/` は、業界構造、ビジネスモデル、主要企業、比較軸、市場・技術・採用トレンド、業界課題を置く。
+- `企業比較/` は、業界内の主要企業比較を置く。個別企業の競合比較は `企業別/企業名/競合比較.md` に置く。
 - `企業概要.md` は、その企業の入口として使う。事実ベースの要約と関連ノートへのリンクだけにする。
 - `事業分析.md` は、事業内容、収益構造、顧客、市場、強み、将来の方向性を事実ベースで整理する。
 - `中期経営計画要約.md` は、中計・統合報告書・IR資料から確認できる内容を整理する。
@@ -54,6 +59,18 @@
 
 ## 企業概要.mdの標準構成
 
+Propertiesは以下を基本にする。
+
+```yaml
+---
+type: company_profile
+company:
+industry:
+last_reviewed:
+source_policy: fact_based
+---
+```
+
 ```text
 # 企業名 企業概要
 
@@ -72,21 +89,45 @@
 
 ## 事業分析.mdの標準構成
 
+Propertiesは以下を基本にする。
+
+```yaml
+---
+type: business_analysis
+company:
+industry:
+last_reviewed:
+source_policy: fact_based
+---
+```
+
 ```text
 # 企業名 事業分析
 
 ## 事業内容・収益構造
 ## 主要サービス・製品
 ## 顧客・市場
+## 事業セグメント
 ## 強み・特徴
 ## 将来の方向性
 ## 中期経営計画の要点
 ## 競合との差分
 ## 事業上の課題
+## 未確認・要確認
 ## 出典
 ```
 
 ## 出典.mdの標準構成
+
+Propertiesは以下を基本にする。
+
+```yaml
+---
+type: source_index
+company:
+last_reviewed:
+---
+```
 
 ```text
 # 企業名 出典
@@ -102,16 +143,71 @@
 
 ## 業界研究の標準構成
 
+Propertiesは以下を基本にする。
+
+```yaml
+---
+type: industry_research
+industry:
+last_reviewed:
+source_policy: fact_based
+---
+```
+
 ```text
 # 業界名 業界研究
 
 ## 業界構造
+## ビジネスモデル
 ## 主要企業
 ## 比較軸
 ## 市場・技術・採用のトレンド
+## 業界課題
 ## 企業ごとの差分
+## 未確認・要確認
 ## 出典
 ```
+
+## 企業比較.mdの標準構成
+
+Propertiesは以下を基本にする。
+
+```yaml
+---
+type: company_comparison
+industry:
+last_reviewed:
+source_policy: fact_based
+---
+```
+
+```text
+# 業界名 主要企業比較
+
+## 比較対象
+## 比較軸
+## 比較表
+## 事実ベースの差分
+## 未確認・要確認
+## 出典
+```
+
+## その他の企業別ノート Properties
+
+既存の企業別ノートは、以下の `type` を使っている。
+
+```yaml
+中期経営計画要約.md:
+  type: medium_term_plan_summary
+採用情報.md:
+  type: recruiting_info
+最近のニュース.md:
+  type: company_news
+競合比較.md:
+  type: competitor_comparison
+```
+
+いずれも `company`、`last_reviewed`、必要に応じて `industry`、`plan_period`、`source_policy: fact_based` を付ける。
 
 ## 情報源の扱い
 
