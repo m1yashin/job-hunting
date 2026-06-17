@@ -1,4 +1,4 @@
-﻿filters:
+filters:
   and:
     - or:
         - file.inFolder("01_選考対策/共通_面接")
@@ -103,4 +103,3 @@ views:
       - related_answer_unit
       - deep_dive_type
       - file.mtime
-

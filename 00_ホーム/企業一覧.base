@@ -69,9 +69,7 @@ views:
       - gd_prep
       - next_action
       - file.mtime
-    sort:
-      - property: status
-        direction: ASC
+    sort: []
   - type: table
     name: ES入口
     filters:
