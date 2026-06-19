@@ -20,34 +20,21 @@
             }
           },
           {
-            "id": "f58741ffec1c74c8",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "00_Dashboard/企業一覧.base",
-                "viewName": "企業"
-              },
-              "icon": "lucide-table",
-              "title": "企業一覧"
-            }
-          },
-          {
-            "id": "94442df33f99fb27",
+            "id": "b17a1bb796821a44",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "01_選考対策/アビームコンサルティング/ES/ES一覧.md",
+                "file": "03_メモ素材/SourceNotes/NEC/001_2030中期経営計画.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ES一覧"
+              "title": "001_2030中期経営計画"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -222,43 +209,45 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "94442df33f99fb27",
+  "active": "b17a1bb796821a44",
   "lastOpenFiles": [
-    "01_選考対策/NTTデータ/ES/ES一覧.md",
-    "01_選考対策/日立/ES/ES一覧.md",
-    "01_選考対策/キーエンス/面接回答素材_時事テーマ.md",
-    "03_メモ素材/WebClip/キーエンス/キーエンス_エンジニア職一次面接_抽出質問リスト.md",
-    "03_メモ素材/WebClip/キーエンス/キーエンス_エンジニア職一次面接_時事テーマ仮説.md",
-    "01_選考対策/ベイカレント/面接対策.md",
-    "03_メモ素材/WebClip/ベイカレント/ベイカレント_動画面接_抽出質問リスト.md",
-    "03_メモ素材/WebClip/ベイカレント/ベイカレント_動画面接_ワンキャリ収集.md",
-    "03_メモ素材/WebClip/ベイカレント",
-    "01_選考対策/アビームコンサルティング/ES/ES一覧.md",
-    "01_選考対策/IBM/ES/ES一覧.md",
-    "01_選考対策/三菱総合研究所/ES/ES一覧.md",
-    "01_選考対策/キーエンス/面接対策.md",
-    "03_メモ素材/WebClip/キーエンス/キーエンス_エンジニア職一次面接_ワンキャリ収集.md",
-    "03_メモ素材/WebClip/キーエンス",
-    "01_選考対策/IBM/企業概要.md",
-    "01_選考対策/アビームコンサルティング/企業概要.md",
-    "01_選考対策/キーエンス/ES/ES一覧.md",
-    "01_選考対策/キーエンス/企業概要.md",
-    "01_選考対策/IBM/ES",
-    "01_選考対策/IBM",
-    "01_選考対策/アビームコンサルティング/ES",
-    "01_選考対策/アビームコンサルティング",
-    "01_選考対策/キーエンス/ES",
-    "01_選考対策/キーエンス",
-    "01_選考対策/大和総研/面接回答素材_ITソリューション.md",
-    "01_選考対策/共通_面接/回答ユニット/ITソリューション_ES横断素材.md",
-    "03_メモ素材/WebClip/大和総研/大和総研_夏インターン面接_抽出質問リスト.md",
-    "03_メモ素材/WebClip/大和総研/大和総研_夏インターン面接_ワンキャリ収集.md",
-    "03_メモ素材/WebClip/大和総研",
-    "01_選考対策/NTTデータ/ES/プレエントリー.md",
-    "01_選考対策/ES_評価.md",
-    "01_選考対策/AGENTS.md",
-    "01_選考対策/NRI/ES/ES一覧.md",
-    "01_選考対策/三菱総合研究所/面接対策.md",
-    "01_選考対策/三菱総合研究所/ログ"
+    "02_企業研究/企業別/NEC/出典.md",
+    "02_企業研究/企業別/NEC/採用情報.md",
+    "02_企業研究/企業別/NEC/技術変化・開発方法.md",
+    "02_企業研究/企業別/NEC/長期展望.md",
+    "02_企業研究/企業別/NEC/企業概要.md",
+    "03_メモ素材/DeepResearch/NEC/NEC_長期展望レポート.md",
+    "企業研究用プロンプト.md",
+    "03_メモ素材/DeepResearch/三井住友銀行/三井住友銀行_長期展望レポート.md",
+    "03_メモ素材/DeepResearch/NTTデータ/NTTデータ_論点マップ.md",
+    "03_メモ素材/SourceNotes/NTTデータ/005_金融共同AI基盤.md",
+    "03_メモ素材/SourceNotes/三井住友銀行/001_新中期経営計画.md",
+    "03_メモ素材/DeepResearch/三井住友銀行/三井住友銀行_SourceIndex.md",
+    "03_メモ素材/SourceNotes/NTTデータ/003_AI-Native開発で広がるSIerの可能性.md",
+    "03_メモ素材/DeepResearch/NEC/NEC_論点マップ.md",
+    "03_メモ素材/SourceNotes/NEC/013_新卒採用_技術職種.md",
+    "03_メモ素材/SourceNotes/NEC/012_新卒採用_部門マッチング.md",
+    "03_メモ素材/SourceNotes/NEC/011_研究開発_R&D.md",
+    "03_メモ素材/SourceNotes/NEC/010_サイバーセキュリティ経営報告書2025.md",
+    "03_メモ素材/SourceNotes/NEC/009_BluStellar_Modernization.md",
+    "03_メモ素材/SourceNotes/NEC/008_クライアントゼロ戦略.md",
+    "03_メモ素材/SourceNotes/NEC/007_NEC_Generative_AI_Service.md",
+    "03_メモ素材/SourceNotes/NEC/006_AIエージェント.md",
+    "03_メモ素材/SourceNotes/NEC/005_cotomi強化.md",
+    "03_メモ素材/SourceNotes/NEC/004_AI_Platform_Service.md",
+    "03_メモ素材/SourceNotes/NEC/003_BluStellar_AI強化.md",
+    "03_メモ素材/SourceNotes/NEC/002_NEC統合レポート2025.md",
+    "02_企業研究/企業別/NEC",
+    "03_メモ素材/SourceNotes/NEC",
+    "03_メモ素材/DeepResearch/NEC",
+    "01_選考対策/三井住友銀行/ES",
+    "01_選考対策/三菱UFJ銀行/ES",
+    "00_ホーム/企業一覧.base",
+    "00_ホーム/面接対策一覧.base",
+    "00_ホーム/メモ素材一覧.base",
+    "00_ホーム/GD対策一覧.base",
+    "03_メモ素材/SourceNotes/NTTデータ",
+    "01_選考対策/日立システムズ/ES/日立ソリューションズ｜新卒マイページ_files/logo.png",
+    "01_選考対策/NTTドコモ/ES/株式会社NTTドコモ_files/logo.png"
   ]
 }
