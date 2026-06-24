@@ -2,14 +2,14 @@
 type: interview_question
 question:
 category:
-related_answer_unit: []
+related_common_notes: []
 ---
 
 # 質問名
 
 ## 質問の意図
 
-## 使う回答ユニット
+## 使う共通メモ
 
 - 
 

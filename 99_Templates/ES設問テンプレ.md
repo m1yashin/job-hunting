@@ -6,7 +6,7 @@ word_limit:
 status: 未着手
 deadline:
 version: 1
-related_answer_unit: []
+related_common_notes: []
 ---
 
 # 設問名
@@ -28,7 +28,7 @@ related_answer_unit: []
 
 - 
 
-### 回答ユニット
+### 共通メモ
 
 - 
 

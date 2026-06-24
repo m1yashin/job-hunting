@@ -6,10 +6,9 @@ filters:
     - file.ext == "md"
     - file.name != "AGENTS"
     - or:
-        - type == "answer_unit"
-        - type == "interview_question"
-        - type == "interview_questions"
+        - type == "interview_common_prep"
         - type == "interview_company_prep"
+        - type == "motivation"
 properties:
   file.name:
     displayName: ノート
@@ -17,63 +16,33 @@ properties:
     displayName: 種別
   theme:
     displayName: テーマ
-  question:
-    displayName: 質問
-  category:
-    displayName: 分類
   company:
     displayName: 企業
-  priority:
-    displayName: 優先度
   status:
     displayName: 状況
-  related_answer_unit:
-    displayName: 関連回答ユニット
-  related_questions:
-    displayName: 関連質問
-  deep_dive_type:
-    displayName: 深掘りタイプ
   use_for:
     displayName: 用途
+  source_notes:
+    displayName: 元メモ
   source_clips:
     displayName: 原典
+  related_common_notes:
+    displayName: 関連共通メモ
+  related_company_research:
+    displayName: 関連企業研究
   file.mtime:
     displayName: 更新日
 views:
   - type: table
-    name: 回答ユニット
+    name: 共通メモ
     filters:
       and:
-        - type == "answer_unit"
+        - type == "interview_common_prep"
     order:
       - file.name
       - theme
-      - status
-      - priority
       - use_for
-      - related_questions
-      - deep_dive_type
-      - file.mtime
-  - type: table
-    name: 質問Item
-    filters:
-      and:
-        - type == "interview_question"
-    order:
-      - file.name
-      - question
-      - category
-      - related_answer_unit
-      - file.mtime
-  - type: table
-    name: 質問マップ
-    filters:
-      and:
-        - type == "interview_questions"
-    order:
-      - file.name
-      - category
-      - use_for
+      - source_notes
       - file.mtime
   - type: table
     name: 企業別面接対策
@@ -88,18 +57,14 @@ views:
       - source_clips
       - file.mtime
   - type: table
-    name: 改善中
+    name: 志望理由
     filters:
       and:
-        - type == "answer_unit"
-        - status == "改善中"
+        - type == "motivation"
     order:
       - file.name
-      - type
-      - theme
-      - question
+      - company
       - status
-      - priority
-      - related_answer_unit
-      - deep_dive_type
+      - related_company_research
+      - related_common_notes
       - file.mtime
