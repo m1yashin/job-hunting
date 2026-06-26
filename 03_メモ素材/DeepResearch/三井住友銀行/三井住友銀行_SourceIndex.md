@@ -15,18 +15,23 @@ focus: IT・デジタル・技術変化強め
 - 口コミ、SNS、掲示板は今回の事実根拠には使わない。
 - 確認日: 2026-06-19
 
+## S+ 優先資料
+
+| 優先度 | 深さ | 種別 | 資料名 | URL | 公開日・対象期間 | 確認日 | 重要理由 | 状態 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S+ | evidence_ledger | IR・中期経営計画 | 新たな中期経営計画 | https://www.smfg.co.jp/company/strategy/ | 2026年度から3年間 | 2026-06-19 | ITトランスフォーメーション、1兆円規模のIT投資、クラウド化、開発力強化、AI前提の業務プロセスを経営計画として明示 | Source Note厚めに更新済み |
+| S+ | evidence_ledger | IR・決算説明会 | 2025年度決算 投資家説明会 | https://www.smfg.co.jp/investor/financial/latest_statement/2026_3/2026_fy_setumei.pdf | 2025年度決算、2026年5月 | 2026-06-19 | IT投資1兆円、クラウド比率8%から50%、AI・クラウド人材300人から1,000人、AI投入1,000億円など技術KPIが具体的 | Source Note厚めに更新済み |
+| S+ | evidence_ledger | 技術・生成AI | SMBCグループの生成AI活用の可能性を最大化。「LLM-CoE」の使命とインパクト | https://www.smfg.co.jp/dx_link/article/0219.html | 2026-01頃 | 2026-06-19 | LLM-CoE、生成AIによるシステム開発高度化、レガシー解析、組織的な生成AI推進を確認できる | Source Note厚めに更新済み |
+| S+ | evidence_ledger | 技術・RAG | SMBCグループ独自AI「SMBC-GAI」、130万件の社内文書ファイルを横断検索へ | https://www.smfg.co.jp/dx_link/article/0226.html | 2026-02-19 | 2026-06-19 | RAG、社内文書130万件、1日7〜8万件投稿、参照元提示、ハルシネーション対策など金融AI運用の実態が濃い | Source Note厚めに更新済み |
+| S+ | evidence_ledger | 技術・開発方法 | 日本総研とULSコンサルティングがAIを核とするデジタル変革の推進に向けた包括的パートナーシップを締結 | https://www.jri.co.jp/company/release/2026/0326/ | 2026-03-26 | 2026-06-19 | AIネイティブ開発モデル、AI前提の開発標準、開発基盤、ナレッジベース、人材育成を明示 | Source Note厚めに更新済み |
+| S+ | evidence_ledger | 採用・IT職 | IT・デジタルコース | https://www.smbc-freshers.com/course06/ | 2027卒採用サイト | 2026-06-19 | IT戦略、案件企画、プロジェクト推進、デジタルサービス創出、求める人材像を確認できる | Source Note厚めに更新済み |
+| S+ | evidence_ledger | セキュリティ | サイバーセキュリティ | https://www.smfg.co.jp/company/organization/cybersecurity.html | 2025年3月末情報含む | 2026-06-19 | CISO体制、700名以上の専門スタッフ、SOC、CSIRT、CFC、脅威インテリジェンス、セキュリティ・バイ・デザインを確認できる | Source Note厚めに更新済み |
+
 ## S 優先資料
 
-| 優先度 | 種別 | 資料名 | URL | 公開日・対象期間 | 確認日 | 重要理由 | 状態 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| S | IR・中期経営計画 | 新たな中期経営計画 | https://www.smfg.co.jp/company/strategy/ | 2026年度から3年間 | 2026-06-19 | ITトランスフォーメーション、1兆円規模のIT投資、クラウド化、開発力強化、AI前提の業務プロセスを明示 | Source Note作成済み |
-| S | IR・決算説明会 | 2025年度決算 投資家説明会 | https://www.smfg.co.jp/investor/financial/latest_statement/2026_3/2026_fy_setumei.pdf | 2025年度決算、2026年5月 | 2026-06-19 | IT投資1兆円、クラウド比率8%から50%、AI・クラウド人材300人から1,000人、AI投入1,000億円など技術KPIが具体的 | Source Note作成済み |
-| S | プレスリリース | 「DX銘柄2026」及びDXグランプリ企業への選定について | https://www.smbc.co.jp/news/pdf/j202604dx_01.pdf | 2026-04-10 | 2026-06-19 | DX・AIを経営の中心に据えた業態変革、生成AI投資枠500億円、全社AI基盤・データマネジメント・サイバーセキュリティを確認できる | Source Note作成済み |
-| S | 技術・生成AI | SMBCグループの生成AI活用の可能性を最大化。「LLM-CoE」の使命とインパクト | https://www.smfg.co.jp/dx_link/article/0219.html | 2026-01頃 | 2026-06-19 | LLM-CoE、生成AIによるシステム開発高度化、レガシー解析、組織的な生成AI推進を確認できる | Source Note作成済み |
-| S | 技術・RAG | SMBCグループ独自AI「SMBC-GAI」、130万件の社内文書ファイルを横断検索へ | https://www.smfg.co.jp/dx_link/article/0226.html | 2026-02-19 | 2026-06-19 | RAG、社内文書130万件、1日7〜8万件投稿、参照元提示、ハルシネーション対策など金融AI運用の実態が濃い | Source Note作成済み |
-| S | 技術・開発方法 | 日本総研とULSコンサルティングがAIを核とするデジタル変革の推進に向けた包括的パートナーシップを締結 | https://www.jri.co.jp/company/release/2026/0326/ | 2026-03-26 | 2026-06-19 | AIネイティブ開発モデル、AI前提の開発標準、開発基盤、ナレッジベース、人材育成を明示 | Source Note作成済み |
-| S | 採用・IT職 | IT・デジタルコース | https://www.smbc-freshers.com/course06/ | 2027卒採用サイト | 2026-06-19 | IT戦略、案件企画、プロジェクト推進、デジタルサービス創出、求める人材像を確認できる | Source Note作成済み |
-| S | セキュリティ | サイバーセキュリティ | https://www.smfg.co.jp/company/organization/cybersecurity.html | 2025年3月末情報含む | 2026-06-19 | CISO体制、700名以上の専門スタッフ、SOC、CSIRT、CFC、脅威インテリジェンス、セキュリティ・バイ・デザインを確認できる | Source Note作成済み |
+| 優先度 | 深さ | 種別 | 資料名 | URL | 公開日・対象期間 | 確認日 | 重要理由 | 状態 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S | deep | プレスリリース | 「DX銘柄2026」及びDXグランプリ企業への選定について | https://www.smbc.co.jp/news/pdf/j202604dx_01.pdf | 2026-04-10 | 2026-06-19 | DX・AIを経営の中心に据えた業態変革、生成AI投資枠500億円、全社AI基盤・データマネジメント・サイバーセキュリティを確認できる | Source Note作成済み |
 
 ## A 優先資料
 

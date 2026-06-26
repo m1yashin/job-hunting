@@ -1,13 +1,13 @@
 ---
 type: es
-company: 日立システムズ
+company: 日立ソリューションズ
 question_type: インターンシップES
 status:
 version:
 source: 日立ソリューションズ｜新卒マイページ.html
 ---
 
-# 日立システムズ_ES
+# 日立ソリューションズ_ES
 
 ## 当プログラムにご応募いただいた理由を教えてください。(300字以内)
 

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noarchive">
+<meta name="robots" content="noindex,nofollow">	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge"><title>ログイン|三井住友カード株式会社</title>
+<base href="https://axol.jp/zw/s/smbc-card_28/mypage/">
+<style>
+	.custom .main { background-image: url(https://upload.axol.jp/zw/s/smbc-card_28/mypage/1/eDgNmgsmczufcVvKibMiJBuCnWuGtR.jpg);}
+.custom .logo img { max-width: 200px;} @media screen and (max-width:599px) {.custom .logo img { max-width: calc(200px * 0.8); max-height: 60px;}}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+	<link rel="stylesheet" href="https://static.axol.jp/zw/st/public/css/common.css">
+	<link rel="stylesheet" href="https://static.axol.jp/zw/st/public/css/pages.css">
+			<link rel="stylesheet" href="https://static.axol.jp/zw/st/public/css/org_r.css">
+	
+<script src="https://static.axol.jp/zw/st/js/jquery.js"></script>
+<script src="https://static.axol.jp/zw/st/js/jquery.easing.js"></script>
+<script src="https://static.axol.jp/zw/st/js/saiyo.js"></script>
+<script src="https://static.axol.jp/zw/st/js/AxolUtils.js"></script>
+<script src="https://static.axol.jp/zw/st/js/FormBuilderValidator.js"></script>
+
+<script>
+  var st_url="https://static.axol.jp/zw/st";
+  var st_user_url="https://static.axol.jp/zw/st/s/smbc-card_28";
+</script>
+
+
+
+
+
+
+</head>
+		<script>
+		$(document).ready(function() {
+			(function(){
+				const scrollStartEvent = new $.Event("scrollstart");
+				const scrollEndEvent = new $.Event("scrollend");
+				let onScroll = false;
+				let scrollTimer = null;
+				$(window).on('scroll.startstop', function(){
+					if (!onScroll) {
+						onScroll = true;
+						$(window).trigger(scrollStartEvent);
+					}
+					if (scrollTimer) {
+						clearTimeout(scrollTimer);
+					}
+					scrollTimer = setTimeout(function(){
+						onScroll = false;
+						$(window).trigger(scrollEndEvent);
+					}, 1000); // 慣性スクロール最後考慮して1秒。
+				});
+			})();
+
+			const $toPageTop = $('#page-top');
+			$toPageTop.on('click.toPageTop', function(e){
+				$('body, html').animate({scrollTop:0}, 500, 'swing');
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			}).hide();
+			const $window = $(window);
+			$window.on('scrollstart.toPageTop', function() {
+				$toPageTop.removeClass('onScroll').addClass('onScroll');
+			}).on('scrollend.toPageTop', function(){
+				if ($window.scrollTop() > 100) {
+					$toPageTop.fadeIn();
+				} else {
+					$toPageTop.fadeOut();
+				}
+				$toPageTop.removeClass('onScroll');
+			});
+		});
+	</script>
+
+
+<body id="mypage_login" class="cls_s customize custom s3 m4 gray">
+<div id="page__all" class="page__all">
+		<div class="header__img"></div>
+	<div class="page__inner">
+		<header id="header__top" class="header">
+
+			<span class="logo"><a href="https://axol.jp/zw/s/smbc-card_28/mypage/login"><img src="https://upload.axol.jp/zw/s/smbc-card_28/mypage/1/683664473868799946Z42396448844.jpg" alt="三井住友カード株式会社のロゴ"/></a></span>
+
+			<!-- スキップリンク（WA対応）※focus時に表示 -->
+			<button type="button" class="go__maincontents type__sp" onclick="document.getElementById('main__contents').scrollIntoView(); document.getElementById('main__contents').focus();">メインコンテンツへ</button>
+			<button type="button"
+							class="menu__btn"
+							tabindex="0"
+							aria-controls="menu_dialog"
+							aria-expanded="false"
+							onclick="menu_dialog.showModal()">
+				<span class="material-symbols-outlined" role="img" aria-label="メニュー">menu</span>
+			</button>
+
+			<dialog id="menu_dialog">
+				<button type="button"
+					class="menu__close__btn"
+					tabindex="0"
+					aria-label="閉じる"					onclick="menu_dialog.close();">
+					<span class="material-symbols-outlined" aria-hidden="true">close</span>
+				</button>
+				<div class="menu__back sp__menu">
+					<nav class="menu__wrap">
+	
+		<ul class="menu">
+					<li class="menu__login menu__now">
+									<a href="login" tabindex="0">
+												ログイン											</a>
+							</li>
+					<li class="menu__kiyaku">
+									<a href="kiyaku" tabindex="0">
+												会員規約											</a>
+							</li>
+					<li class="menu__reminder">
+									<a href="reminder" tabindex="0">
+												ID・パスワードをお忘れの方											</a>
+							</li>
+					<li class="menu__entry">
+									<a href="../entry/" tabindex="0" target="_blank" aria-label="登録はこちら(外部へ)">
+												登録はこちら						<span class="material-symbols-outlined page__out" aria-hidden="true">open_in_new</span>					</a>
+							</li>
+					<li class="menu__browser">
+									<a href="browser" tabindex="0">
+												利用環境について											</a>
+							</li>
+			</ul>
+	
+	
+	</nav>
+
+				</div>
+			</dialog>
+
+      <!-- closedbyが普及されたらこれを使ってください -->
+      <!-- <dialog id="menu_dialog" closedby="any"> -->
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					const menuBtn = document.querySelector('.menu__btn');
+					const dialog = document.querySelector('#menu_dialog');
+					menuBtn.addEventListener('click', function() {
+						dialog.showModal();
+						menuBtn.setAttribute('aria-expanded', 'true');
+						// Safari対応: ダイアログ内の最初のボタンにフォーカスを当てる
+						setTimeout(function() {
+							const firstBtn = dialog.querySelector('button, [tabindex]:not([tabindex="-1"])');
+								if (firstBtn) firstBtn.focus();
+							}, 10); // showModal直後だとSafariで反映されないため少し遅延
+						});
+					dialog.addEventListener('close', function() {
+						menuBtn.setAttribute('aria-expanded', 'false');
+					});
+					dialog.addEventListener('click', function(ev) {
+						if (ev.target === dialog) { dialog.close() }
+					});
+				});
+			</script>
+			<div class="menu__back pc__menu">
+				<button type="button" class="go__maincontents type__pc" onclick="document.getElementById('main__contents').scrollIntoView(); document.getElementById('main__contents').focus();">メインコンテンツへ</button>
+				<nav class="menu__wrap">
+	
+		<ul class="menu">
+					<li class="menu__login menu__now">
+									<a href="login" tabindex="0">
+												ログイン											</a>
+							</li>
+					<li class="menu__kiyaku">
+									<a href="kiyaku" tabindex="0">
+												会員規約											</a>
+							</li>
+					<li class="menu__reminder">
+									<a href="reminder" tabindex="0">
+												ID・パスワードをお忘れの方											</a>
+							</li>
+					<li class="menu__entry">
+									<a href="../entry/" tabindex="0" target="_blank" aria-label="登録はこちら(外部へ)">
+												登録はこちら						<span class="material-symbols-outlined page__out" aria-hidden="true">open_in_new</span>					</a>
+							</li>
+					<li class="menu__browser">
+									<a href="browser" tabindex="0">
+												利用環境について											</a>
+							</li>
+			</ul>
+	
+	
+	</nav>
+
+			</div>
+		</header>
+
+		<main id="main__contents" tabindex="-1" class="main main__contents">
+		
+					<h1 id="contents__title" class="contents__title">ログイン</h1>
+				
+		
+		<div class="contents ">
+							<script>
+										(function( $, undefined ){
+$(document).ready(function(){
+var fncs = [];
+var strings = {'FB_AlertMsg':"入力内容にエラーがあります。再入力してください。",
+'FB_RequiredRuleFmt':"%1$s は必須です"};
+var items = [{'names':{'id':'ID番号','password':'パスワード'}, 'type':'require', 'errformat':''}];
+var answeredFileNames = [];
+var useJsAlert = true;
+var isDoubleSendBreak = false;
+var isPrecheck = false;
+$.axolFormBuilder.register('form1', 'form[name="form1"]', fncs, strings, items, answeredFileNames, useJsAlert, 0, isDoubleSendBreak, isPrecheck);
+});
+})(jQuery);														</script>
+			
+			
+<div class="login__wrap">
+
+  
+
+		<div class="login__message">
+		<p class="main__text">会員規約を確認し、同意の上ログインしてください。</p>			</div>
+	
+		<div class="kiyaku" tabindex="0">三井住友カード株式会社　インターンシップ・採用ホームページ　My Page　会員規約
+
+「三井住友カード株式会社　インターンシップ・採用ホームページ　My Page」を利用するには、以下の会員規約を遵守してください。
+利用者ご本人によって、会員規約を確認し、同意の上、「My Page」をご利用ください。
+
+■三井住友カード株式会社　インターンシップ・採用ホームページ　My Page 会員規約
+
+○第１条(三井住友カード株式会社インターンシップ・採用ホームページMy Pageの定義)
+「三井住友カード株式会社インターンシップ・採用ホームページMy Page」(以下「My Page」といいます)とは、三井住友カード株式会社(以下「当社」といいます)が採用活動（インターンシップを含む）を目的として、インターネットウェブサイトを主な媒体として提供する就職情報サービスのことをいいます。
+
+○第２条(会員)
+(1) 会員とは、就職活動（インターンシップを含む）を行う学生が、当社が定める方法によって「My Page」にログインし、会員規約に同意して、「My Page」を利用する方をいいます。
+(2) 会員は自らの意思および責任で「My Page」に会員登録し「My Page」を利用するものとします。
+(3) 会員は、「My Page」における会員向けのサービスを受けることができます。
+
+○第３条(会員ＩＤ番号とパスワード)
+(1) 会員は、当社により会員登録の承認を受けた場合、会員ＩＤ番号とパスワードが付与されるものとします。
+(2) 会員は、会員ＩＤ番号及びパスワードを第三者に譲渡もしくは貸与してはなりません。また、下記第５条に抵触するおそれがあると当社がその裁量により判断する場合、会員ＩＤ番号を付与されないことがありますが、当社はその理由について会員となろうとする方に対して開示する義務を負わないものとします。
+(3) 会員の会員ＩＤ番号及びパスワードの管理および使用は会員の責任とし、これらの使用上の過誤または第三者による不正使用等については、当社は一切の責任を負わないものとします。
+
+○第４条(会員の禁止行為)
+会員は「My Page」を利用する際に以下の行為を行なわないものとします。
+
+(1) 他の会員または第三者の著作権、肖像権、その他知的所有権を侵害する行為 
+(2) 他の会員または第三者を批判、攻撃する行為 
+(3) 他の会員もしくは第三者を差別、誹謗中傷、脅迫し、または他の会員もしくは第三者の財産、プライバシー、人権等を侵害する行為 
+(4) 犯罪行為に結びつく行為
+(5) 公序良俗に反する行為
+(6) 個人的な勧誘行為、個人的な物品の売買行為
+(7) 政治活動、選挙活動、宗教活動
+(8) 当社の名誉、信用を傷付ける行為
+(9) 当社に不利益を与える行為
+(10) 当社の業務を阻害する行為
+(11) 「My Page」を通じて入手した情報を、複製、販売、出版その他、私的利用の範囲を超えて使用すること 
+(12) 「My Page」を使用して、営業活動、営利を目的とした情報提供活動を行うこと 
+(13) 「My Page」の運営を妨げ、或は当社の信用を毀損するような行為、またはその恐れのある行為 
+(14) 第三者へのなりすまし行為や、虚偽の内容に基づいて会員登録をする行為
+(15) その他、法律、法令に反する行為 
+
+○第５条(運営の中止中断)
+(1) 当社は、会員への事前の通知なくして、「My Page」を変更、中断、中止することがあり、会員はこれを承諾するものとします。 
+(2) 会員は、システム障害などの事情により、「My Page」機能に支障が生じ、もしくは停止する等の可能性があることを承諾するものとします。
+
+○第６条(解約、会員資格の取り消し)
+会員が以下の各号のいずれかに該当する場合は、当社は直ちに当該会員に対する「My Page」の提供を中止し、または当該会員を除名することができるものとします。
+
+(1) 第4条(会員の禁止行為)に該当すると当社がその裁量により判断した場合 
+(2) 虚偽の内容に基づいて入会の申し込みをしたことが判明した場合 
+(3) その他会員規約に違反した場合 
+(4) その他会員として不適切と当社がその裁量により判断した場合 
+
+○第７条(損害賠償)
+当社は、「My Page」の利用、変更、中断、中止などにより発生した会員の損害すべてに対し、一切の責任を負わないものとします。
+
+○第８条(提供された情報の利用)
+会員は、自己が提供した個人情報を含む情報内容を、当社が採用活動（インターンシップを含む）及びこれと密接に関連する範囲の目的で利用することを承諾するものとします。当社は、会員の氏名など個人情報の漏洩防止に努めるものとし、採用活動及びこれと密接に関連する範囲以外の目的では利用しないものとします。 
+
+○第９条(会員規約の変更)
+当社は会員規約を随時変更することができるものとします。変更の内容については「My Page」上に表示します。会員は「My Page」を利用した時点で最新の会員規約に同意したものとみなします。
+
+
+■個人情報の取り扱いについて
+
+私たち三井住友カード株式会社（以下、「弊社」といいます）は、採用ならびに選考、インターンシップ（以下、「採用選考等」といいます）を希望する応募者または内定者（以下「応募者等」といいます）よりお預かりした個人情報について、下記のとおり取り扱います。
+
+1.個人情報の収集・利用目的
+採用活動及びこれに密接に関連する範囲（応募者等への E-mail やダイレクトメールによる情報提供、採用選考、選考結果の通知、過去応募の実績照会、採用方針策定のための統計データ作成、選考後のイベント・求人・アンケートのご案内、採用に至った場合の入社手続き等）についてのみ利用いたします。
+
+※提出していただいた各種書類（履歴書、職務経歴書、成績を証明する書類、在籍・卒業を証明する書類、健康診断書、障害者手帳の写し等）は返却致しませんので、予めご了承下さい。
+
+2.機微（センシティブ）情報＜要配慮個人情報を含む＞の取り扱い
+弊社は、前項の利用目的の範囲で応募者等から提出いただいた各種書類に記載されている場合を除き、応募者等の機微（センシティブ）情報を取得・利用・第三者提供致しません。
+※機微（センシティブ）情報とは、「人種」「信条」「社会的身分」「病歴」「犯罪の経歴」「犯罪により害を被った事実」「門地」「本籍地」「保健医療」等が含まれる個人情報をいいます。
+
+3.個人情報の第三者への提供
+応募者等の個人情報は、以下の場合を除き応募者等の同意を得ることなく、第三者に提供することは致しません。
+
+・法令に基づく場合
+・人の生命、身体又は財産の保護のために必要がある場合であって、本人の同意を得ることが困難であるとき。
+・公衆衛生の向上又は児童の健全な育成の推進のために特に必要がある場合であって、本人の同意を得ることが困難であるとき。
+・国の機関若しくは地方公共団体又はその委託を受けた者が法令の定める事務を遂行することに対して協力する必要がある場合であって、本人の同意を得ることにより当該事務の遂行に支障を及ぼすおそれがあるとき。
+
+4.個人情報の取り扱いの委託
+採用選考等を行うにあたり、予め当社と機密保持契約を結んでいる業務委託会社等に、応募者等の個人情報の取り扱いを委託する場合があります。
+
+5.個人情報の安全管理
+弊社は応募者等の個人情報の漏洩等を防止するために必要な安全管理措置を講じます。
+また、個人情報を取り扱う従業員や業務委託会社等について、適切に監督を行います。
+また、採用選考等の結果、採用させていただくこととなった方の個人情報は、弊社の社員情報として保管・管理致します。
+
+6.本同意事項等に不同意の場合
+弊社は応募者等が採用選考等に必要な情報の提供を行わない場合、及び、本同意事項の内容の全部または一部を承認できない場合、採用選考をお断りすることがあります。
+
+7.個人情報の開示・訂正・削除等
+ご提出いただいた個人情報について、開示、訂正、削除及び、利用の停止等を希望される場合は、下記宛にご連絡下さい。
+
+■三井住友カード株式会社
+　人事部　採用グループ
+recruittky@jn.smbc-card.com
+
+8.個人情報管理責任者
+（所属）人事部
+（職名）部長
+
+
+三井住友カード株式会社
+</div>
+	
+
+	<form method="post" action="login?nextpage=mypage%2Fcom%2F11%2Ffiles%3Fcd%3D28" name="form1" autocomplete="off">
+	<input name="fb_csrf" value="GszCpd9mCpXbQvd_Lk55vq0cx697KwjozDEfVvjKQgGPTM2gsD8g65U7b" type="hidden"/>
+
+
+		<!-- origin -->
+		<div class="login__item origin">
+			<h2>
+				オリジナルID･パスワードでログイン
+							</h2>
+			<div class="id-pass__wrap fb_checkpoint">
+				<label class="id">
+					<span>ID番号</span>
+					<input style="ime-mode:disabled;" type="text" name="id" value="" required=""/>
+				</label>
+				<label class="pass">
+					<span>パスワード</span>
+					<input type="password" name="password" value="" required=""/>
+				</label>
+				<div class="fb_ownAlertStrs" style="display: none;" role="alert" aria-live="polite"></div>
+			</div>
+			<div class="login__button original">
+				<button class="btn md action next" name="submit" type="submit" value="規約に同意してログイン">規約に同意してログイン</button>
+			</div>
+		</div>
+
+		<!-- mynavi -->
+				<div class="login__item mynavi">
+			<h2>
+				マイナビ会員ID･パスワードでログイン
+							</h2>
+			<p>
+				マイナビ2028以外でエントリーされた方もマイナビボタンから再手続きすると、「マイナビ会員ID・パスワード」からログインすることができます。
+							</p>
+			<div class="login__button">
+				<a href="https://job.mynavi.jp/28/pc/is_os_login/2008" class="btn md base mynavi" tabindex="0" aria-label="マイナビ会員ID･パスワードでログイン" title="マイナビ会員ID･パスワードでログイン">ログイン</a>
+			</div>
+		</div>
+		
+		<!-- LINE -->
+			</form>
+
+	<p class="ssl">
+  このサイトはSSL（インターネット上のデータを第３者から読み取れないように通信を暗号化する技術）で保護されています。
+  </p>
+
+</div>
+
+<script>
+  $(document).ready(function() {
+		// VoiveOver対策で、flash_messageへ100ミリ秒遅延でフォーカスされるため101ミリ秒後にidへフォーカス
+		setTimeout(function() {
+			$('input[name="id"]').trigger('focus');
+		}, 101);
+  });
+</script>
+
+	    </div>
+
+		</main>
+        		</div>
+
+      <footer id="footer" class="footer">
+
+    
+    <small class="copyright"></small>
+              <p class="ssl">
+  このサイトはSSL（インターネット上のデータを第３者から読み取れないように通信を暗号化する技術）で保護されています。
+  </p>
+    
+  </footer>
+  
+  
+  
+</div>
+
+
+
+<button id="page-top" type="button" aria-label="ページのTOPへ戻る">▲</button>
+</body>
+</html>

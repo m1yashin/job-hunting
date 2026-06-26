@@ -1,0 +1,3190 @@
+// axol専用ツール群の定義
+var axol = {class: {}};
+(function ($, undefined) {
+
+  //////////////////////////////////
+  // simillar php buildin functions
+
+  // nullまたはundefinedかどうか
+  axol.is_null_undefined = function (value) {
+    return (value === null || value === undefined);
+  };
+
+  // 文字列かどうか
+  axol.is_string = function (value) {
+    return ((typeof value) == 'string' || value instanceof String);
+  };
+
+  // 配列(ハッシュ)かどうか
+  axol.is_array = function (value) {
+    if (!value) {
+      return false;
+    }
+    return (value.constructor == Array || value.constructor == Object);
+  };
+
+  axol.isNumeric = function (n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+  }
+
+  // deprecated => axol.isNumeric
+  axol.is_numeric = function (value) {
+    return isFinite(value);
+  };
+
+  // スカラーの場合は文字数、配列(ハッシュ)の場合は要素数を取得
+  axol.count = function (mixed) {
+    if (axol.is_null_undefined(mixed)) {
+      return 0;
+    }
+    if (mixed.constructor == Array) {
+      return mixed.length;
+    } else if (mixed.constructor == Object) {
+      return Object.keys(mixed).length;
+    }
+    return mixed.toString().length;
+  };
+
+  // 配列(ハッシュ)のキーが存在するかどうか
+  axol.array_key_exists = function (key, search) {
+    if (!axol.is_array(search)) {
+      return false;
+    }
+    return key in search;
+  };
+
+  // 配列(ハッシュ)に値が存在するかどうか
+  axol.in_array = function (value, search) {
+    if (!axol.is_array(search)) {
+      return false;
+    }
+    var ret = false;
+    $.each(search, function (key, val) {
+      if (val == value) {
+        ret = true;
+        return false;  // break
+      }
+    });
+    return ret;
+  };
+
+  // 改行コードを除いた文字数
+  axol.strlen_nobr = function (inputString) {
+    var crobj = inputString.match(/\r/g);
+    var lfobj = inputString.match(/\n/g);
+    var cr_count = 0;
+    var lf_count = 0;
+    if (crobj) {
+      cr_count = crobj.length;
+    }
+    if (lfobj) {
+      lf_count = lfobj.length;
+    }
+    return inputString.length - cr_count - lf_count;
+  };
+
+  // 空値でないかどうか(0のときはtrueを返します)
+  axol.isValidValue = function (value) {
+    if (axol.is_null_undefined(value) || value === false) {
+      return false;
+    }
+    return value.toString().length > 0;
+  };
+
+  // スカラの場合は空値でないかどうか。配列(ハッシュ)の場合は要素を持ち、かつ1つ以上の要素に空値でない値がセットされているかどうか
+  axol.hasValidValue = function (search) {
+    return axol.getValidValueCount(search) ? true : false;
+  };
+
+  // スカラの場合は空値でなければ1、空値なら0。配列(ハッシュ)の場合は空値でない値がセットされている要素数を返します。
+  axol.getValidValueCount = function (search) {
+    if (!axol.is_array(search)) {
+      return axol.isValidValue(search) ? 1 : 0;
+    }
+    var cnt = 0;
+    $.each(search, function (key, val) {
+      if (axol.isValidValue(val)) {
+        cnt++;
+      }
+    });
+    return cnt;
+  };
+
+  // スカラの場合は空値かどうか、配列(ハッシュ)の場合は要素が空かどうか(0はtrueを返します)
+  axol.empty = function (value) {
+    if (!value) {
+      return true;
+    }
+    if (axol.is_array(value)) {
+      if (!axol.count(value)) {
+        return true;
+      }
+    } else if (axol.is_string(value)) {
+      if (value === '0' || value.length == 0) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // スカラの場合は値がセットされているかどうか、配列(ハッシュ)の場合は要素が空かどうか
+  axol.isset = function (value) {
+    if (axol.is_array(value)) {
+      return axol.count ? true : false;
+    } else {
+      return axol.isValidValue(value);
+    }
+  };
+
+  // css等のpx文字列から数値部分を取り出し、数値として返します。
+  axol.pxToInt = function (pxStr) {
+    if (axol.is_numeric(pxStr)) {
+      return parseInt(pxStr, 10);
+    }
+    if (typeof(pxStr) !== 'string') {
+      return 0;
+    }
+    var matches = pxStr.match(/^([0-9]+)px$/);
+    if (matches) {
+      return parseInt(matches[1]);
+    }
+    return 0;
+  };
+
+  axol.getBrowser = function () {
+    var ua = window.navigator.userAgent.toLowerCase(),
+      ver = window.navigator.appVersion.toLowerCase();
+    var _name = 'ie', _version = 11, _compat = false, _doc_mode = 11;
+    if (ua.indexOf('msie') != -1) {
+      _name = 'ie';
+      if (ver.indexOf('msie 5.') != -1) {
+        _version = '7';
+        _compat = true;
+        _doc_mode = 7;
+      }
+      else if (ver.indexOf('msie 6.') != -1) {
+        _version = '7';
+        _compat = true;
+        _doc_mode = 7;
+      }
+      else if (ver.indexOf('msie 7.') != -1) {
+        _version = '7';
+      }
+      else if (ver.indexOf('msie 8.') != -1) {
+        _version = '8';
+      }
+      else if (ver.indexOf('msie 9.') != -1) {
+        _version = '9';
+      }
+      else if (ver.indexOf('msie 10.') != -1) {
+        _version = '10';
+      }
+      else if (ver.indexOf('msie 11.') != -1) {
+        _version = '11';
+      }
+      if (!_compat && document.documentMode) {
+        if (document.documentMode <= 7) {
+          _compat = true;
+        }
+        _doc_mode = document.documentMode;
+      }
+    } else if (ua.indexOf('trident/7') != -1) {
+      _name = 'ie11';
+      _version = ver;
+    }
+    else if (ua.indexOf('chrome') != -1) {
+      _name = 'chrome';
+      _version = ver;
+    }
+    else if (ua.indexOf('safari') != -1) {
+      _name = 'safari';
+      _version = ver;
+    }
+    else if (ua.indexOf('opera') != -1) {
+      _name = 'opera';
+      _version = ver;
+    }
+    else if (ua.indexOf('firefox') != -1) {
+      _name = 'firefox';
+      _version = ver;
+    }
+    return {'name': _name, 'version': _version, 'compat': _compat, 'doc_mode': _doc_mode};
+  };
+
+  axol.getRandom = function (min, max) {
+    return parseInt(Math.random() * (max - min) + min, 10);
+  };
+  axol.mt_rand = function (min, max) {
+    return axol.getRandom(min, max);
+  };
+  axol.rand = function (min, max) {
+    return axol.getRandom(min, max);
+  };
+
+  axol.nl2br = function (str) {
+    return str.replace(/\r?\n/g, '<br/>');
+  };
+
+  axol.str_repeat = function (str, count) {
+    var ret = '';
+    for (var i = 0; i < count; i++) {
+      ret += str;
+    }
+    return ret;
+  };
+
+  axol.sprintf = function (args___) {
+    var argv = arguments;
+    if (argv.length < 1) {
+      return '';
+    } else if (argv.length == 1) {
+      return argv[0];
+    }
+    var format = '';
+    var args = [];
+    for (var _i = 0; _i < argv.length; _i++) {
+      if (_i == 0) {
+        format = argv[_i];
+      } else {
+        args.push(argv[_i]);
+      }
+    }
+    var formats = (format + "     ").split(""); // add dummy 5 chars.
+
+    var rv = [], i = 0, v, width, precision, sign, idx, next = 0, repeatChar=' ', tmp;
+    var unsign = function (val) {
+      return (val >= 0) ? val : val % 0x100000000 + 0x100000000;
+    };
+    var getArg = function () {
+      return args[idx ? idx - 1 : next++];
+    };
+
+    for (; i < formats.length - 5; ++i) {
+      if (formats[i] !== "%") {
+        rv.push(formats[i]);
+        continue;
+      }
+      i++;
+      idx = 0;
+      precision = undefined;
+      // arg-index-specifier
+      if (!isNaN(parseInt(formats[i], 10)) && formats[i + 1] === "$") {
+        idx = parseInt(formats[i], 10);
+        i += 2;
+      }
+      // sign-specifier
+      if (formats[i] !== "#") {
+        sign = false;
+      } else {
+        i++;
+        sign = true;
+      }
+      // width-specifier
+      tmp = parseInt(formats[i], 10);
+      width = 0;
+      if (!isNaN(tmp)) {
+        if (tmp == 0) {
+          repeatChar = '0';
+          tmp = parseInt(formats[++i], 10);
+        }
+        if (!isNaN(tmp)) {
+          width = tmp;
+          tmp = parseInt(formats[++i], 10);
+        }
+        while(!isNaN(tmp)) {
+          width *= 10;
+          width += tmp;
+          tmp = parseInt(formats[++i], 10);
+        }
+      }
+      // precision-specifier
+      if (formats[i] === "." && !isNaN(parseInt(formats[i + 1], 10))) {
+        precision = parseInt(formats[i + 1], 10);
+        i += 2;
+      }
+
+      switch (formats[i]) {
+        case "d":
+          v = parseInt(getArg(), 10).toString();
+          break;
+        case "u":
+          v = parseInt(getArg(), 10);
+          if (!isNaN(v)) {
+            v = unsign(v).toString();
+          }
+          break;
+        case "o":
+          v = parseInt(getArg(), 10);
+          if (!isNaN(v)) {
+            v = (sign ? "0" : "") + unsign(v).toString(8);
+          }
+          break;
+        case "x":
+          v = parseInt(getArg(), 10);
+          if (!isNaN(v)) {
+            v = (sign ? "0x" : "") + unsign(v).toString(16);
+          }
+          break;
+        case "X":
+          v = parseInt(getArg(), 10);
+          if (!isNaN(v)) {
+            v = (sign ? "0X" : "") + unsign(v).toString(16).toUpperCase();
+          }
+          break;
+        case "f":
+          v = parseFloat(getArg()).toFixed(precision);
+          break;
+        case "c":
+          width = 0;
+          v = getArg();
+          v = (typeof v === "number") ? String.fromCharCode(v) : NaN;
+          break;
+        case "s":
+          width = 0;
+          v = getArg().toString();
+          if (precision) {
+            v = v.substring(0, precision);
+          }
+          break;
+        case "%":
+          width = 0;
+          v = formats[i];
+          break;
+        default:
+          width = 0;
+          v = "%" + ((width) ? width.toString() : "") + formats[i].toString();
+          break;
+      }
+      if (isNaN(v)) {
+        v = v.toString();
+      }
+      (v.length < width) ? rv.push(axol.str_repeat(repeatChar, width - v.length), v) : rv.push(v);
+    }
+    return rv.join("");
+  };
+
+  axol.toDataSizeString = function (sizeB) {
+    var sizeKB = parseFloat(sizeB) / 1024;
+    if (sizeKB < 1024) {
+      return axol.toSignificant2DigitsString(sizeKB) + 'KB';
+    } else {
+      sizeKB /= 1024;
+      return axol.toSignificant2DigitsString(sizeKB) + 'MB';
+    }
+  };
+
+  axol.toSignificant2DigitsString = function (number) {
+    if (number < 1) {
+      return axol.sprintf('%.2f', axol.floatRound(number, 2));
+    } else if (number < 10) {
+      return axol.sprintf('%.1f', axol.floatRound(number, 1));
+    }
+    return axol.sprintf('%d', Math.round(number));
+  };
+
+  axol.floatRound = function (number, n) {
+    var _pow = Math.pow(10, n);
+    return Math.round(number * _pow) / _pow;
+  };
+
+  axol.array_keys = function (search) {
+    if (!axol.is_array(search)) {
+      return [];
+    }
+    var ret = [];
+    $.each(search, function (key) {
+      ret.push(key);
+    });
+    return ret;
+  };
+
+  axol.getValidArray = function (values, useKey) {
+    var ret = [];
+    if (axol.is_string(values) && axol.isValidValue(values)) {
+      ret.push(values);
+    } else {
+      var _tmp = '';
+      $.each(values, function (key, val) {
+        _tmp = useKey ? key : val;
+        if (axol.isValidValue(_tmp)) {
+          ret.push(_tmp);
+        }
+      });
+    }
+    return ret;
+  };
+
+  axol.getValidHash = function (values, useKey) {
+    var ret = {};
+    if (axol.is_string(values) && axol.isValidValue(values)) {
+      ret[values] = values;
+    } else {
+      var _tmp = '';
+      $.each(values, function (key, val) {
+        _tmp = useKey ? key : val;
+        if (axol.isValidValue(_tmp)) {
+          ret[_tmp] = _tmp;
+        }
+      });
+    }
+    return ret;
+  };
+
+  axol.getZindex = function ($obj) {
+    var position, value;
+    while ( $obj.length && $obj[ 0 ] !== document ) {
+      // Ignore z-index if position is set to a value where z-index is ignored by the browser
+      // This makes behavior of this function consistent across browsers
+      // WebKit always returns auto if the element is positioned
+      position = $obj.css( "position" );
+      if ( position === "absolute" || position === "relative" || position === "fixed" ) {
+        // IE returns 0 when zIndex is not specified
+        // other browsers return a string
+        // we ignore the case of nested elements with an explicit value of 0
+        // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
+        value = parseInt( $obj.css( "zIndex" ), 10 );
+        if ( !isNaN( value ) && value !== 0 ) {
+          return value;
+        }
+      }
+      $obj = $obj.parent();
+    }
+    return 0;
+  };
+
+  axol.getMaxZindex = function () {
+    return axol.getMaxZindexFromNodes($('body'));
+  };
+
+  axol.getMaxZindexFromNodes = function ($parentNodes) {
+    var value=0;
+    $parentNodes.each(function(){
+      var $me = $(this);
+      var pos = $me.css( "position" );
+      var tmp = 0;
+      if ( pos === "absolute" || pos === "relative" || pos === "fixed" || pos === "sticky" ) {
+        tmp = parseInt($me.css("zIndex"), 10);
+        if (!isNaN(tmp) && tmp !== 0 && tmp > value) {
+          value = tmp;
+        }
+      }
+      var $children = $me.children();
+      if ($children.length) {
+        tmp = axol.getMaxZindexFromNodes($children);
+        if (!isNaN(tmp) && tmp !== 0 && tmp > value) {
+          value = tmp;
+        }
+      }
+    });
+    return value;
+  };
+
+  //////////////////////////////////
+  // using DateTime
+  // 時間または時刻を保持する
+  axol.class.axolTime = (function(){
+    var _skelton = function(His) {
+      this.hour = 0;
+      this.minute = 0;
+      this.second = 0;
+      if (typeof His == 'string' && His.length) {
+        var _tmp = His.split(':');
+        this.hour = parseInt(_tmp[0], 10);
+        this.minute = parseInt(_tmp[1], 10);
+        this.second = 0;
+        if (axol.array_key_exists(2, _tmp)) {
+          this.second = parseInt(_tmp[2], 10);
+        }
+      } else if (axol.is_array(His)) {
+        if (axol.array_key_exists(0, His)) {
+          this.hour = parseInt(His[0], 10);
+        }
+        if (axol.array_key_exists(1, His)) {
+          this.minute = parseInt(His[1], 10);
+        }
+        if (axol.array_key_exists(2, His)) {
+          this.second = parseInt(His[2], 10);
+        }
+      }
+    };
+    _skelton.prototype = {
+      diff: function(axolTimeObj) { // 時刻オブジェクト同士の差分を時間オブジェクトとして返す。
+        var ret = new axol.class.axolTime();
+        if (typeof(axolTimeObj) != 'object' || !(axolTimeObj instanceof axol.class.axolTime)) {
+          return ret;
+        }
+        var secDiff = Math.abs(this.secDiff(axolTimeObj));
+        var tmp = secDiff % 3600;
+        ret.hour = (secDiff - tmp) / 3600;
+        secDiff = tmp;
+        tmp = secDiff % 60;
+        ret.minute = (secDiff - tmp) / 60;
+        ret.second = tmp;
+        return ret;
+      },
+      addMinute: function(addMin) {
+        this.minute += parseInt(addMin, 10);
+        var tmp = 0;
+        if (this.minute >= 60) {
+          tmp = parseInt(Math.floor(this.minute / 60), 10);
+          this.hour += tmp;
+          this.minute -= tmp*60;
+        }
+        while (this.minute < 0) {
+          tmp = parseInt(Math.ceil((-this.minute) / 60), 10);
+          this.hour-=tmp;
+          this.minute += tmp*60;
+        }
+        if (this.hour < 0) {
+          this.hour = 0;
+          this.minute = 0;
+        }
+        return this;
+      },
+      secDiff: function(axolTimeObj) {
+        if (typeof(axolTimeObj) != 'object' || !(axolTimeObj instanceof axol.class.axolTime)) {
+          return 0;
+        }
+        return this.toSecond() - axolTimeObj.toSecond();
+      },
+      toMinute: function(){
+        return (this.hour*60) + this.minute;
+      },
+      toSecond: function(){
+        return (this.hour*3600) + (this.minute*60) + this.second;
+      },
+      lt: function(axolTimeObj) {
+        return this.secDiff(axolTimeObj) < 0;
+      },
+      gt: function(axolTimeObj) {
+        return this.secDiff(axolTimeObj) > 0;
+      },
+      eq: function(axolTimeObj) {
+        return this.secDiff(axolTimeObj) == 0;
+      },
+      ne: function(axolTimeObj) {
+        return this.secDiff(axolTimeObj) != 0;
+      },
+      lte: function(axolTimeObj) {
+        return this.secDiff(axolTimeObj) <= 0;
+      },
+      gte: function(axolTimeObj) {
+        return this.secDiff(axolTimeObj) >= 0;
+      },
+      toHourFloat: function() { // 時間を単位としたfloat型データを返す。
+        return parseFloat(this.hour) + parseFloat(this.minute)/60 + parseFloat(this.second)/3600;
+      },
+      toMinSecFloat: function() { // 時間を単位としたfloat型データを返す。
+        return parseFloat(this.minute)/60 + parseFloat(this.second)/3600;
+      },
+      toHiStr: function() {
+        return axol.sprintf('%d:%02d', this.hour, this.minute);
+      },
+      toHisStr: function() {
+        return axol.sprintf('%d:%02d:%02d', this.hour, this.minute, this.second);
+      },
+      minuteStr: function() {
+        return axol.sprintf('%02d', this.minute);
+      },
+      getClone: function() {
+        var ret = new axol.class.axolTime();
+        ret.hour = this.hour;
+        ret.minute = this.minute;
+        ret.second = this.second;
+        return ret;
+      },
+      filterTime: function(axolTimeObj_st, axolTimeObj_fn){
+        if (this.lt(axolTimeObj_st)) {
+          return axolTimeObj_st.getClone();
+        }
+        if (this.gt(axolTimeObj_fn)) {
+          return axolTimeObj_fn.getClone();
+        }
+        return this.getClone();
+      }
+    };
+    return _skelton;
+  })();
+
+  // 日付を保持する(これはtimezone無視)
+  axol.class.axolDate = (function(){
+    var _skelton = function(Ymd) {
+      var meObj = this;
+      // null/パースできない文字列のときは、「現在地」での今日の日付が入る。
+      var setNow = function() {
+        var curDay = new Date();
+        meObj._date = new axol.class.axolDateTime([curDay.getFullYear(), curDay.getMonth()+1, curDay.getDate()], 0);
+      };
+      if (typeof Ymd == 'string') {
+        var regex = new RegExp('^([0-9]{4})[-/]([0-9]{1,2})[-/]([0-9]{1,2})');
+        var regResult = Ymd.match(regex);
+        if (!regResult) {
+          setNow();
+          return;
+        }
+        Ymd = [
+          regResult[1],
+          regResult[2],
+          regResult[3]
+        ];
+      }
+      if (axol.is_array(Ymd)) {
+        this._date = new axol.class.axolDateTime(Ymd, 0);
+        this._date.toStartOfDay();
+      } else {
+        setNow();
+      }
+    };
+    _skelton.prototype = {
+      toStr: function(formatStr){
+        if (axol.is_null_undefined(formatStr) || formatStr.length == 0) {
+          formatStr = 'm/d(w)';
+        }
+        return this._date.format(formatStr, 0);
+      },
+      format: function(formatStr){
+        return this._date.format(formatStr, 0);
+      },
+      toStrYmd: function(){ return this._date.format('Y/m/d', 0); },
+      isSunday: function(){ return this._date.weekDay() == 0; },
+      isSaturday: function(){ return this._date.weekDay() == 6; },
+      isMonday: function(){ return this._date.weekDay() == 1; },
+      eq: function(axolDateObj){
+        return this._date.eq(axolDateObj._date);
+      },
+      ne: function(axolDateObj){
+        return this._date.ne(axolDateObj._date);
+      },
+      gt: function(axolDateObj) {
+        return this._date.gt(axolDateObj._date);
+      },
+      lt: function(axolDateObj) {
+        return this._date.lt(axolDateObj._date);
+      },
+      gte: function(axolDateObj) {
+        return this._date.gte(axolDateObj._date);
+      },
+      lte: function(axolDateObj) {
+        return this._date.lte(axolDateObj._date);
+      },
+      isAfter: function(axolDateObj) {
+        return this._date.isAfter(axolDateObj._date);
+      },
+      isBefore: function(axolDateObj) {
+        return this._date.isBefore(axolDateObj._date);
+      },
+      isSameOrAfter: function(axolDateObj) {
+        return this._date.isSameOrAfter(axolDateObj._date);
+      },
+      isSameOrBefore: function(axolDateObj) {
+        return this._date.isSameOrBefore(axolDateObj._date);
+      },
+      addDay: function(days) {
+        this._date.addDay(days);
+        return this;
+      },
+      addMonth: function(months) {
+        this._date.addMonth(months);
+        return this;
+      },
+      addYear: function(years) {
+        this._date.addYear(years);
+        return this;
+      },
+      diffDay: function(axolDateObj) {
+        return this._date.diffDay(axolDateObj._date);
+      },
+      getNearyPreMonday: function() { // 自分を含んだ直前の月曜日を返す。
+        var ret = new axol.class.axolDate();
+        ret._date = this._date.getNearyPreMonday();
+        return ret;
+      },
+      getNextMonday: function() { // 自分を含まない次の月曜日を返す。
+        var ret = new axol.class.axolDate();
+        ret._date = this._date.getNextMonday();
+        return ret;
+      },
+      getClone: function() {
+        var ret = new axol.class.axolDate();
+        ret._date = this._date.getClone();
+        return ret;
+      },
+      month: function() {
+        return this._date.month();
+      },
+      year: function() {
+        return this._date.year();
+      },
+      day: function() {
+        return this._date.day();
+      },
+      filterDate: function(axolDateObj_st, axolDateObj_fn){
+        if (this.lt(axolDateObj_st)) {
+          return axolDateObj_st.getClone();
+        }
+        if (this.gt(axolDateObj_fn)) {
+          return axolDateObj_fn.getClone();
+        }
+        return this.getClone();
+      },
+      weekDay: function(){
+        return this._date.weekDay();
+      },
+      getNearyPreWeekday: function(weekday) {// 自分を含んだ直前の指定曜日を返す。
+        var ret = new axol.class.axolDate();
+        ret._date = this._date.getNearyPreWeekday(weekday);
+        return ret;
+      },
+      getNextWeekday: function(weekday) { // 自分を含まない次の指定曜日を返す。
+        var ret = new axol.class.axolDate();
+        ret._date = this._date.getNextWeekday(weekday);
+        return ret;
+      },
+      isJpHoliday: function() {
+        return this._date.isJpHoliday();
+      },
+      toStartOfMonth: function() { // 現在のタイムゾーンでのxxxx-xx-01T00:00:00にする。
+        this._date.toStartOfMonth();
+        return this;
+      },
+      toEndOfMonth: function() { // xxxx-xx-(END)T00:00:00にする。
+        this._date.toStartOfMonth();
+        this._date.toStartOfDay();
+        return this;
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.getWeekStr = function(weekDay, isLong) {
+    isLong = isLong ? true : false;
+    weekDay = parseInt(weekDay, 10) % 7;
+    var templates = isLong
+      ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    switch(axol.config.dateLocale) {
+      case 'JP':
+      case 'jp':
+      case 'ja':
+        templates = isLong
+          ? ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日']
+          : ['日', '月', '火', '水', '木', '金', '土'];
+    }
+    return templates[weekDay];
+  };
+
+  axol.getMonthStr = function(month, isLong) {
+    isLong = isLong ? true : false;
+    month = parseInt(month-1, 10) % 12;
+    switch(axol.config.dateLocale) {
+      case 'JP':
+      case 'jp':
+      case 'ja':
+        return (month+1)+'月';
+    }
+    var templates = isLong
+      ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return templates[month];
+  };
+
+  // 日時を扱う(タイムゾーン対応)
+  axol.class.axolDateTime = (function(){
+    var _skelton = function(YmdHis, tzUtcAddHour) {
+      var meObj = this;
+      var setNow = function(){
+        meObj._date = new Date();
+        meObj._date.setMilliseconds(0);
+        meObj.changeTimeZone(tzUtcAddHour);
+      };
+      meObj.tzUtcAddMin = meObj._getTzUtcAddMin(tzUtcAddHour);
+      meObj._tzDate = null;
+      if (typeof YmdHis == 'string' && YmdHis.length) {
+        var regex = new RegExp('^([0-9]{4})[-/]([0-9]{1,2})[-/]([0-9]{1,2})(?:[T ]([0-9]{1,2}):([0-9]{1,2})(?:\:([0-9.]{1,}))?)?$'); // nearly ISO8601
+        var regResult = YmdHis.match(regex);
+        if (!regResult) {
+          regex = new RegExp('^([0-9]{4})[-/]([0-9]{1,2})[-/]([0-9]{1,2})[T ]([0-9]{1,2}):([0-9]{1,2}):([0-9.]{1,})(Z|[+-][0-9]{2}):([0-9]{2})$'); // nearly ISO8601
+          regResult = YmdHis.match(regex);
+          var tzAddMin = 0;
+          var sec = 0;
+          if (axol.is_array(regResult)) {
+            tzAddMin = (regResult[7] == 'Z') ? 0 : parseInt(regResult[7], 10) * 60;
+            if (tzAddMin > 0) {
+              tzAddMin += parseInt(regResult[8], 10);
+            } else {
+              tzAddMin -= parseInt(regResult[8], 10);
+            }
+            sec = parseInt(regResult[6], 10);
+          } else {
+            regex = new RegExp('^([0-9]{4})[-/]([0-9]{1,2})[-/]([0-9]{1,2})[T ]([0-9]{1,2}):([0-9]{1,2})(Z|[+-][0-9]{2}):([0-9]{2})$'); // nearly ISO8601
+            regResult = YmdHis.match(regex);
+            if (!regResult) {
+              setNow();
+              return;
+            }
+            tzAddMin = (regResult[6] == 'Z') ? 0 : parseInt(regResult[6], 10) * 60;
+            if (tzAddMin > 0) {
+              tzAddMin += parseInt(regResult[7], 10);
+            } else {
+              tzAddMin -= parseInt(regResult[7], 10);
+            }
+          }
+          meObj._date = new Date(Date.UTC(regResult[1], regResult[2] - 1, regResult[3], regResult[4], regResult[5], sec, 0) - tzAddMin*60000);//Y,m,d,H,i,s,ms(m = 0-11)
+          meObj._makeTzDate();
+          return;
+        }
+        YmdHis = [
+          regResult[1],
+          regResult[2],
+          regResult[3],
+          axol.isset(regResult[4]) ? regResult[4] : 0,
+          axol.isset(regResult[5]) ? regResult[5] : 0,
+          axol.isset(regResult[6]) ? regResult[6] : 0
+        ];
+      }
+      if (!axol.is_array(YmdHis)) {
+        setNow();
+        return;
+      }
+
+      var dtArray = YmdHis;
+      var setArray = [1970, 0, 1, 0 ,0, 0];
+      if (dtArray.length >= 6) {
+        setArray[5] = parseInt(dtArray[5], 10);
+      }
+      if (dtArray.length >= 5) {
+        setArray[4] = parseInt(dtArray[4], 10);
+      }
+      if (dtArray.length >= 4) {
+        setArray[3] = parseInt(dtArray[3], 10);
+      }
+      if (dtArray.length >= 3) {
+        setArray[2] = parseInt(dtArray[2], 10);
+      }
+      if (dtArray.length >= 2) {
+        setArray[1] = parseInt(dtArray[1], 10) - 1;
+      }
+      if (dtArray.length >= 1) {
+        setArray[0] = parseInt(dtArray[0], 10);
+        meObj._date = new Date(Date.UTC(setArray[0], setArray[1], setArray[2], setArray[3], setArray[4], setArray[5], 0) - meObj.tzUtcAddMin*60000);//Y,m,d,H,i,s,ms(m = 0-11)
+        meObj._date.setMilliseconds(0);
+        meObj._makeTzDate();
+      } else {
+        setNow();
+      }
+    };
+    _skelton.prototype = {
+      _getTzUtcAddMin: function(tzUtcAddHour){
+        return axol.is_null_undefined(tzUtcAddHour) ? 9*60 : tzUtcAddHour * 60;
+      },
+      changeTimeZone: function(tzUtcAddHour) {
+        this.tzUtcAddMin = this._getTzUtcAddMin(tzUtcAddHour);
+        this._makeTzDate();
+      },
+      _makeTzDate: function(){
+        this._tzDate = new Date(this._date.getTime() + this.tzUtcAddMin*60000);
+      },
+      _toStr: function(formatStr, tzDate){
+        var year = tzDate.getUTCFullYear(),month = tzDate.getUTCMonth()+1, day = tzDate.getUTCDate(),
+          hour = tzDate.getUTCHours(), minute=tzDate.getUTCMinutes(), second=tzDate.getUTCSeconds(),
+          wday = tzDate.getUTCDay();
+        if (axol.is_null_undefined(formatStr) || formatStr.length == 0) {
+          return '';
+        }
+        var quoted = false;
+        var strs = formatStr.split('');
+        var ret = '';
+        for (var i=0; i<strs.length; i++) {
+          var chr = strs[i];
+          if (!quoted && chr === '\\') {
+            quoted = true;
+            continue;
+          }
+          if (quoted) {
+            ret += chr;
+            quoted = false;
+            continue;
+          }
+          switch (chr) {
+            //////////////////////////////////////////////////
+            // date defaults
+            //////////////////////////////////////////////////
+            // year
+            case 'Y': // 2016
+              ret += (year+'');break;
+            case 'y': // 16
+              ret += (year+'').substr(2);break;
+            // month
+            case 'm': // 01
+              ret += axol.sprintf('%02d', month);break;
+            case 'n': // 1
+              ret += (month+'');break;
+            case 'F': // January
+              ret += axol.getMonthStr(month, true);break;
+            case 'M': // Jan
+              ret += axol.getMonthStr(month, false);break;
+            // day
+            case 'd': // 01
+              ret += axol.sprintf('%02d', day);break;
+            case 'j': // 1
+              ret += (day+'');break;
+            // hour
+            case 'H': // 05, 13
+              ret += axol.sprintf('%02d', hour);break;
+            case 'G': // 5, 13
+              ret += (hour+'');break;
+            // minute
+            case 'i': // 05
+              ret += axol.sprintf('%02d', minute);break;
+            // second
+            case 's': // 05
+              ret += axol.sprintf('%02d', second);break;
+
+            //////////////////////////////////////////////////
+            // custom
+            //////////////////////////////////////////////////
+
+            // week
+            case 'w':
+              ret += axol.getWeekStr(wday);break;
+            case 'W':
+              ret += axol.getWeekStr(wday, true);break;
+            // 和暦(明治/大正/昭和/平成)
+            case 'J':
+              ret += this._getJpYear(year, month, day);break;
+            // 和暦(M/T/S/H)
+            case 'p':
+              ret += this._getJpYear(year, month, day, true);break;
+            // 年齢(本日時点)
+            case 'A':
+              ret += (this.age()+'');break;
+            default:
+              ret += chr;
+          }
+        }
+        return ret;
+      },
+      toStr: function(formatStr, tzUtcAddHour) {
+        var tzUtcAddMin = this._getTzUtcAddMin(tzUtcAddHour);
+        return this._toStr(formatStr, new Date(this._date.getTime()+tzUtcAddMin*60000));
+      },
+      format: function(formatStr, tzUtcAddHour) {
+        return this.toStr(formatStr, tzUtcAddHour);
+      },
+      formatInnerTz: function(formatStr) {
+        return this._toStr(formatStr, this._tzDate);
+      },
+      toStrInnerTz: function(formatStr) {
+        return this._toStr(formatStr, this._tzDate);
+      },
+      isSunday: function(){ return this.weekDay() == 0; },
+      isSaturday: function(){ return this.weekDay() == 6; },
+      isMonday: function(){ return this.weekDay() == 1; },
+      eq: function(axolDateObj){
+        return this.getAbsMSec() === axolDateObj.getAbsMSec();
+      },
+      ne: function(axolDateObj){
+        return this.getAbsMSec() !== axolDateObj.getAbsMSec();
+      },
+      gt: function(axolDateObj) {
+        return this.getAbsMSec() > axolDateObj.getAbsMSec();
+      },
+      lt: function(axolDateObj) {
+        return this.getAbsMSec() < axolDateObj.getAbsMSec();
+      },
+      gte: function(axolDateObj) {
+        return this.getAbsMSec() >= axolDateObj.getAbsMSec();
+      },
+      lte: function(axolDateObj) {
+        return this.getAbsMSec() <= axolDateObj.getAbsMSec();
+      },
+      isAfter: function(axolDateObj) {
+        return this.gt(axolDateObj);
+      },
+      isBefore: function(axolDateObj) {
+        return this.lt(axolDateObj);
+      },
+      isSameOrAfter: function(axolDateObj) {
+        return this.gte(axolDateObj);
+      },
+      isSameOrBefore: function(axolDateObj) {
+        return this.lte(axolDateObj);
+      },
+      addYear: function(years) {
+        years = parseInt(years, 10);
+        this._date = new Date(Date.UTC(this.UTCyear() + years, this.UTCmonth() - 1, this.UTCday(), this.UTChour(), this.UTCminute(), this.UTCsecond(), 0));//Y,m,d,H,i,s,ms(m = 0-11)
+        this._makeTzDate();
+        return this;
+      },
+      addMonth: function(months) {
+        months = parseInt(months, 10);
+        this._date = new Date(Date.UTC(this.UTCyear(), this.UTCmonth() - 1 + months, this.UTCday(), this.UTChour(), this.UTCminute(), this.UTCsecond(), 0));//Y,m,d,H,i,s,ms(m = 0-11)
+        this._makeTzDate();
+        return this;
+      },
+      addDay: function(days) {
+        days = parseInt(days, 10);
+        this._date = new Date(this._date.getTime() + days*60*60*24*1000);
+        this._makeTzDate();
+        return this;
+      },
+      addHour: function(hours) {
+        hours = parseInt(hours, 10);
+        this._date = new Date(this._date.getTime() + hours*60*60*1000);
+        this._makeTzDate();
+        return this;
+      },
+      addMinute: function(minutes) {
+        minutes = parseInt(minutes, 10);
+        this._date = new Date(this._date.getTime() + minutes*60*1000);
+        this._makeTzDate();
+        return this;
+      },
+      addSecond: function(seconds) {
+        seconds = parseInt(seconds, 10);
+        this._date = new Date(this._date.getTime() + seconds*1000);
+        this._makeTzDate();
+        return this;
+      },
+      diffDay: function(axolDateObj) {
+        var msec = this._date.getTime() - axolDateObj._date.getTime();
+        return Math.floor(msec/86400000);
+      },
+      getNearyPreMonday: function() { // 自分を含んだ直前の月曜日を返す。
+        var wday = this.weekDay();
+        var ret = this.getClone();
+        if (wday == 0) {
+          ret.addDay(-6);
+        } else if (wday > 1) {
+          ret.addDay(1 - wday);
+        }
+        return ret;
+      },
+      getNextMonday: function() { // 自分を含まない次の月曜日を返す。
+        var wday = this.weekDay();
+        var ret = this.getClone();
+        if (wday == 0) {
+          ret.addDay(1);
+        } else if (wday > 1) {
+          ret.addDay(8 - wday);
+        } else {
+          ret.addDay(7);
+        }
+        return ret;
+      },
+      getClone: function() {
+        var ret = new axol.class.axolDateTime();
+        ret._date = new Date(this._date.getTime());
+        ret.tzUtcAddMin = this.tzUtcAddMin;
+        ret._makeTzDate();
+        return ret;
+      },
+      month: function() {
+        return this._tzDate.getUTCMonth()+1;
+      },
+      year: function() {
+        return this._tzDate.getUTCFullYear();
+      },
+      day: function() {
+        return this._tzDate.getUTCDate();
+      },
+      hour: function() {
+        return this._tzDate.getUTCHours();
+      },
+      minute: function() {
+        return this._tzDate.getUTCMinutes();
+      },
+      second: function() {
+        return this._tzDate.getUTCSeconds();
+      },
+      weekDay: function() {
+        return this._tzDate.getUTCDay();
+      },
+      toStartOfDay: function() { // 現在のタイムゾーンでの00:00:00にする。
+        this._tzDate = new Date(Date.UTC(this.year(), this.month()-1, this.day(), 0, 0, 0, 0));
+        this._date = new Date(this._tzDate.getTime() - this.tzUtcAddMin*60000);
+        return this;
+      },
+      toEndOfDay: function() { // 現在のタイムゾーンでの23:59:59にする。
+        this._tzDate = new Date(Date.UTC(this.year(), this.month()-1, this.day(), 23, 59, 59, 0));
+        this._date = new Date(this._tzDate.getTime() - this.tzUtcAddMin*60000);
+        return this;
+      },
+      toStartOfMonth: function() { // 現在のタイムゾーンでのxxxx-xx-01T00:00:00にする。
+        this._tzDate = new Date(Date.UTC(this.year(), this.month()-1, 1, 0, 0, 0, 0));
+        this._date = new Date(this._tzDate.getTime() - this.tzUtcAddMin*60000);
+        return this;
+      },
+      toEndOfMonth: function() { // 現在のタイムゾーンでのxxxx-xx-(END)T23:59:59にする。
+        this._tzDate = new Date(Date.UTC(this.year(), this.month(), 1, 23, 59, 59, 0) - 60*60*24*1000); // わざと次の月開始-1日。
+        this._date = new Date(this._tzDate.getTime() - this.tzUtcAddMin*60000);
+        return this;
+      },
+      setHour: function(hour) { // 現在のタイムゾーンでの時刻をhourにする。
+        var changeHour = hour - this.hour();
+        this._date = new Date(this._date.getTime() + changeHour*60*60*1000);
+        this._makeTzDate();
+        return this;
+      },
+      setMinute: function(minute) { // 現在のタイムゾーンでの分をhourにする。
+        var changeMin = minute - this.minute();
+        this._date = new Date(this._date.getTime() + changeMin*60*1000);
+        this._makeTzDate();
+        return this;
+      },
+      setSecond: function(second) {  // 現在のタイムゾーンでの秒をsecondにする。
+        var changeSec = second - this.second();
+        this._date = new Date(this._date.getTime() + changeSec*1000);
+        this._makeTzDate();
+        return this;
+      },
+      getAbsMSec: function() {
+        return this._date.getTime();
+      },
+      UTCyear: function() {
+        return this._date.getUTCFullYear();
+      },
+      UTCmonth: function() {
+        return this._date.getUTCMonth()+1;
+      },
+      UTCday: function() {
+        return this._date.getUTCDate();
+      },
+      UTChour: function() {
+        return this._date.getUTCHours();
+      },
+      UTCminute: function() {
+        return this._date.getUTCMinutes();
+      },
+      UTCsecond: function() {
+        return this._date.getUTCSeconds();
+      },
+      UTCweekDay: function() {
+        return this._date.getUTCDay();
+      },
+      getTimezoneOffsetHour: function() {
+        return this.tzUtcAddMin / 60;
+      },
+      getTimezoneOffsetMin: function() {
+        return this.tzUtcAddMin;
+      },
+      age: function(axolDateTimeObj) {
+        if (!(axolDateTimeObj instanceof axol.class.axolDateTime)) {
+          axolDateTimeObj = new axol.class.axolDateTime();
+        }
+        var birth = parseFloat(axol.sprintf('%04d.%02d%02d', this.UTCyear(), this.UTCmonth(), this.UTCday()));
+        var target = parseFloat(axol.sprintf('%04d.%02d%02d', axolDateTimeObj.UTCyear(), axolDateTimeObj.UTCmonth(), axolDateTimeObj.UTCday()));
+        return parseInt(Math.floor(target - birth), 10);
+      },
+      jpYear: function(isShort) {
+        this._getJpYear(this.year(), this.month(), this.day(), isShort);
+      },
+      _getJpYear: function(year, month, day, isShort) {
+        var meiji_st = '18680125';
+        var taisho_st = '19120730';
+        var showa_st = '19261225';
+        var heisei_st = '19890108';
+        var cur = parseInt(axol.sprintf('%04d%02d%02d', year, month, day), 10);
+        var gengo = '';
+        var ret = 0;
+        if (cur >= heisei_st) {
+          ret = parseInt(Math.floor((cur - 19890000) / 10000), 10);
+          gengo = isShort ? 'H' : '平成';
+        } else if (cur >= showa_st) {
+          ret = parseInt(Math.floor((cur - 19260000) / 10000), 10);
+          gengo = isShort ? 'S' : '昭和';
+        } else if (cur >= taisho_st) {
+          ret = parseInt(Math.floor((cur - 19120000) / 10000), 10);
+          gengo = isShort ? 'T' : '大正';
+        } else if (cur >= meiji_st) {
+          ret = parseInt(Math.floor((cur - 18680000) / 10000), 10);
+          gengo = isShort ? 'M' : '明治';
+        }
+        if (ret == 0) {
+          ret = isShort ? '1' : '元';
+        } else {
+          ret = ret + 1;
+        }
+        return gengo+''+ret;
+
+      },
+      isJpHoliday: function() {
+        return (new axol.class.axolJpHoliday()).isHoliday(this);
+      },
+      filterDate: function(axolDateObj_st, axolDateObj_fn){
+        if (this.lt(axolDateObj_st)) {
+          return axolDateObj_st.getClone();
+        }
+        if (this.gt(axolDateObj_fn)) {
+          return axolDateObj_fn.getClone();
+        }
+        return this.getClone();
+      },
+      getNearyPreWeekday: function(weekday) {// 自分を含んだ直前の指定曜日のaxolDateTimeObjectを返す。
+        weekday = axol.is_null_undefined(weekday)? 1 : weekday;
+        var wday = this.weekDay();
+        var ret = this.getClone();
+        if (wday == weekday) {
+          return ret;
+        } else if (wday > weekday) {
+          ret.addDay(weekday - wday);
+        } else { //wday < weekday
+          ret.addDay(weekday - wday - 7);
+        }
+        return ret;
+      },
+      getNextWeekday: function(weekday) { // 自分を含まない次の指定曜日のaxolDateTimeObjectを返す。
+        weekday = axol.is_null_undefined(weekday)? 1 : weekday;
+        var wday = this.weekDay();
+        var ret = this.getClone();
+        if (wday == weekday) {
+          return ret.addDay(7); //自分は含まない。
+        } else if (wday > weekday) {
+          ret.addDay(7 - wday + weekday);
+        } else { //wday < weekday
+          ret.addDay(weekday - wday);
+        }
+        return ret;
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.class.axolJpHoliday = (function(){
+
+    var HOLIDAY_GANTAN = 101;
+    var HOLIDAY_SEIJIN = 102;
+    var HOLIDAY_KENKOKU = 103;
+    var HOLIDAY_SHUNBUN = 104;
+    var HOLIDAY_SHOWA = 105;
+    var HOLIDAY_KENPO = 106;
+    var HOLIDAY_MIDORI = 107;
+    var HOLIDAY_KODOMO = 108;
+    var HOLIDAY_UMI = 109;
+    var HOLIDAY_KEIRO = 110;
+    var HOLIDAY_SHUBUN = 111;
+    var HOLIDAY_SPORTS = 112;
+    var HOLIDAY_BUNKA = 113;
+    var HOLIDAY_KINRO = 114;
+    var HOLIDAY_TENNO = 115;
+    var HOLIDAY_HURIKAE = 116;
+    var HOLIDAY_KOKUMIN = 117;
+    var HOLIDAY_YAMA = 118;
+    var HOLIDAY_OTHER = 119;  // その年だけの特別な休日
+
+    var _holidays = {
+      't2011':{
+        't20110101' : HOLIDAY_GANTAN,
+        't20110110' : HOLIDAY_SEIJIN,
+        't20110211' : HOLIDAY_KENKOKU,
+        't20110321' : HOLIDAY_SHUNBUN,
+        't20110429' : HOLIDAY_SHOWA,
+        't20110503' : HOLIDAY_KENPO,
+        't20110504' : HOLIDAY_MIDORI,
+        't20110505' : HOLIDAY_KODOMO,
+        't20110718' : HOLIDAY_UMI,
+        't20110919' : HOLIDAY_KEIRO,
+        't20110923' : HOLIDAY_SHUBUN,
+        't20111010' : HOLIDAY_SPORTS,
+        't20111103' : HOLIDAY_BUNKA,
+        't20111123' : HOLIDAY_KINRO,
+        't20111223' : HOLIDAY_TENNO
+      },
+      't2012':{
+        't20120101' : HOLIDAY_GANTAN,
+        't20120102' : HOLIDAY_HURIKAE,
+        't20120109' : HOLIDAY_SEIJIN,
+        't20120211' : HOLIDAY_KENKOKU,
+        't20120320' : HOLIDAY_SHUNBUN,
+        't20120429' : HOLIDAY_SHOWA,
+        't20120430' : HOLIDAY_HURIKAE,
+        't20120503' : HOLIDAY_KENPO,
+        't20120504' : HOLIDAY_MIDORI,
+        't20120505' : HOLIDAY_KODOMO,
+        't20120716' : HOLIDAY_UMI,
+        't20120917' : HOLIDAY_KEIRO,
+        't20120922' : HOLIDAY_SHUBUN,
+        't20121008' : HOLIDAY_SPORTS,
+        't20121103' : HOLIDAY_BUNKA,
+        't20121123' : HOLIDAY_KINRO,
+        't20121223' : HOLIDAY_TENNO,
+        't20121224' : HOLIDAY_HURIKAE
+      },
+      't2013':{
+        't20130101' : HOLIDAY_GANTAN,
+        't20130114' : HOLIDAY_SEIJIN,
+        't20130211' : HOLIDAY_KENKOKU,
+        't20130320' : HOLIDAY_SHUNBUN,
+        't20130429' : HOLIDAY_SHOWA,
+        't20130503' : HOLIDAY_KENPO,
+        't20130504' : HOLIDAY_MIDORI,
+        't20130505' : HOLIDAY_KODOMO,
+        't20130506' : HOLIDAY_HURIKAE,
+        't20130715' : HOLIDAY_UMI,
+        't20130916' : HOLIDAY_KEIRO,
+        't20130923' : HOLIDAY_SHUBUN,
+        't20131014' : HOLIDAY_SPORTS,
+        't20131103' : HOLIDAY_BUNKA,
+        't20131104' : HOLIDAY_HURIKAE,
+        't20131123' : HOLIDAY_KINRO,
+        't20131223' : HOLIDAY_TENNO
+      },
+      't2014':{
+        't20140101' : HOLIDAY_GANTAN,
+        't20140113' : HOLIDAY_SEIJIN,
+        't20140211' : HOLIDAY_KENKOKU,
+        't20140321' : HOLIDAY_SHUNBUN,
+        't20140429' : HOLIDAY_SHOWA,
+        't20140503' : HOLIDAY_KENPO,
+        't20140504' : HOLIDAY_MIDORI,
+        't20140505' : HOLIDAY_KODOMO,
+        't20140506' : HOLIDAY_HURIKAE,
+        't20140721' : HOLIDAY_UMI,
+        't20140915' : HOLIDAY_KEIRO,
+        't20140923' : HOLIDAY_SHUBUN,
+        't20141013' : HOLIDAY_SPORTS,
+        't20141103' : HOLIDAY_BUNKA,
+        't20141123' : HOLIDAY_KINRO,
+        't20141124' : HOLIDAY_HURIKAE,
+        't20141223' : HOLIDAY_TENNO
+      },
+      't2015':{
+        't20150101' : HOLIDAY_GANTAN,
+        't20150112' : HOLIDAY_SEIJIN,
+        't20150211' : HOLIDAY_KENKOKU,
+        't20150321' : HOLIDAY_SHUNBUN,
+        't20150429' : HOLIDAY_SHOWA,
+        't20150503' : HOLIDAY_KENPO,
+        't20150504' : HOLIDAY_MIDORI,
+        't20150505' : HOLIDAY_KODOMO,
+        't20150506' : HOLIDAY_HURIKAE,
+        't20150720' : HOLIDAY_UMI,
+        't20150921' : HOLIDAY_KEIRO,
+        't20150922' : HOLIDAY_KOKUMIN,
+        't20150923' : HOLIDAY_SHUBUN,
+        't20151012' : HOLIDAY_SPORTS,
+        't20151103' : HOLIDAY_BUNKA,
+        't20151123' : HOLIDAY_KINRO,
+        't20151223' : HOLIDAY_TENNO
+      },
+      't2016':{
+        't20160101' : HOLIDAY_GANTAN,
+        't20160111' : HOLIDAY_SEIJIN,
+        't20160211' : HOLIDAY_KENKOKU,
+        't20160320' : HOLIDAY_SHUNBUN,
+        't20160321' : HOLIDAY_HURIKAE,
+        't20160429' : HOLIDAY_SHOWA,
+        't20160503' : HOLIDAY_KENPO,
+        't20160504' : HOLIDAY_MIDORI,
+        't20160505' : HOLIDAY_KODOMO,
+        't20160718' : HOLIDAY_UMI,
+        't20160811' : HOLIDAY_YAMA,
+        't20160919' : HOLIDAY_KEIRO,
+        't20160922' : HOLIDAY_SHUBUN,
+        't20161010' : HOLIDAY_SPORTS,
+        't20161103' : HOLIDAY_BUNKA,
+        't20161123' : HOLIDAY_KINRO,
+        't20161223' : HOLIDAY_TENNO
+      },
+      't2017': {
+        't20170101' : HOLIDAY_GANTAN,
+        't20170102' : HOLIDAY_HURIKAE,
+        't20170109' : HOLIDAY_SEIJIN,
+        't20170211' : HOLIDAY_KENKOKU,
+        't20170320' : HOLIDAY_SHUNBUN,
+        't20170429' : HOLIDAY_SHOWA,
+        't20170503' : HOLIDAY_KENPO,
+        't20170504' : HOLIDAY_MIDORI,
+        't20170505' : HOLIDAY_KODOMO,
+        't20170717' : HOLIDAY_UMI,
+        't20170811' : HOLIDAY_YAMA,
+        't20170918' : HOLIDAY_KEIRO,
+        't20170923' : HOLIDAY_SHUBUN,
+        't20171009' : HOLIDAY_SPORTS,
+        't20171103' : HOLIDAY_BUNKA,
+        't20171123' : HOLIDAY_KINRO,
+        't20171223' : HOLIDAY_TENNO
+      },
+      't2018': {
+        't20180101' : HOLIDAY_GANTAN,
+        't20180108' : HOLIDAY_SEIJIN,
+        't20180211' : HOLIDAY_KENKOKU,
+        't20180212' : HOLIDAY_HURIKAE,
+        't20180321' : HOLIDAY_SHUNBUN,
+        't20180429' : HOLIDAY_SHOWA,
+        't20180430' : HOLIDAY_HURIKAE,
+        't20180503' : HOLIDAY_KENPO,
+        't20180504' : HOLIDAY_MIDORI,
+        't20180505' : HOLIDAY_KODOMO,
+        't20180716' : HOLIDAY_UMI,
+        't20180811' : HOLIDAY_YAMA,
+        't20180917' : HOLIDAY_KEIRO,
+        't20180923' : HOLIDAY_SHUBUN,
+        't20180924' : HOLIDAY_HURIKAE,
+        't20181008' : HOLIDAY_SPORTS,
+        't20181103' : HOLIDAY_BUNKA,
+        't20181123' : HOLIDAY_KINRO,
+        't20181223' : HOLIDAY_TENNO,
+        't20181224' : HOLIDAY_HURIKAE
+      },
+      't2019': {
+        't20190101' : HOLIDAY_GANTAN,
+        't20190114' : HOLIDAY_SEIJIN,
+        't20190211' : HOLIDAY_KENKOKU,
+        't20190321' : HOLIDAY_SHUNBUN,
+        't20190429' : HOLIDAY_SHOWA,
+        't20190430' : HOLIDAY_KOKUMIN,
+        't20190501' : HOLIDAY_OTHER,  // 新天皇即位
+        't20190502' : HOLIDAY_KOKUMIN,
+        't20190503' : HOLIDAY_KENPO,
+        't20190504' : HOLIDAY_MIDORI,
+        't20190505' : HOLIDAY_KODOMO,
+        't20190506' : HOLIDAY_HURIKAE,
+        't20190715' : HOLIDAY_UMI,
+        't20190811' : HOLIDAY_YAMA,
+        't20190812' : HOLIDAY_HURIKAE,
+        't20190916' : HOLIDAY_KEIRO,
+        't20190923' : HOLIDAY_SHUBUN,
+        't20191014' : HOLIDAY_SPORTS,
+        't20191022' : HOLIDAY_OTHER,  // 即位礼正殿の儀
+        't20191103' : HOLIDAY_BUNKA,
+        't20191104' : HOLIDAY_HURIKAE,
+        't20191123' : HOLIDAY_KINRO
+      },
+      't2020': {
+        't20200101' : HOLIDAY_GANTAN,
+        't20200113' : HOLIDAY_SEIJIN,
+        't20200211' : HOLIDAY_KENKOKU,
+        't20200223' : HOLIDAY_TENNO,
+        't20200224' : HOLIDAY_HURIKAE,
+        't20200320' : HOLIDAY_SHUNBUN,
+        't20200429' : HOLIDAY_SHOWA,
+        't20200503' : HOLIDAY_KENPO,
+        't20200504' : HOLIDAY_MIDORI,
+        't20200505' : HOLIDAY_KODOMO,
+        't20200506' : HOLIDAY_HURIKAE,
+        't20200723' : HOLIDAY_UMI,    // オリンピック開会式の影響で7/20から移動
+        't20200724' : HOLIDAY_SPORTS, // オリンピック開会式の影響で10/12から移動
+        't20200810' : HOLIDAY_YAMA,   // オリンピック閉会式の影響で8/11から移動
+        't20200921' : HOLIDAY_KEIRO,
+        't20200922' : HOLIDAY_SHUBUN,
+        't20201103' : HOLIDAY_BUNKA,
+        't20201123' : HOLIDAY_KINRO
+      },
+      't2021': {
+        't20210101' : HOLIDAY_GANTAN,
+        't20210111' : HOLIDAY_SEIJIN,
+        't20210211' : HOLIDAY_KENKOKU,
+        't20210223' : HOLIDAY_TENNO,
+        't20210320' : HOLIDAY_SHUNBUN,
+        't20210429' : HOLIDAY_SHOWA,
+        't20210503' : HOLIDAY_KENPO,
+        't20210504' : HOLIDAY_MIDORI,
+        't20210505' : HOLIDAY_KODOMO,
+        't20210722' : HOLIDAY_UMI,    // オリンピック開会式の影響で7/19から移動
+        't20210723' : HOLIDAY_SPORTS, // オリンピック開会式の影響で10/11から移動
+        't20210808' : HOLIDAY_YAMA,   // オリンピック閉会式の影響で8/11から移動
+        't20210809' : HOLIDAY_HURIKAE,
+        't20210920' : HOLIDAY_KEIRO,
+        't20210923' : HOLIDAY_SHUBUN,
+        't20211103' : HOLIDAY_BUNKA,
+        't20211123' : HOLIDAY_KINRO
+      },
+      't2022': {
+        't20220101' : HOLIDAY_GANTAN,
+        't20220110' : HOLIDAY_SEIJIN,
+        't20220211' : HOLIDAY_KENKOKU,
+        't20220223' : HOLIDAY_TENNO,
+        't20220321' : HOLIDAY_SHUNBUN,
+        't20220429' : HOLIDAY_SHOWA,
+        't20220503' : HOLIDAY_KENPO,
+        't20220504' : HOLIDAY_MIDORI,
+        't20220505' : HOLIDAY_KODOMO,
+        't20220718' : HOLIDAY_UMI,
+        't20220811' : HOLIDAY_YAMA,
+        't20220919' : HOLIDAY_KEIRO,
+        't20220923' : HOLIDAY_SHUBUN,
+        't20221010' : HOLIDAY_SPORTS,
+        't20221103' : HOLIDAY_BUNKA,
+        't20221123' : HOLIDAY_KINRO
+      },
+      't2023': {
+        't20230101' : HOLIDAY_GANTAN,
+        't20230102' : HOLIDAY_HURIKAE,
+        't20230109' : HOLIDAY_SEIJIN,
+        't20230211' : HOLIDAY_KENKOKU,
+        't20230223' : HOLIDAY_TENNO,
+        't20230321' : HOLIDAY_SHUNBUN,
+        't20230429' : HOLIDAY_SHOWA,
+        't20230503' : HOLIDAY_KENPO,
+        't20230504' : HOLIDAY_MIDORI,
+        't20230505' : HOLIDAY_KODOMO,
+        't20230717' : HOLIDAY_UMI,
+        't20230811' : HOLIDAY_YAMA,
+        't20230918' : HOLIDAY_KEIRO,
+        't20230923' : HOLIDAY_SHUBUN,
+        't20231009' : HOLIDAY_SPORTS,
+        't20231103' : HOLIDAY_BUNKA,
+        't20231123' : HOLIDAY_KINRO
+      },
+      't2024': {
+        't20240101' : HOLIDAY_GANTAN,
+        't20240108' : HOLIDAY_SEIJIN,
+        't20240211' : HOLIDAY_KENKOKU,
+        't20240212' : HOLIDAY_HURIKAE,
+        't20240223' : HOLIDAY_TENNO,
+        't20240320' : HOLIDAY_SHUNBUN,
+        't20240429' : HOLIDAY_SHOWA,
+        't20240503' : HOLIDAY_KENPO,
+        't20240504' : HOLIDAY_MIDORI,
+        't20240505' : HOLIDAY_KODOMO,
+        't20240506' : HOLIDAY_HURIKAE,
+        't20240715' : HOLIDAY_UMI,
+        't20240811' : HOLIDAY_YAMA,
+        't20240812' : HOLIDAY_HURIKAE,
+        't20240916' : HOLIDAY_KEIRO,
+        't20240922' : HOLIDAY_SHUBUN,
+        't20240923' : HOLIDAY_HURIKAE,
+        't20241014' : HOLIDAY_SPORTS,
+        't20241103' : HOLIDAY_BUNKA,
+        't20241104' : HOLIDAY_HURIKAE,
+        't20241123' : HOLIDAY_KINRO
+      },
+      't2025': {
+        't20250101' : HOLIDAY_GANTAN,
+        't20250113' : HOLIDAY_SEIJIN,
+        't20250211' : HOLIDAY_KENKOKU,
+        't20250223' : HOLIDAY_TENNO,
+        't20250224' : HOLIDAY_HURIKAE,
+        't20250320' : HOLIDAY_SHUNBUN,
+        't20250429' : HOLIDAY_SHOWA,
+        't20250503' : HOLIDAY_KENPO,
+        't20250504' : HOLIDAY_MIDORI,
+        't20250505' : HOLIDAY_KODOMO,
+        't20250506' : HOLIDAY_HURIKAE,
+        't20250721' : HOLIDAY_UMI,
+        't20250811' : HOLIDAY_YAMA,
+        't20250915' : HOLIDAY_KEIRO,
+        't20250923' : HOLIDAY_SHUBUN,
+        't20251013' : HOLIDAY_SPORTS,
+        't20251103' : HOLIDAY_BUNKA,
+        't20251123' : HOLIDAY_KINRO,
+        't20251124' : HOLIDAY_HURIKAE
+      }
+    };
+
+    var _skelton = function() {
+    };
+    _skelton.prototype = {
+      isHoliday: function(axolDateObj) {
+        var year = axolDateObj.year();
+        var chk = axol.sprintf('t%04d%02d%02d', axolDateObj.year(), axolDateObj.month(), axolDateObj.day());
+        if (!axol.isset(_holidays['t'+year])) {
+          this._setYearHolidays(year);
+        }
+        return axol.isset(_holidays['t'+year][chk]);
+      },
+      _orderedWeekday: function(year, month, order, dayOfWeek) {
+        dayOfWeek = parseInt(Math.abs(dayOfWeek), 10) % 7;
+        // 与えられた年月の妥当性をチェック
+        if (month < 1 || month > 12 || order < 1 || order > 5) {
+          return false;
+        }
+        // 指定された年月の1日が何曜日かを計算する
+        var tmpDateObj = new axol.class.axolDateTime([year, month, 1]);
+        var stWday = tmpDateObj.weekDay();
+        // 指定された第n週x曜日が何日にあたるかを計算する
+        var ret = 1 + (dayOfWeek - stWday);
+        if (ret <= 0) {
+          ret += 7;
+        }
+        ret += (order - 1) * 7;
+        // 指定の日付を算出後、最大日数を超えるようならばfalseを返す
+        var retObj = new axol.class.axolDateTime([year, month, ret]);
+        if (retObj.month() != month) {
+          return false;
+        }
+        return ret;
+      },
+      _setYearHolidays: function(year) {
+        var hd = {};
+        var date = '';
+        // 元旦
+        hd[axol.sprintf('t%04d%02d%02d', year, 1, 1)] = HOLIDAY_GANTAN;
+        // 成人の日(1月の第二月曜日)
+        date = this._orderedWeekday(year, 1, 2, 1);
+        if (date !== false) {
+          hd[axol.sprintf('t%04d%02d%02d', year, 1, date)] = HOLIDAY_SEIJIN;
+        }
+        // 建国記念の日(2/11)
+        hd[axol.sprintf('t%04d%02d%02d', year, 2, 11)] = HOLIDAY_KENKOKU;
+        // 天皇誕生日(2/23) 2018までは12/23で、2019は即位前なのでナシ。2020以降から有効。
+        hd[axol.sprintf('t%04d%02d%02d', year, 2, 23)] = HOLIDAY_TENNO;
+        // 春分の日(計算)
+        date = parseInt(Math.floor(20.8431 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4), 10);
+        hd[axol.sprintf('t%04d%02d%02d', year, 3, date)] = HOLIDAY_SHUNBUN;
+        // 昭和の日(4/29)
+        hd[axol.sprintf('t%04d%02d%02d', year, 4, 29)] = HOLIDAY_SHOWA;
+        // 憲法記念日(5/3)
+        hd[axol.sprintf('t%04d%02d%02d', year, 5, 3)] = HOLIDAY_KENPO;
+        // みどりの日(5/4)
+        hd[axol.sprintf('t%04d%02d%02d', year, 5, 4)] = HOLIDAY_MIDORI;
+        // こどもの日(5/5)
+        hd[axol.sprintf('t%04d%02d%02d', year, 5, 5)] = HOLIDAY_KODOMO;
+        // 海の日(7月の第三月曜日)
+        date = this._orderedWeekday(year, 7, 3, 1);
+        if (date !== false) {
+          hd[axol.sprintf('t%04d%02d%02d', year, 7, date)] = HOLIDAY_UMI;
+        }
+        // 山の日(2016以降の8/11)
+        hd[axol.sprintf('t%04d%02d%02d', year, 8, 11)] = HOLIDAY_YAMA;
+        // 敬老の日(9月の第三月曜日)
+        date = this._orderedWeekday(year, 9, 3, 1);
+        if (date !== false) {
+          hd[axol.sprintf('t%04d%02d%02d', year, 9, date)] = HOLIDAY_KEIRO;
+        }
+        // 秋分の日(計算)
+        date = Math.floor(23.2488 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4);
+        hd[axol.sprintf('t%04d%02d%02d', year, 9, date)] = HOLIDAY_SHUBUN;
+        // スポーツの日(10月の第二月曜日)
+        date = this._orderedWeekday(year, 10, 2, 1);
+        if (date !== false) {
+          hd[axol.sprintf('t%04d%02d%02d', year, 10, date)] = HOLIDAY_SPORTS;
+        }
+        // 文化の日(11/3)
+        hd[axol.sprintf('t%04d%02d%02d', year, 11, 3)] = HOLIDAY_BUNKA;
+        // 勤労感謝の日(11/23)
+        hd[axol.sprintf('t%04d%02d%02d', year, 11, 23)] = HOLIDAY_KINRO;
+        // 国民の休日(祝日に挟まれた祝日以外の日)
+        var tmp = {};
+        $.each(hd, function(key, naiyo) {
+          // キーになっている日付の次の日とその次の日を編集する
+          var tmpObj = new axol.class.axolDateTime([year, key.substr(5, 2), key.substr(7, 2)]);
+          var tomorrow = 't'+tmpObj.addDay(1).format('Ymd');
+          var nextTomorrow = 't'+tmpObj.addDay(1).format('Ymd');
+          // 翌々日のキーがあり、翌日のキーがない場合、国民の休日のセットをする
+          if (axol.isset(hd[nextTomorrow]) && !axol.isset(hd[tomorrow])) {
+            tmp[tomorrow] = HOLIDAY_KOKUMIN;
+          }
+        });
+        $.each(tmp, function(key, val){
+          hd[key] = val;
+        });
+        tmp = {};
+        // 振替休日
+        // 祝日の曜日を調べ、日曜日の場合は祝日でない一番早い日を振替休日とする
+        $.each(hd, function(key, naiyo) {
+          // キーになっている日付の曜日を取得する
+          var tmpObj = new axol.class.axolDateTime([year, key.substr(5, 2), key.substr(7, 2)]);
+          var wday = tmpObj.weekDay();
+          if (wday == 0) {
+            for (var i = 1; i <= 7; i++) {
+              var tmpKey = 't'+tmpObj.addDay(1).format('Ymd');
+              // 祝日に該当日がないときは、振替休日に追加
+              if (!axol.isset(hd[tmpKey])) {
+                tmp[tmpKey] = HOLIDAY_HURIKAE;
+                break;
+              }
+            }
+          }
+        });
+        $.each(tmp, function(key, val){
+          hd[key] = val;
+        });
+        // staticキャッシュに追加
+        _holidays['t'+year] = hd;
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.class.axolWeek = (function(){
+    // weekStartDayObjは、この週の開始日時(オブジェクト作成側が、ループで持っているので、開始曜日の代わりに突っ込む。)
+    var _skelton = function(weekStartDayObj, startDateObj, endDateObj, hasBefore, hasNext) {
+      this.weekStartDayObj = weekStartDayObj;
+      this.startDateObj = startDateObj;
+      this.endDateObj = endDateObj;
+      this._hasNext = hasNext;
+      this._hasBefore = hasBefore;
+    };
+    _skelton.prototype = {
+      eachDay: function(callback) {
+        var tmpDateObj = this.weekStartDayObj.getClone();
+        do {
+          callback(tmpDateObj.getClone(), (tmpDateObj.gte(this.startDateObj) && tmpDateObj.lte(this.endDateObj)));
+          tmpDateObj.addDay(1);
+        } while(tmpDateObj.weekDay() != this.weekStartDayObj.weekDay());
+      },
+      isInWeek: function(axolDateObj) {
+        var tmp = axolDateObj.getClone();
+        tmp.addDay(-7);
+        return this.weekStartDayObj.lte(axolDateObj) && this.weekStartDayObj.gt(tmp);
+      },
+      hasNext: function(){
+        return this._hasNext;
+      },
+      hasBefore: function(){
+        return this._hasBefore;
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.class.axolMonth = (function(){
+    var _skelton = function(year, month) {
+      this.year = parseInt(year, 10);
+      this.month = parseInt(month, 10);
+      this.startDayOfWeek = 1;
+    };
+    _skelton.prototype = {
+      changeStartDayOfWeek: function(startDayOfWeek){
+        this.startDayOfWeek = parseInt(startDayOfWeek, 10) % 7;
+      },
+      changeNextMonth: function() {
+        this.month += 1;
+        if (this.month > 12) {
+          this.year++;
+          this.month = 1;
+        }
+      },
+      changePreMonth: function() {
+        this.month -= 1;
+        if (this.month < 1) {
+          this.year--;
+          this.month = 12;
+        }
+      },
+      getYear: function(){
+        return this.year;
+      },
+      getMonth: function(){
+        return this.month;
+      },
+      getWeeks: function() {
+        var monthStartDateObj = this.getStartDate();
+        var tmpDateObj = monthStartDateObj.getNearyPreWeekday(this.startDayOfWeek);
+        var monthLastDateObj = this.getLastDate();
+        var lastDateObj = monthLastDateObj.getNextWeekday(this.startDayOfWeek);
+        var tmpWeekStartDayObj = tmpDateObj.getClone();
+        var tmpStartObj = null, tmpEndObj = null;
+        var ret = [];
+        do {
+          if (axol.is_null_undefined(tmpStartObj) && tmpDateObj.month() == this.month) {
+            tmpStartObj = tmpDateObj.getClone();
+          }
+          if (tmpDateObj.month() == this.month) {
+            tmpEndObj = tmpDateObj.getClone();
+          }
+          tmpDateObj.addDay(1);
+          if (tmpDateObj.weekDay() == this.startDayOfWeek) {
+            ret.push(new axol.class.axolWeek(tmpWeekStartDayObj, tmpStartObj, tmpEndObj, monthStartDateObj.ne(tmpStartObj), monthLastDateObj.ne(tmpEndObj)));
+            tmpStartObj = null;
+            tmpWeekStartDayObj = tmpDateObj.getClone();
+          }
+        } while(tmpDateObj.lt(lastDateObj));
+        return ret;
+      },
+      getStartDate: function() {
+        return new axol.class.axolDate([this.year, this.month, 1]);
+      },
+      getLastDate: function() {
+        var ret = new axol.class.axolDate([this.year, this.month+1, 1]);
+        ret.addDay(-1);
+        return ret;
+      }
+    };
+    return _skelton;
+  })();
+
+  // 日付同士のスパンを保持する
+  axol.class.axolDateSpan = (function(){
+    var _skelton = function(axolDate_st, axolDate_fn) {
+      this.startDateObj = axolDate_st;
+      this.endDateObj = axolDate_fn;
+      this.weeks = [];
+      this.startDayOfWeek = 1;
+    };
+    _skelton.prototype = {
+      changeStartDayOfWeek: function(startDayOfWeek) {
+        this.startDayOfWeek = parseInt(startDayOfWeek, 10) % 7;
+        this.weeks = [];
+      },
+      _initWeeks: function(){
+        if (this.weeks.length != 0) {
+          return;
+        }
+        var startObj = this.startDateObj.getNearyPreWeekday(this.startDayOfWeek);
+        var tmpWeekStartDayObj = startObj.getClone();
+        var endObj = this.endDateObj.getNextWeekday(this.startDayOfWeek);
+        var tmpDateObj = startObj.getClone();
+        var tmpStartObj = null, tmpEndObj = null;
+        do {
+          if (axol.is_null_undefined(tmpStartObj) && tmpDateObj.gte(this.startDateObj)) {
+            tmpStartObj = tmpDateObj.getClone();
+          }
+          if (tmpDateObj.lte(this.endDateObj)) {
+            tmpEndObj = tmpDateObj.getClone();
+          }
+          tmpDateObj.addDay(1);
+          if (tmpDateObj.weekDay() == this.startDayOfWeek) {
+            this.weeks.push(new axol.class.axolWeek(tmpWeekStartDayObj, tmpStartObj, tmpEndObj, this.startDateObj.ne(tmpStartObj), this.endDateObj.ne(tmpEndObj)));
+            tmpStartObj = null;
+            tmpWeekStartDayObj = tmpDateObj.getClone();
+          }
+        } while(tmpDateObj.lt(endObj));
+      },
+      getWeekCount: function(){
+        this._initWeeks();
+        return this.weeks.length;
+      },
+      getWeekNumFromDay: function(axolDateObj){
+        var startObj = this.startDateObj.getNearyPreWeekday(this.startDayOfWeek);
+        var tmpObj = axolDateObj.getNearyPreWeekday(this.startDayOfWeek);
+        var diff = tmpObj.diffDay(startObj);
+        return parseInt(Math.floor(diff / 7), 10);
+      },
+      /** @return axolWeek */
+      getWeek: function(weekNum) {
+        this._initWeeks();
+        return axol.array_key_exists(weekNum, this.weeks) ? this.weeks[weekNum] : null;
+      },
+      eachWeek:function(callback){
+        this._initWeeks();
+        for (var i=0; i<this.weeks.length; i++) {
+          callback(this.weeks[i]);
+        }
+      },
+      isInner: function(axolDate){
+        return this.startDateObj.lte(axolDate) && this.endDateObj.gte(axolDate);
+      },
+      eachDay:function(callback){
+        var _now = this.startDateObj.getClone();
+        while(_now.isSameOrBefore(this.endDateObj)) {
+          callback(_now.getClone());
+          _now.addDay(1);
+        }
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.class.axolDateTimePicker = (function(){
+    var _skelton = function(callBackFunction, currentDateObj, startDateObj, endDateObj, baseZindex){
+      //カレンダーの初期位置月と現在日にclassつける
+      this.currentDateObj =  axol.is_null_undefined(currentDateObj) ? null : currentDateObj;
+      //現在月
+      this.monthObj = null;
+      //コールバック
+      this.callBackFunc = callBackFunction;
+      //週の開始曜日
+      this.startDayOfWeek = 1;
+
+      //カレンダー上の入力可能年月日の開始日
+      this.startDateObj = axol.is_null_undefined(startDateObj)? null : startDateObj;
+      //カレンダー上の入力可能年月日の終了日
+      this.endDateObj = axol.is_null_undefined(endDateObj)? null : endDateObj;
+      //入力可能年月日の開始以前と開始以降をクリック可能にするかどうか
+      this.outDateClickable = true;
+
+      //日本の祝日をカレンダーに反映する
+      this.jpHoliyday = true;
+
+      this.baseZindex = axol.is_null_undefined(baseZindex) ? 10000000 : baseZindex;
+
+      if (axol.is_null_undefined(this.currentDateObj)) {
+        var curDay = new axol.class.axolDateTime();
+        this.monthObj = new axol.class.axolMonth(curDay.year(), curDay.month())
+      } else {
+        this.monthObj = new axol.class.axolMonth(this.currentDateObj.year(), this.currentDateObj.month());
+      }
+    };
+    _skelton.prototype = {
+      render: function ($renderTargetObj, e) {
+        var meObj = this;
+        var $wrapper = $('<div>').addClass('jsAxolDateTimePicker');
+        var modalTipObj = new axol.axolModalTip('jsAxolDateTimePicker', $renderTargetObj, e.offsetX, e.offsetY);
+        modalTipObj.setCancelCallback(function(){
+          $wrapper.off('.AxolDateTimePicker_select').off('.AxolDateTimePicker');
+        });
+        var $header = $('<div>').addClass('jsAxolDateTimePicker_header');
+        var $title = $('<div>').addClass('jsAxolDateTimePicker_title').text(meObj.monthObj.getYear()+'/'+meObj.monthObj.getMonth());
+        var $prev = $('<div>').addClass('jsAxolDateTimePicker_prev').text('< '+(axol.config.dateLocale == 'JP' ? '前月' : 'prev'));
+        var $next = $('<div>').addClass('jsAxolDateTimePicker_next').text((axol.config.dateLocale == 'JP' ? '次月' : 'next') + ' >');
+        $header.append($prev, $title, $next);
+        var $body = $('<div>').addClass('jsAxolDateTimePicker_body');
+        var $footer = $('<div>').addClass('jsAxolDateTimePicker_footer');
+        var $today = $('<div>').addClass('jsAxolDateTimePicker_today').text((axol.config.dateLocale == 'JP' ? '本日' : 'today'));
+        $footer.append($today);
+        $wrapper.append($header, $body, $footer);
+
+        var initCal = function(){
+          $title.text(meObj.monthObj.getYear()+'/'+meObj.monthObj.getMonth());
+          var $table = meObj._makeCalenderTable();
+          $table.find('td.dates').on('click.AxolDateTimePicker_select', function(){
+            var $me = $(this);
+            if(!meObj.outDateClickable){
+              if($me.hasClass('outOfDateSpan')){return false;}
+            }
+            if (!axol.is_null_undefined(meObj.callBackFunc)) {
+              meObj.callBackFunc(new axol.class.axolDate([$me.attr('year'), $me.attr('month'), $me.attr('day')]));
+            }
+            modalTipObj.cancel();
+          });
+          $body.off('.AxolDateTimePicker_select').html('').append($table);
+        };
+        $prev.on('click.AxolDateTimePicker', function(){
+          meObj.monthObj.changePreMonth();
+          initCal();
+        });
+        $next.on('click.AxolDateTimePicker', function(){
+          meObj.monthObj.changeNextMonth();
+          initCal();
+        });
+        $today.on('click.AxolDateTimePicker', function(){
+          const nowDateObj = new axol.class.axolDate();
+          meObj.monthObj = new axol.class.axolMonth(nowDateObj.year(), nowDateObj.month());
+          meObj.changeStartDayOfWeek(meObj.startDayOfWeek);
+          var $me = $(this);
+          if(!meObj.outDateClickable){
+            if($me.hasClass('outOfDateSpan')){return false;}
+          }
+          if (!axol.is_null_undefined(meObj.callBackFunc)) {
+            meObj.callBackFunc(new axol.class.axolDate([nowDateObj.year(), nowDateObj.month(), nowDateObj.day()]));
+          }
+          modalTipObj.cancel();
+          initCal();
+        });
+
+        initCal();
+        modalTipObj.doModal($wrapper);
+      },
+      changeStartDayOfWeek: function(startDayOfWeek){
+        this.startDayOfWeek = startDayOfWeek;
+        this.monthObj.changeStartDayOfWeek(startDayOfWeek);
+      },
+      setOutDateClickable: function(boolClickable){
+        this.outDateClickable = boolClickable;
+      },
+      enableJpHoliday: function(){
+        this.jpHoliyday = true;
+      },
+      disableJpHoliday: function(){
+        this.jpHoliyday = false;
+      },
+      _makeCalenderTable: function() {
+        var meObj = this;
+        var weekObjAry = this.monthObj.getWeeks();
+        var $table = $('<table>').addClass('js_date_time_picker_table');
+        var $header = $('<tr>');
+        weekObjAry[0].eachDay(function(dayObj, isScope){
+          $header.append(
+            $('<th>').addClass('week_'+dayObj.weekDay()).text(dayObj.format('w'))
+          );
+        });
+        $table.append($header);
+        var nowDay = new axol.class.axolDate();
+        var setDayStr = axol.is_null_undefined(this.currentDateObj) ? '' : this.currentDateObj.format('Ymd');
+        $.each(weekObjAry, function(key, weekObj){
+          var $tr = $('<tr>');
+          weekObj.eachDay(function(dayObj, isScope){
+            var $td = $('<td>').addClass('dates').attr({year:dayObj.year(), month:dayObj.month(), day:dayObj.day()}).text(dayObj.day());
+            if (!isScope) {
+              $td.addClass('outOfMonth');
+            }
+            if (dayObj.isSunday()) {
+              $td.addClass('sunday');
+            }
+            if (dayObj.isSaturday()) {
+              $td.addClass('saturday');
+            }
+            if (dayObj.eq(nowDay)) {
+              $td.addClass('today');
+            }
+            if (setDayStr == dayObj.format('Ymd')) {
+              $td.addClass('selectDay');
+            }
+            if(!axol.is_null_undefined(meObj.startDateObj)){
+              if (meObj.startDateObj.gt(dayObj)) {
+                $td.addClass('outOfDateSpan');
+              }
+            }
+            if(!axol.is_null_undefined(meObj.endDateObj)){
+              if (meObj.endDateObj.lt(dayObj)) {
+                $td.addClass('outOfDateSpan');
+              }
+            }
+            if(meObj.jpHoliyday){
+              if (dayObj._date.isJpHoliday()) {
+                $td.addClass('holiday');
+              }
+            }
+            $tr.append($td);
+          });
+          $table.append($tr);
+        });
+        return $table;
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.class.axolMonthPicker = (function(){
+    var _skelton = function(year, month){
+      //現在月
+      this.monthObj = null;
+      //コールバック
+      this.callBackFunc = null;
+      //週の開始曜日
+      this.startDayOfWeek = 1;
+      //日本の祝日をカレンダーに反映する
+      this.jpHoliyday = true;
+      this.monthObj = new axol.class.axolMonth(year, month);
+      this.$table = null;
+      this.selectDays = {};
+    };
+    _skelton.prototype = {
+      render: function ($renderTargetObj) {
+        var meObj = this;
+        meObj.$table = meObj._makeCalenderTable();
+        meObj.$table.find('td.dates').not('.outOfMonth').on('click.AxolMonthPicker', function(){
+          var $me = $(this);
+          var dateObj = new axol.class.axolDate([$me.attr('year'), $me.attr('month'), $me.attr('day')]);
+          var dateKey = dateObj.format('Y-m-d');
+          $me.removeClass('AxolMonthPicker_Checked');
+          if (axol.array_key_exists(dateKey, meObj.selectDays)) {
+            delete(meObj.selectDays[dateKey]);
+          } else {
+            meObj.selectDays[dateKey] = true;
+            $me.addClass('AxolMonthPicker_Checked');
+          }
+          if (!axol.is_null_undefined(meObj.callBackFunc)) {
+            meObj.callBackFunc(dateObj.getClone(), meObj);
+          }
+        });
+        $renderTargetObj.off('.AxolMonthPicker').html('').append(meObj.$table);
+        meObj.reRender();
+      },
+      reRender: function(){
+        var meObj = this;
+        if (axol.is_null_undefined(meObj.$table)) {
+          return;
+        }
+        meObj.$table.find('td.dates').not('.outOfMonth').each(function(){
+          var $me = $(this);
+          var dateObj = new axol.class.axolDate([$me.attr('year'), $me.attr('month'), $me.attr('day')]);
+          var dateKey = dateObj.format('Y-m-d');
+          if ($me.hasClass('AxolMonthPicker_Checked')) {
+            if (!axol.array_key_exists(dateKey, meObj.selectDays)) {
+              $me.removeClass('AxolMonthPicker_Checked');
+            }
+          } else {
+            if (axol.array_key_exists(dateKey, meObj.selectDays)) {
+              $me.addClass('AxolMonthPicker_Checked');
+            }
+          }
+        });
+      },
+      setCallback: function(callBack) {
+        this.callBackFunc = callBack;
+      },
+      setDateFromText: function(dateTxt){
+        if (dateTxt.length == 0) {
+          return;
+        }
+        var dateStrs = dateTxt.split(',');
+        var meObj = this;
+        $.each(dateStrs, function(key,val){
+          meObj.selectDays[val] = val;
+        });
+        meObj.reRender();
+      },
+      getDateText: function(){
+        var rets = [];
+        $.each(this.selectDays, function(key, val){
+          rets.push(key);
+        });
+        return rets.join(',');
+      },
+      clearDates: function(){
+        this.selectDays = {};
+        this.reRender();
+      },
+      changeStartDayOfWeek: function(startDayOfWeek){
+        this.startDayOfWeek = startDayOfWeek;
+        this.monthObj.changeStartDayOfWeek(startDayOfWeek);
+      },
+      enableJpHoliday: function(){
+        this.jpHoliyday = true;
+      },
+      disableJpHoliday: function(){
+        this.jpHoliyday = false;
+      },
+      _makeCalenderTable: function() {
+        var meObj = this;
+        var weekObjAry = this.monthObj.getWeeks();
+        var $table = $('<table>').addClass('jsAxolMonthPickerCalendar');
+        var $header = $('<tr>');
+        weekObjAry[0].eachDay(function(dayObj, isScope){
+          $header.append(
+            $('<th>').addClass('week_'+dayObj.weekDay()).text(dayObj.format('w'))
+          );
+        });
+        $table.append($header);
+        var nowDay = new axol.class.axolDate();
+        $.each(weekObjAry, function(key, weekObj){
+          var $tr = $('<tr>');
+          weekObj.eachDay(function(dayObj, isScope){
+            var $td = $('<td>').addClass('dates').attr({year:dayObj.year(), month:dayObj.month(), day:dayObj.day()}).text(dayObj.day());
+            if (!isScope) {
+              $td.addClass('outOfMonth');
+            }
+            if (dayObj.isSunday()) {
+              $td.addClass('sunday');
+            }
+            if (dayObj.isSaturday()) {
+              $td.addClass('saturday');
+            }
+            if (dayObj.eq(nowDay)) {
+              $td.addClass('today');
+            }
+            if(meObj.jpHoliyday){
+              if (dayObj._date.isJpHoliday()) {
+                $td.addClass('holiday');
+              }
+            }
+            $tr.append($td);
+          });
+          $table.append($tr);
+        });
+        var $wrapper = $('<div>').addClass('jsAxolMonthPicker');
+        $wrapper.append(
+          $('<div>').addClass('jsAxolMonthPickerHeader').text(meObj.monthObj.getYear()+' / '+meObj.monthObj.getMonth()),
+          $table
+        );
+        return $wrapper;
+      }
+    };
+    return _skelton;
+  })();
+
+  //////////////////////////////////
+  // using Form values nearly php
+
+  axol.formNameParser = function (name) {
+    if (!axol.is_string(name)) {
+      name = '';
+    }
+    var _reg = new RegExp('^(.+)\\[(.*)\\]$');
+    var _ret = {'keyname': name, 'optname': '', 'isMulti': false};
+    if (name.match(_reg)) {
+      _ret['keyname'] = RegExp.$1;
+      _ret['optname'] = RegExp.$2;
+      _ret['isMulti'] = true;
+    }
+    return _ret;
+  };
+
+  axol.getRadioValue = function (name) {
+    return axol.getRadioValueFromObj($('input[type="radio"][name*="' + name + '["]'));
+  };
+  axol.getRadioValueFromObj = function ($radios) {
+    var ret = {};
+    $radios.each(function () {
+      var $me = $(this);
+      if (!$me.prop('checked')) {
+        return; // continue;
+      }
+      ret[$me.attr('name')] = $me.val();
+    });
+    return ret;
+  };
+
+  axol.getSelectValue = function (name) {
+    var $select = $('select[name="' + name + '"]');
+    if ($select.length == 0) {
+      $select = $('select[name*="' + name + '["]');
+    }
+    axol.getSelectValueFromObj($select);
+  };
+  axol.getSelectValueFromObj = function ($selects) {
+    var ret = {};
+    $selects.each(function () {
+      var $me = $(this);
+      var _name = axol.formNameParser($me.attr('name'));
+      if (_name.keyname) {
+        ret[_name.keyname] = $me.val(); // val():multiple->array, other->string
+      }
+    });
+    return ret;
+  };
+
+  axol.getCheckboxValue = function (name) {
+    var $checks = $('input[type="checkbox"][name*="' + name + '["]');
+    if ($checks.length == 0) {
+      $checks = $('input[type="checkbox"][name*="' + name + '"]');
+    }
+    axol.getValueFromObj($checks, true);
+  };
+  axol.getValueFromObj = function ($objs, isCheckbox, isButton) {
+    var ret = {};
+    $objs.each(function () {
+      var $me = $(this);
+      if (isCheckbox && !$me.prop('checked')) {
+        return; // continue;
+      }
+      var _name = axol.formNameParser($me.attr('name'));
+      if (!_name.keyname) {
+        return true;  // continue
+      }
+      if (isButton) {
+        ret[_name.keyname] = ($me.attr('value') !== undefined) ? $me.val() : $me.text();
+      } else if (!_name.isMulti) {
+        ret[_name.keyname] = $me.val();
+      } else {
+        if (!axol.array_key_exists(_name.keyname, ret)) {
+          ret[_name.keyname] = [];
+        }
+        ret[_name.keyname].push($me.val());
+      }
+    });
+    return ret;
+  };
+
+  // deplicated
+  axol.getFormData = function (parentobj, forceSearch) {
+    if (parentobj.get(0).tagName.toLowerCase() == 'form' && forceSearch == undefined) {
+      return new FormData(parentobj.get(0));
+    }
+    var targets = parentobj;
+    var posts = {};
+    var _checker = ['input[type="text"]', 'input[type="password"]', 'input[type="hidden"]', 'textarea'];
+    for (var i = 0; i < _checker.length; i++) {
+      targets.find(_checker[i]).each(function () {
+        var _me = $(this);
+        var _name = _me.attr('name');
+        posts[_name] = _me.val();
+      });
+    }
+    targets.find('input[type="radio"]').each(function () {
+      var _me = $(this);
+      var _name = axol.formNameParser(_me.attr('name'));
+      if (!_me.prop('checked')) {
+        return;
+      }
+      if (_name.keyname && !axol.array_key_exists(_name.keyname, posts)) {
+        posts[_name.keyname] = _me.val();
+      }
+    });
+    targets.find('select').each(function () {
+      var _me = $(this);
+      var _name = axol.formNameParser(_me.attr('name'));
+      if (!_name.keyname) {
+        return true;  // continue
+      }
+      if (!_name.isMulti) {
+        posts[_name.keyname] = _me.val();
+      } else {
+        if (!axol.array_key_exists(_name.keyname, posts)) {
+          posts[_name.keyname] = {};
+        }
+        posts[_name.keyname][_name.optname] = _me.val();
+      }
+    });
+    targets.find('input[type="checkbox"]').each(function () {
+      var _me = $(this);
+      var _name = axol.formNameParser(_me.attr('name'));
+      if (!_me.prop('checked')) {
+        return;
+      }
+      if (!_name.keyname) {
+        return true;  // continue
+      }
+      if (!_name.isMulti) {
+        posts[_name.keyname] = 'on';
+      } else {
+        if (!axol.array_key_exists(_name.keyname, posts)) {
+          posts[_name.keyname] = {};
+        }
+        posts[_name.keyname][_name.optname] = _me.attr('value');
+      }
+    });
+    return posts;
+  };
+
+  // formValues
+  axol.class.FormValuesObject = (function () {
+    var _skelton = function ($parent) { // $parentは、validationする対象のjqueryオブジェクト。
+      // property define
+      this._elements = {};
+      this.$parent = $parent;
+      this._parseObject(this._elements, $parent.find('input,textarea,select,button'));
+    };
+    // define methods
+    _skelton.prototype = {
+      _getElementType: function (tag, type) {
+        var _type = axol.is_string(type) ? type.toLowerCase() : '';
+        var _tag = axol.is_string(tag) ? tag.toLowerCase() : '';
+        if (_tag == 'select') {
+          return _tag;
+        } else if (_tag == 'input' && (_type == 'radio' || _type == 'checkbox')) {
+          return _type;
+        } else if (_tag === 'button') {
+          return 'button';
+        }
+        return 'normal';
+      },
+      _parseObject: function (rets, $items, parentAlias) { // validation
+        var _me = this;
+        $items.each(function () {
+          var $me = $(this);
+          var type = _me._getElementType(this.tagName, $me.attr('type'));
+          var _name = axol.formNameParser($me.attr('name'));  // []のあるcheckbox, multiのselectをケア
+          var name = _name.keyname;
+          if (name) {
+            if (axol.array_key_exists(name, rets) && rets[name]['type'] !== 'alias') {
+              rets[name]['objs'] = rets[name]['objs'].add($me);
+            } else {
+              rets[name] = {'type': type, 'objs': $().add($me)};
+            }
+          }
+
+          // aliasの処理
+          var alias = $me.attr('namealias');
+          alias = (parentAlias === alias) ? '' : alias;
+          if (!axol.is_string(alias) || !alias.length || alias == name) {
+            return; // continue;
+          }
+          if (!axol.array_key_exists(alias, rets)) {
+            rets[alias] = {'type': 'alias', 'objs': {}};
+          }
+          _me._parseObject(rets[alias]['objs'], $me, alias);
+        });
+      },
+      postFile: function (name, postUrl, addValues, successCallback, errorCallback) {
+        var $fileItem = this.$parent.find('input[type="file"][name="' + name + '"]');
+        if (!$fileItem.length) {
+          errorCallback();
+          return false;
+        }
+        var _formdata = new window.FormData();
+        if (axol.is_array(addValues) && axol.count(addValues)) {
+          $.each(addValues, function (key, val) {
+            _formdata.append(key, val);
+          });
+        }
+        _formdata.append(name, $fileItem.prop('files')[0]);
+        $.ajax({
+          url: postUrl,
+          method: 'POST',
+          type: 'POST',
+          dataType: 'text',
+          processData: false,
+          contentType: false,
+          data: _formdata,
+          async: true
+        }).done(function (text) {
+          var data = JSON.parse(text);
+          if (axol.array_key_exists('err', data) && !data['err']) {
+            successCallback();
+            return;
+          }
+          var errText = axol.array_key_exists('errStr', data) ? data['errStr'] : '';
+          errorCallback(errText);
+        }).fail(function (xhr, status, error) {
+          errorCallback();
+        });
+      },
+      getObject: function (name) {
+        if (!axol.array_key_exists(name, this._elements) || this._elements['type'] == 'alias') {
+          return $(); // continue;
+        }
+        return this._elements[name]['objs'];
+      },
+      getAllObjects: function () {
+        var $rets = $();
+        var _me = this;
+        $.each(_me._elements, function (name, elem) {
+          if (elem['type'] !== 'alias') {
+            $rets = $rets.add(elem['objs']);
+          }
+        });
+        return $rets;
+      },
+      getValues: function (names) {
+        var ret = {};
+        var _me = this;
+        $.each(names, function (key, name) {
+          if (!axol.array_key_exists(name, _me._elements)) {
+            return; // continue;
+          }
+          _me._addSingleValue(ret, name, _me._elements[name]['type'], _me._elements[name]['objs'])
+        });
+        return ret;
+      },
+      getAll: function () {
+        var ret = {};
+        var _me = this;
+        $.each(_me._elements, function (name, elem) {
+          if (elem['type'] !== 'alias') {
+            _me._addSingleValue(ret, name, elem['type'], elem['objs']);
+          }
+        });
+        return ret;
+      },
+      clearAll: function (isTrigger) {
+        var _me = this;
+        $.each(_me._elements, function (name, elem) {
+          if (elem['type'] !== 'alias') {
+            switch (elem['type']) {
+              case 'radio':
+              case 'checkbox':
+                elem['objs'].prop('checked', false);
+                break;
+              case 'select':
+              default:
+                elem['objs'].val('');
+                break;
+            }
+            if (isTrigger) {
+              elem['objs'].trigger('change');
+            }
+          }
+        });
+      },
+      toggleRequired: function (checked) {
+        var ignore = ['kaigaik', 'yubink_kaigai', 'jushok3', 'telk_kaigai'];
+        $.each(this._elements, function (name, elem) {
+          // チェックされた場合はすべての項目からrequiredを外す
+          // チェックが外れた場合は国内の表示のため、海外の項目は必須にしない(jushok3はどちらにせよ必須でない)
+          if (elem.type !== 'alias' && (checked || !ignore.includes(name))) {
+            elem.objs.prop('required', !checked);
+          }
+        });
+      },
+      _addSingleValue: function (values, name, type, $obj) {
+        var _me = this;
+        switch (type) {
+          case 'radio':
+            $.extend(values, axol.getRadioValueFromObj($obj));
+            break;
+          case 'checkbox':
+            $.extend(values, axol.getValueFromObj($obj, true));
+            break;
+          case 'select':
+            $.extend(values, axol.getSelectValueFromObj($obj));
+            break;
+          case 'alias':
+            $.each($obj, function (name, vals) {
+              _me._addSingleValue(values, name, vals['type'], vals['objs']);
+            });
+            break;
+          case 'button':
+            $.extend(values, axol.getValueFromObj($obj, false, true));
+            break;
+          default:
+            $.extend(values, axol.getValueFromObj($obj, false));
+        }
+      }
+    };
+    return _skelton;
+  })();
+
+
+  axol.config = {
+    dateLocale: 'JP',
+    ajax_default_err_msg: 'サーバーとの通信に失敗しました。',
+    ajax_default_delete_confirm_msg: '本当に削除してもよろしいですか？'
+  };
+
+  axol.axolAjax = function (url, posts, redirect_url, success_func, error_func, complete_func, not_async, token_name) {
+    var ret = false;
+    var _token_name = token_name ? token_name : 'fb_csrf';
+    if (!posts) {
+      posts = {};
+    }
+    var tokenObj = $('input[name="' + _token_name + '"][type="hidden"]');
+    posts[_token_name] = tokenObj.val();
+    var execError = function () {
+      ret = false;
+      if (error_func instanceof Function) {
+        error_func(ret);
+      } else {
+        alert(axol.config.ajax_default_err_msg);
+      }
+    };
+    $.ajax({
+      url: url,
+      type: 'POST',
+      data: posts,
+      cache: false,
+      async: not_async ? false : true
+    }).done(function (resp) {
+      var err = false;
+      if (resp) {
+        if (resp instanceof Object) {
+          ret = resp;
+        } else {
+          try {
+            ret = JSON.parse(resp);
+          }
+          catch (e) {
+            err = true;
+          }
+        }
+      }
+      if (!resp || err || !axol.array_key_exists('status', ret)) {
+        execError();
+        return;
+      }
+      // token update
+      if (axol.array_key_exists(token_name, ret)) {
+        tokenObj.val(ret[_token_name]);
+      }
+      // show message
+      if (axol.array_key_exists('status_str', ret) && ret['status_str'].length) {
+        alert(ret['status_str']);
+      }
+      // set return value
+      if (Number(ret['status']) != 1) {
+        execError();
+        return;
+      }
+      // redirect
+      if (redirect_url && redirect_url.length && String(ret['status']) == '1') {
+        location.href = redirect_url;
+        return;
+      }
+      // exec function
+      if (success_func instanceof Function) {
+        success_func(ret);
+      }
+    }).fail(function (e) {
+      execError();
+    }).always(function (XMLHttpRequest, textStatus) {
+      if (complete_func instanceof Function) {
+        complete_func(XMLHttpRequest, textStatus);
+      }
+    });
+    return ret;
+  };
+
+  // FormDataのリストを取得して、そのパラメタに表示されたフォームデータを更新します
+  axol.setFormData = function (parentobj, setparams) {
+    if (!setparams || setparams.constructor !== Object) {
+      return false;
+    }
+    for (var _key in setparams) {
+      if (!setparams.hasOwnProperty(_key) || setparams[_key] == null || setparams[_key] == undefined) {
+        continue;
+      }
+      if (setparams[_key].constructor == Object || setparams[_key].constructor == Array) {
+        // setparamsの内容をインデックス化しておく。
+        var param_index = [];
+        for (var _sec_key in setparams[_key]) {
+          if (!setparams[_key].hasOwnProperty(_sec_key)) {
+            continue;
+          }
+          param_index[setparams[_key][_sec_key]] = true;
+        }
+        // selectかcheckboxのみ。
+        var _tmp = parentobj.find('select[name="' + _key + '"]');
+        if (_tmp) {
+          _tmp.find('option').each(function () {
+            if (axol.array_key_exists($(this).attr('value'), param_index)) {
+              $(this).prop('selected', true);
+            }
+          });
+        }
+        parentobj.find('input[type="checkbox"][name^="' + _key + '"]').each(function () {
+          var _me = $(this);
+          var _name = axol.formNameParser(_me.attr('name'));
+          if (!_name.keyname || _name.keyname != _key) {
+            return;
+          }
+          if (axol.array_key_exists(_me.attr('value'), param_index)) {
+            _me.prop('checked', true);
+          }
+        });
+      } else {
+        var _target = parentobj.find('[name="' + _key + '"]');
+        if (_target.length && (_target[0].tagName == 'input' || _target[0].tagName == 'INPUT') && _target.attr('type') == 'radio') {
+          _target.each(function () {
+            if ($(this).attr('value') == setparams[_key]) {
+              $(this).prop('checked', true);
+            }
+          });
+        } else if (_target.length && (_target[0].tagName == 'input' || _target[0].tagName == 'INPUT') && _target.attr('type') == 'checkbox') {
+          _target.prop('checked', true);
+        } else {
+          _target.val(setparams[_key]); // はたしてこれですべていける？
+        }
+      }
+    }
+
+  };
+
+  //////////////////////////////////
+  // Dialog manage
+
+  // 常に中央に表示されるモーダルダイアログクラス定義
+  axol.modalDialog = (function(){
+    var _skelton = function(addClassName, exitFocusElm) {
+      this.$wrapper = null;
+      this.$body = null;
+      this.addClassName = addClassName ? addClassName : '';
+      this.onBeforeCancelCallBack = null;
+      this.onCancelCallBack = null;
+      this.canClose = true;
+      this.canBackClose = true;
+      this.fadeMsec = 500;
+      this.zIndexFilter = null;
+      this.isBackWrapperWidthPer = false; // 背景のラッパを100%(100vw/vh)でセットするかどうか。(タブレット利用時はこれをtrueにしないとズームに対応できません。が、bodyがすべての要素のサイズより大きい必要があります。)
+      this.exitFocusElm = exitFocusElm;
+    };
+    _skelton.prototype = {
+      setZindexFilter: function($doms) {
+        this.zIndexFilter = $doms;
+      },
+      setZindexFilterBody: function() {
+        this.zIndexFilter = $('body');
+      },
+      setZindexFilterDialogs: function() {
+        this.zIndexFilter = $('.axol_modal_dialog');
+      },
+      changeBackWrapperType: function(setWidthPercent) {
+        this.isBackWrapperWidthPer = setWidthPercent ? true : false;
+      },
+      doModal: function(dialogInner){
+        var meObj = this;
+        var maxZindex = (meObj.zIndexFilter == null) ? axol.getMaxZindex() : axol.getMaxZindexFromNodes(meObj.zIndexFilter);
+        if(maxZindex == 0) {
+          maxZindex = 100;
+        }
+        var backZindex = maxZindex+1;
+        var dialogZindex = maxZindex+2;
+
+        var $wrapper = $('<div>').addClass('_axol_modal_bind').css({'z-index':backZindex, 'display':'none', 'position':'fixed', 'width':'100%', 'height': '100%'});
+        var $dialog = $('<div>').attr({ role: "dialog", "aria-modal": "true", "aria-labelledby": "jsDialogTitle" }).addClass('axol_modal_dialog').css({'z-index':dialogZindex, 'position':'absolute'});
+        if (meObj.addClassName.length) {
+          $dialog.addClass(meObj.addClassName);
+        }
+        var $back = $('<div>').addClass('_axol_modal_back').css({'width':'100%', 'height':'100%'});
+        var $content = $('<div>').addClass('_axol_modal_body').html(dialogInner);
+        if (meObj.canClose) {
+          if (meObj.canBackClose) {
+            $back.on('click.axolModal', function(){ meObj.cancel(); });
+          }
+          const ariaLabel = navigator.language === 'ja' ? '閉じる' : 'close';
+          var $closeBtn = $('<button>').attr({'type':'button', 'aria-label': ariaLabel }).addClass('_axol_modal_close_btn').on('click.axolModal', function(){ meObj.cancel(); });
+          $dialog.append($closeBtn, $content);
+        } else {
+          $dialog.append($content);
+        }
+
+        // focus-trap
+        const focusableEls = $dialog.find('button, input, a, textarea, select, [tabindex]:not([tabindex="-1"])').not('.disabled').not(':disabled')
+        const firstFocusableElement = focusableEls.first().get(0);
+        const lastFocusableElement = focusableEls.last().get(0);
+
+        $dialog.on('keydown', function(e) {
+          // ESCキーでの閉じる機能追加
+          if (e.key === 'Escape' || e.keyCode === 27) {
+            meObj.cancel();
+          }
+
+          // needs both
+          if (firstFocusableElement && lastFocusableElement) {
+            const ev = e.originalEvent ?? e;
+            if (ev.key === 'Tab' || ev.keyCode === 9) {
+              if (ev.shiftKey) {
+                if (document.activeElement === firstFocusableElement) {
+                  ev.preventDefault();
+                  lastFocusableElement.focus();
+                }
+              } else {
+                if (document.activeElement === lastFocusableElement) {
+                  ev.preventDefault();
+                  firstFocusableElement.focus();
+                }
+              }
+            }
+          }
+        });
+
+        $wrapper.append($back, $dialog);
+        if(this.isBackWrapperWidthPer) {
+          $wrapper.css({'width':'100%', 'height':'100%'});
+        }
+        var $body = $('body');
+        $body.prepend($wrapper);
+        var mgTop = $body.css('margin-top');
+        var mgLeft = $body.css('margin-left');
+        var abs_top = (mgTop == 'auto') ? -8 : -parseInt(mgTop, 10);
+        var abs_left = (mgLeft == 'auto') ? -8 : -parseInt(mgLeft, 10);
+        // bodyに余計なmargin/paddingがある場合の処理。
+        $wrapper.css({'top':abs_top, 'left':abs_left});
+        meObj.$wrapper = $wrapper;
+        meObj.$body = $content;
+        $wrapper.fadeIn(meObj.fadeMsec);
+        if ($closeBtn) $closeBtn.focus();
+      },
+      setCancelCallback: function(callback) {
+        this.onCancelCallBack = callback;
+      },
+      setBeforeCancelCallback: function(callback) {
+        this.onBeforeCancelCallBack = callback;
+      },
+      setCanClose: function(canClose){
+        this.canClose = canClose;
+      },
+      setCanBackClose: function(canClose){
+        this.canBackClose = canClose;
+      },
+      setFadeMsec: function(milliSecond){
+        this.fadeMsec = milliSecond;
+      },
+      close: function(){
+        this.cancel();
+      },
+      cancel: function(){
+        var meObj = this;
+        if (!axol.is_null_undefined(meObj.$wrapper)) {
+          if (meObj.onBeforeCancelCallBack && !meObj.onBeforeCancelCallBack(meObj)){
+            return false;
+          }
+          if (meObj.exitFocusElm) meObj.exitFocusElm.focus();
+          meObj.$wrapper.fadeOut(meObj.fadeMsec, function () {
+            if (meObj.onCancelCallBack) {
+              meObj.onCancelCallBack(meObj);
+            }
+            meObj.$wrapper.off('.axolModal').remove();
+            meObj.$wrapper = null;
+            meObj.$body = null;
+          });
+        }
+      },
+      getBodyObj: function(){
+        return this.$body;
+      },
+      isActive: function(){
+        return !axol.is_null_undefined(this.$wrapper);
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.loadingDialog = (function(){
+    var _skelton = function() {
+      this.dialog = new axol.modalDialog('_axol_modal_loading');
+      this.dialog.setCanClose(false);
+      this.dialog.setFadeMsec(5);
+    };
+    _skelton.prototype = {
+      show: function(){
+        var content = $('<div>').addClass('loading__wrap').append(
+          $('<div>').addClass('loading__items loading__item1'),
+          $('<div>').addClass('loading__items loading__item2'),
+          $('<div>').addClass('loading__items loading__item3')
+        );
+        this.dialog.doModal(content);
+      },
+      close: function(){
+        this.dialog.cancel();
+      },
+      changeBackWrapperType: function(setWidthPercent) {
+        this.dialog.changeBackWrapperType(setWidthPercent);
+      },
+      cancel: function(){
+        this.dialog.cancel();
+      },
+      getBodyObj: function(){
+        return this.dialog.getBodyObj();
+      },
+      isActive: function() {
+        return this.dialog.isActive();
+      }
+    };
+    return _skelton;
+  })();
+
+  axol.imgAjaxGet = function(url, afterCallback) {
+    var nowLoadingObj = new axol.loadingDialog();
+    nowLoadingObj.show();
+    $.ajax({
+      'url': url,
+      'type': 'GET',
+      'cache': true,
+      'async': true
+    }).done(function (result) {
+      afterCallback(true, result);
+      nowLoadingObj.close();
+    }).fail(function () {
+      afterCallback(false);
+      nowLoadingObj.close();
+    });
+  };
+
+  axol.axolModalTip = (function(){
+    var _skelton = function(addClassName, $target, mouseX, mouseY) {
+      this.addClassName = addClassName;
+      this.$target = $target;
+      this.mouseX = mouseX ? parseInt(mouseX, 10) : 0;
+      this.mouseY = mouseY ? parseInt(mouseY, 10) : 0;
+      this.cancelCallback = null;
+      this.$dialogParent = null;
+      this.showClickPos = false; // クリックした位置から直接描画するかどうか。縦が長いdomに対し設定する場合に対応。
+      this.triangleSize = 8;
+      this.isBottom = false;
+      this.isBackWrapperWidthPer = false; // 背景のラッパを100%(100vw/vh)でセットするかどうか。(タブレット利用時はこれをtrueにしないとズームに対応できません。が、bodyがすべての要素のサイズより大きい必要があります。)
+      // dom object
+      this.$dialogParent = null;
+      this.$dialog = null;
+      this.$dialogContent = null;
+      this.$triangle = null;
+    };
+    _skelton.prototype = {
+      changeTriangleSize: function(triangleSizePx) {
+        this.triangleSize = triangleSizePx;
+      },
+      changeBackWrapperType: function(setWidthPercent) {
+        this.isBackWrapperWidthPer = setWidthPercent ? true : false;
+      },
+      setCancelCallback: function(callback) {
+        this.cancelCallback = callback;
+      },
+      setShowClickPos: function(isShowClickPos) {
+        this.showClickPos = isShowClickPos;
+      },
+      doModal: function(content){
+        if (!axol.is_null_undefined(this.$dialogParent)) {
+          this.close();
+        }
+        // z-indexの設定
+        var maxZindex = axol.getMaxZindex();
+        if(maxZindex == 0) {
+          maxZindex = 110;
+        }
+        var $body = $('body');
+        this.$dialogParent = $('<div>').addClass('axolModalTip_parent').css({'position':'absolute', 'top': 0, 'left': 0, 'height': 0, 'z-index':maxZindex + 1});
+        var $back = $('<div>').addClass('axolModalTip_backWrapper').css({'position':'fixed', 'width':'100%', 'height':'100%', 'top':'0', 'left':'0', 'z-index':maxZindex + 2});
+        const ariaLabel = navigator.language === 'ja' ? '閉じる' : 'close';
+        var $cancelBtn = $('<button>').attr({'type':'button', 'aria-label': ariaLabel }).addClass('_axol_modal_close_btn');
+        this.$dialogContent = $('<div>').addClass('axolModalTip_dialogContent');
+        this.$dialogContent.html(content);
+        this.$triangle = $('<div>').addClass('axolModalTip_triangle').css({
+          'position': 'absolute', 'width':0, 'height':0, 'z-index':maxZindex + 4,
+          'border-left-color':'transparent', 'border-right-color':'transparent', 'border-style':'solid'
+        });
+        this.$dialog = $('<div>').addClass('axolModalTip_dialog').attr({'role': 'dialog', 'aria-modal': 'true'}).addClass(this.addClassName).css({'position':'absolute', 'z-index':maxZindex + 3}).append(
+          $cancelBtn, this.$triangle, this.$dialogContent
+        );
+        this.$dialogParent.append($back, this.$dialog);
+
+        // focus-trap
+        const focusableEls = this.$dialog.find('button, input, a, textarea, select, [tabindex]:not([tabindex="-1"])').not('.disabled').not(':disabled')
+        const firstFocusableElement = focusableEls.first().get(0);
+        const lastFocusableElement = focusableEls.last().get(0);
+
+        this.$dialog.on('keydown', function(e) {
+          // ESCキーでの閉じる機能追加
+          if (e.key === 'Escape' || e.keyCode === 27) {
+            meObj.cancel();
+          }
+
+          // needs both
+          if (firstFocusableElement && lastFocusableElement) {
+            const ev = e.originalEvent ?? e;
+            if (ev.key === 'Tab' || ev.keyCode === 9) {
+              if (ev.shiftKey) {
+                if (document.activeElement === firstFocusableElement) {
+                  ev.preventDefault();
+                  lastFocusableElement.focus();
+                }
+              } else {
+                if (document.activeElement === lastFocusableElement) {
+                  ev.preventDefault();
+                  firstFocusableElement.focus();
+                }
+              }
+            }
+          }
+        });
+
+        $body.prepend(this.$dialogParent);
+        $cancelBtn.add($back).on('click.axolModalTip', {'myself':this}, this.onCancel);
+        $(window).on('load.axolModalTip resize.axolModalTip scroll.axolModalTip', {'myself':this}, this.onResize);
+
+        var mgTop = $body.css('margin-top');
+        var mgLeft = $body.css('margin-left');
+        var abs_top = (mgTop == 'auto') ? -8 : -parseInt(mgTop, 10);
+        var abs_left = (mgLeft == 'auto') ? -8 : -parseInt(mgLeft, 10);
+        // bodyに余計なmargin/paddingがある場合の処理。
+        this.$dialogParent.css({'top':abs_top, 'left':abs_left});
+
+        if(this.isBackWrapperWidthPer) {
+          $back.css({'width':'100%', 'height':'100%'});
+        }
+        this.resize(true);
+        $cancelBtn.focus();
+      },
+      getBodyObj: function(){
+        return this.$dialogContent;
+      },
+      isActive: function() {
+        return !axol.is_null_undefined(this.$dialogParent);
+      },
+      close: function() {
+        this.cancel();
+      },
+      cancel: function() {
+        var meObj = this;
+        if (!axol.is_null_undefined(this.$dialogParent)) {
+          meObj.$dialogParent.fadeOut(500, function () {
+            if (meObj.cancelCallback) {
+              meObj.cancelCallback(meObj);
+            }
+            $(window).off('.axolModalTip');
+            meObj.$dialogParent.off('.axolModalTip');
+            meObj.$dialogParent.remove();
+            meObj.$dialogParent = null;
+            meObj.$dialogContent = null;
+            meObj.$dialog = null;
+          });
+        }
+      },
+      onCancel: function(e) { // eventHandler
+        var meObj = e.data['myself'];
+        meObj.cancel();
+        e.preventDefault();
+        return false;
+      },
+      resize: function(checkTopBottom) {
+        // windowSize
+        var $window = $(window);
+        var windowWidth = $window.outerWidth();
+
+        // 親オブジェクト位置(body左上が原点)
+        var targetOffset = this.$target.offset();
+        var targetLeft = targetOffset.left + this.mouseX;
+        var targetTop = 0;
+        var targetBottom = 0;
+        var targetHeight = this.$target.outerHeight();
+        if (this.showClickPos) {
+          targetTop = targetBottom = targetOffset.top + this.mouseY;
+        } else {
+          targetTop = targetOffset.top;
+          targetBottom = targetTop + targetHeight;
+        }
+        // 表示オブジェクトのサイズ
+        var ownHeight = this.$dialog.outerHeight(), ownWidth = this.$dialog.outerWidth();
+        var ownWidthHalf = ownWidth / 2;
+
+        // 表示オブジェクトの位置(window左上が原点)
+        var wTargetLeft = targetLeft - $(window).scrollLeft();
+
+        var triangleTopSize = axol.pxToInt(this.$triangle.css('border-top-width'));
+        var triangleBottomSize = axol.pxToInt(this.$triangle.css('border-bottom-width'));
+        var triangleLeftSize = axol.pxToInt(this.$triangle.css('border-left-width'));
+
+        // 表示領域(上下)を確定。
+        if (checkTopBottom) {
+          var windowHeight = $window.height();
+          var wTargetTop = targetTop - $(window).scrollTop();
+          var wTargetBottom = targetBottom - $(window).scrollTop();
+          // 表示領域残り
+          var bottomRemain = windowHeight - wTargetBottom - triangleBottomSize;
+          var topRemain = wTargetTop - triangleTopSize;
+          this.isBottom = (topRemain < bottomRemain || topRemain < ownHeight);
+        }
+
+        var ownTop = this.isBottom
+          ? targetBottom + triangleBottomSize
+          : targetTop - triangleTopSize - ownHeight;
+        // 横位置
+        var ownLeft = 0;
+        if (ownWidthHalf > wTargetLeft) {
+          ownLeft = 10 + $window.scrollLeft();
+        } else if ((windowWidth - wTargetLeft) < ownWidthHalf) {
+          ownLeft = windowWidth + $window.scrollLeft() - 10 - ownWidth;
+        } else {
+          ownLeft = targetLeft - ownWidthHalf;
+        }
+        if (ownLeft < 10) {
+          ownLeft = 10;
+        }
+        var triangleLeft = targetLeft - triangleLeftSize - ownLeft;
+        var triangleTop = this.isBottom ? -(triangleTopSize+triangleBottomSize) : ownHeight;
+        if (this.isBottom) {
+          this.$triangle.css({
+            'border-top-color':'transparent',
+            'top': triangleTop+'px', 'left':triangleLeft+'px'
+          });
+        } else {
+          this.$triangle.css({
+            'border-bottom-color':'transparent',
+            'top': triangleTop+'px', 'left':triangleLeft+'px'
+          });
+        }
+        this.$dialog.css({'top':parseInt(ownTop, 10)+'px', 'left':parseInt(ownLeft, 10)+'px'});
+      },
+      onResize: function(e) // eventHandler
+      {
+        var meObj = e.data['myself'];
+        meObj.resize(false);
+      }
+    };
+    return _skelton;
+  })();
+
+
+  //////////////////////////////////
+  // string manage
+
+  axol.getNumberExcludeUnit = function(text){
+    var regexp = new RegExp('(\\d+)$');
+    var match = text.match(regexp);
+    return match ? Number(match[1]) : 0;
+  };
+
+
+  //////////////////////////////////
+  // overflow manage
+
+  $.fn.axolTextEllipsiser = function(opts){
+    var conf = $.extend({
+      summary_height: 80,
+      suffix: '...',
+      openLabel: '続きを見る',
+      closeLabel: '閉じる'
+    }, opts);
+    var $me = $(this);
+    var fullHeight = $me.height();
+    if (fullHeight < conf.summary_height) {
+      return;
+    }
+    $me.css('position', 'relative');
+    var width = $me.width();
+    var fontSize = axol.getNumberExcludeUnit($me.css('font-size'));
+    var sheetHeight = fontSize + 20;
+    var $sheet = $('<div>')
+      .text(conf.openLabel)
+      .addClass('transparent__filter__t_to_b')
+      .css('width', width)
+      .css('height', sheetHeight.toString()+'px')
+      .css('line-height', sheetHeight.toString()+'px');
+    var btnHeight = 20;
+    var $closeBtn = $('<div>')
+      .text(conf.closeLabel)
+      .addClass('transparent__filter__closebtn')
+      .css('height', btnHeight.toString()+'px')
+      .css('line-height', btnHeight.toString()+'px');
+    var setFilter = function(){
+      $me.css('overflow', 'hidden').css('height', conf.summary_height.toString()+'px');
+      $sheet.show();
+      $closeBtn.hide();
+    };
+    var unsetFilter = function(){
+      $me.css('overflow', 'none').css('height', (fullHeight + btnHeight).toString()+'px');
+      $closeBtn.show();
+      $sheet.hide();
+    };
+
+    $sheet.on('click', function(){
+      unsetFilter();
+    });
+    $closeBtn.on('click', function(){
+      setFilter();
+    });
+    $me.append($closeBtn);
+    $me.append($sheet);
+    setFilter();
+  };
+
+  // insert to selectAt
+  $.fn.axolInsertAtCaret = function(v, isMSIE){
+    var o = this.get(0);
+    o.focus();
+    if (isMSIE) {
+      var r = document.selection.createRange();
+      r.text = v;
+      r.select();
+    } else {
+      var s = o.value;
+      var p = o.selectionStart;
+      var np = p + v.length;
+      o.value = s.substr(0, p) + v + s.substr(p);
+      o.setSelectionRange(np, np);
+    }
+  };
+
+  // 現在使用されていません
+  axol.splitHtmlForFit = function($parent, html, suffix){
+    var lines = html.split("\n");
+    if (!lines.length) {
+      return ['', ''];
+    }
+    var nowHtml = lines.shift();
+    var cutHtml = lines.length ? "\n"+lines.join("\n") : '';
+    if (!nowHtml.length || !cutHtml.length) {
+      return [nowHtml, cutHtml];
+    }
+    var target_org_position = $parent.css('position');
+    $parent.css('position', 'relative');
+
+    var $dummyObj = $parent.clone();
+    $dummyObj.css('display', 'none').css('font-color', 'transparent').css('position', 'absolute').css('overflow', 'visible');
+    $dummyObj.html(nowHtml);
+
+    var cleanFunc = function(){
+      $parent.css('position', target_org_position);
+      $dummyObj.remove();
+    };
+
+    var max = $parent.width();
+    $parent.after($dummyObj);
+    if ($dummyObj.width() < max) {
+      cleanFunc();
+      return [nowHtml, cutHtml];
+    }
+    suffix = suffix ? suffix : '...';
+    var in_tag = false;
+    while (1) {
+      var cutChr = nowHtml.substr(nowHtml.length - 1, 1);
+      cutHtml = cutChr + cutHtml;
+      nowHtml = nowHtml.substr(0, nowHtml.length - 1);
+      if (nowHtml.length) {
+        if (cutChr == '>') {
+          in_tag = true;
+          continue;
+        }
+        if (cutChr == '<') {
+          in_tag = false;
+          continue;
+        }
+        if (in_tag) {
+          continue;
+        }
+      }
+      var tmpHtml = nowHtml + suffix;
+      $dummyObj.html(tmpHtml);
+      if ($dummyObj.width() < max || !nowHtml.length) {
+        cleanFunc();
+        return [tmpHtml, cutHtml];
+      }
+    }
+  };
+
+
+  //////////////////////////////////
+  // radio manage
+
+  axol.radioDeselection = function(p) {
+    const elms = document.getElementsByName(p);
+    for(let count = 0; count < elms.length; count++){
+      const elm = elms[count];
+      elm.checked = false;
+      elm.dispatchEvent(new Event('change'));
+    }
+  }
+
+})(jQuery);
