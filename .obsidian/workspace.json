@@ -25,12 +25,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "01_選考対策/日立製作所/ES/ES一覧2期.md",
+                "file": "01_選考対策/NTTデータ/ES/ES一覧.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ES一覧2期"
+              "title": "ES一覧"
             }
           }
         ],
@@ -91,7 +91,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 360.5
   },
   "right": {
     "id": "6a6b82ef0193e77f",
@@ -209,127 +209,26 @@
       "templater-obsidian:Templater": false
     }
   },
-  "floating": {
-    "id": "af60877cbd89cbcc",
-    "type": "floating",
-    "children": [
-      {
-        "id": "bdfd2632a0986263",
-        "type": "window",
-        "children": [
-          {
-            "id": "53f81583d7476f8d",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "410b178335055ada",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "01_選考対策/大塚商会/ES/ES一覧.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "ES一覧"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 2688,
-        "y": -328,
-        "width": 1027,
-        "height": 763,
-        "maximize": false,
-        "zoom": 0
-      },
-      {
-        "id": "ae5a0e62df30f9a9",
-        "type": "window",
-        "children": [
-          {
-            "id": "d2ab8ce1d3d415ee",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "135f798256d65027",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "01_選考対策/日立製作所/ES/ES一覧.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "ES一覧"
-                }
-              }
-            ]
-          },
-          {
-            "id": "a47ff3a78d5104d2",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "8c120448b5d40b47",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "01_選考対策/NEC/ES/ES一覧.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "ES一覧"
-                }
-              },
-              {
-                "id": "f0b16d4aace1ae9e",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "01_選考対策/大塚商会/ES/ES一覧.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "ES一覧"
-                }
-              }
-            ],
-            "currentTab": 1
-          }
-        ],
-        "direction": "vertical",
-        "x": 2777,
-        "y": -522,
-        "width": 1025,
-        "height": 800,
-        "maximize": false,
-        "zoom": 0
-      }
-    ]
-  },
   "active": "8ea4e8a7f736520f",
   "lastOpenFiles": [
-    "01_選考対策/日立製作所/ES/ES一覧.md",
     "01_選考対策/日立製作所/ES/ES一覧2期.md",
-    "01_選考対策/大塚商会/ES/ES一覧.md",
-    "01_選考対策/日立製作所/ES/ES_SE_生成AI×PM.md",
-    "01_選考対策/NEC/ES/ES一覧.md",
-    "01_選考対策/NTTデータ/ES/ES一覧.md",
-    "01_選考対策/BIPROGY/ES/ES一覧.md",
-    "01_選考対策/CTC/ES/ES一覧.md",
-    "01_選考対策/CTC/素材要約.md",
-    "01_選考対策/NTT東日本/ES/ES一覧.md",
-    "01_選考対策/NTTドコモ/ES/ES.md",
+    "01_選考対策/日立製作所/ES/ES一覧.md",
     "01_選考対策/インテージ/ES/ES一覧.md",
+    "01_選考対策/アビームコンサルティング/ES/ES一覧.md",
+    "01_選考対策/日立製作所/ES/ES_SE_AI-ready.md",
+    "01_選考対策/日立製作所/ES/ES_SE_生成AI×PM.md",
+    "01_選考対策/TIS/ES/ES一覧.md",
+    "01_選考対策/SMCC/ES/ES一覧.md",
+    "01_選考対策/三井住友銀行/ES.md",
+    "01_選考対策/NTT東日本/ES/ES一覧.md",
+    "01_選考対策/CTC/ES/ES一覧.md",
+    "01_選考対策/NEC/ES/ES一覧.md",
+    "01_選考対策/IBM/ES/ES一覧.md",
+    "01_選考対策/NTTデータ/ES/ES一覧.md",
+    "01_選考対策/NTTドコモ/ES/ES.md",
+    "01_選考対策/大塚商会/ES/ES一覧.md",
+    "01_選考対策/BIPROGY/ES/ES一覧.md",
+    "01_選考対策/CTC/素材要約.md",
     "01_選考対策/日立ソリューションズ/ES/ES一覧.md",
     "01_選考対策/日立ソリューションズ/ES/ES.md",
     "01_選考対策/日立ソリューションズ/面接対策.md",
@@ -348,14 +247,8 @@
     "01_選考対策/日立システムズ/ES/日立ソリューションズ｜新卒マイページ_files/jquery.jqtransform.js.ダウンロード",
     "01_選考対策/日立システムズ/ES/日立ソリューションズ｜新卒マイページ_files/jquery.fancybox.js.ダウンロード",
     "01_選考対策/SMCC/ES/SMCC_三井住友カード_ES_files/683664473868799946Z42396448844.jpg",
-    "01_選考対策/SMCC/ES/ES一覧.md",
     "01_選考対策/SMCC/面接対策.md",
     "01_選考対策/SMCC/素材要約.md",
-    "01_選考対策/SMCC/企業分析.md",
-    "01_選考対策/SMCC/企業概要.md",
-    "01_選考対策/インテージ/面接対策.md",
-    "01_選考対策/インテージ/素材要約.md",
-    "01_選考対策/インテージ/企業分析.md",
     "01_選考対策/NTTドコモ/ES/株式会社NTTドコモ_files/logo.png"
   ]
 }
