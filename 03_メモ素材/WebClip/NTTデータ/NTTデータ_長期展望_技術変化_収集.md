@@ -27,21 +27,21 @@ related_extract:
 
 | 資料・ページ | URL | 種類 | 対象年度・期間 | 確認できた主な事実 | 反映先 |
 | --- | --- | --- | --- | --- | --- |
-| NTT DATA Technology Foresight 2026 | https://www.nttdata.com/jp/ja/technology/trend-listing/2026/ | 公式技術発信 | 2026 | 技術・ビジネス・社会の関係から6つのトレンドを提示。NTTデータの技術戦略にも直結するレポートと説明。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]]、[[02_企業研究/企業別/NTTデータ/技術変化・開発方法|技術変化・開発方法]] |
-| NTT DATA Technology Foresight 2026 パンフレット | https://www.nttdata.com/jp/ja/-/media/nttdatajapan/files/foresight/2026/technology-foresight-2026-ntt-data20260128.pdf | 公式技術PDF | 2026 | 人とAIの協調、信頼できる知能、知能を備えたインフラ、半導体エコシステム、エネルギー設計などを提示。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]] |
-| AI-Native開発で広がるSIerの可能性 | https://www.nttdata.com/jp/ja/trends/data-insight/2026/0528/ | 公式技術記事 | 2026 | AIエージェントを開発者として捉え、目的、前提、役割分担、成果物、品質基準を明確にした開発マネジメントが重要と説明。 | [[02_企業研究/企業別/NTTデータ/技術変化・開発方法|技術変化・開発方法]]、[[01_選考対策/NTTデータ/企業分析|企業分析]] |
-| アカウンタビリティを軸としたAI-Native開発のデザイン戦略 | https://www.nttdata.com/jp/ja/-/media/nttdatajapan/files/services/adm/ai-native.pdf | 公式技術PDF | 2026 | AI-Native開発を、AIを開発主体に据え、環境をAI-readyに再構成する開発アプローチとして説明。機能性・品質・透明性・アカウンタビリティを重視。 | [[02_企業研究/企業別/NTTデータ/技術変化・開発方法|技術変化・開発方法]] |
-| Design Strategy for AI-Native | https://www.nttdata.com/global/en/-/media/nttdataglobal/1_files/services/adm/design-strategy-for-ai-native_0518_fix.pdf | 公式技術PDF | 2026 | AI-Native開発の英語版。Three Lines Model、AI-Generated、AI-Verified、AI-Explainableの成熟度を整理。 | [[02_企業研究/企業別/NTTデータ/技術変化・開発方法|技術変化・開発方法]] |
-| GitHubとのビジネス連携によりシステム開発への生成AI適用を推進 | https://www.nttdata.com/global/ja/news/topics/2024/102400/ | 公式トピックス | 2024 | GitHubとの連携により、生成AIをシステム開発に適用。国内でGitHub Copilot 5,000ユーザー利用を目指し、開発生産性16.5%向上を掲げる。 | [[02_企業研究/企業別/NTTデータ/技術変化・開発方法|技術変化・開発方法]]、[[02_企業研究/企業別/NTTデータ/最近のニュース|最近のニュース]] |
-| 生成AIが開発支援を実現！グローバルで推進するGitHub Copilot | https://www.nttdata.com/jp/ja/trends/data-insight/2024/1223/ | 公式技術記事 | 2024 | 100以上のプロジェクト、2,000以上のユーザーでGitHub Copilotを採用。2027年度までにソフトウェア開発工程全体の生産性50%向上を目標。 | [[02_企業研究/企業別/NTTデータ/技術変化・開発方法|技術変化・開発方法]] |
-| OpenAIとのグローバルでの戦略的提携を開始 | https://www.nttdata.com/global/ja/news/release/2025/042400/ | 公式プレスリリース | 2025-2027年度 | OpenAIとグローバル戦略提携。ChatGPT Enterprise提供、業界特化型AIエージェント、OpenAI関連ビジネスで2027年度末までに累計1,000億円規模の売上を目指す。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]]、[[02_企業研究/企業別/NTTデータ/最近のニュース|最近のニュース]] |
-| 金融機関向けに共同利用型のAI基盤を構築開始 | https://www.nttdata.com/global/ja/news/topics/2026/051900/ | 公式トピックス | 2026年度末提供予定 | 金融機関向け共同利用型AI基盤を構築。AIガバナンス、データ統合、マルチベンダー、共創基盤を設計思想として提示。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]]、[[02_企業研究/企業別/NTTデータ/最近のニュース|最近のニュース]] |
-| NTT DATAのコンサルティング | https://www.nttdata.com/jp/ja/services/consulting/ | 公式サービスページ | 確認日: 2026-06-17 | Foresightを起点に経営課題を提言し、実現・成果創出までエンドツーエンドで伴走すると説明。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]] |
-| Human Resource | https://www.nttdata.com/global/en/about-us/sustainability/employee/human-resouce | 公式サステナビリティ | 確認日: 2026-06-17 | 中長期の事業活動を支える高度専門人材のパイプライン、デジタル技術・グローバル人材の採用、専門性別キャリアパスを説明。 | [[02_企業研究/企業別/NTTデータ/採用情報|採用情報]]、[[02_企業研究/企業別/NTTデータ/長期展望|長期展望]] |
-| 2025年度決算説明会資料 | https://www.nttdata.com/global/en/-/media/nttdataglobal/1_files/investors/financial-results/2024/fy2024_pre_4q.pdf | IR資料 | 2025年度決算、2026年3月期方針 | Strategy 05「Be the Best Place to Work」に基づき、変化に対応しデジタル業界をリードできる高度専門人材を育成。FY2024に生成AI能力を持つ人材を約15,000人育成。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]]、[[02_企業研究/企業別/NTTデータ/採用情報|採用情報]] |
-| AI | https://www.nttdata.com/global/en/services/ai | 公式サービスページ | 確認日: 2026-06-17 | AIを企業全体に統合し、人間が制御と結果責任を持つ形で、業務変革・イノベーション・顧客体験・成長を支援すると説明。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]] |
-| Impact of AI on the IT industry: Talent transformation in the AI era | https://www.nttdata.com/global/en/-/media/nttdataglobal/1_files/insights/generative-ai/ntt-data-insead-ai-talent-transformation.pdf | 公式レポート | 2026 | ITサービス業界の価値創造・組織設計・人材戦略がAIで変化すると整理。タスク、職務、プロセス、組織、価値提案の5層で変化を見る。 | [[02_企業研究/企業別/NTTデータ/長期展望|長期展望]]、[[01_選考対策/NTTデータ/企業分析|企業分析]] |
-| 求める人財像 | https://nttdata-recruit.com/recruit/hr.html | 新卒採用ページ | 確認日: 2026-06-17 | 求める人財像として、考導力、変革力、共創力と強い意志・情熱を提示。 | [[02_企業研究/企業別/NTTデータ/採用情報|採用情報]]、[[01_選考対策/NTTデータ/企業分析|企業分析]] |
+| NTT DATA Technology Foresight 2026 | https://www.nttdata.com/jp/ja/technology/trend-listing/2026/ | 公式技術発信 | 2026 | 技術・ビジネス・社会の関係から6つのトレンドを提示。NTTデータの技術戦略にも直結するレポートと説明。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]]、[[01_企業別/NTTデータ/企業研究/技術変化・開発方法|技術変化・開発方法]] |
+| NTT DATA Technology Foresight 2026 パンフレット | https://www.nttdata.com/jp/ja/-/media/nttdatajapan/files/foresight/2026/technology-foresight-2026-ntt-data20260128.pdf | 公式技術PDF | 2026 | 人とAIの協調、信頼できる知能、知能を備えたインフラ、半導体エコシステム、エネルギー設計などを提示。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]] |
+| AI-Native開発で広がるSIerの可能性 | https://www.nttdata.com/jp/ja/trends/data-insight/2026/0528/ | 公式技術記事 | 2026 | AIエージェントを開発者として捉え、目的、前提、役割分担、成果物、品質基準を明確にした開発マネジメントが重要と説明。 | [[01_企業別/NTTデータ/企業研究/技術変化・開発方法|技術変化・開発方法]]、[[01_企業別/NTTデータ/企業分析|企業分析]] |
+| アカウンタビリティを軸としたAI-Native開発のデザイン戦略 | https://www.nttdata.com/jp/ja/-/media/nttdatajapan/files/services/adm/ai-native.pdf | 公式技術PDF | 2026 | AI-Native開発を、AIを開発主体に据え、環境をAI-readyに再構成する開発アプローチとして説明。機能性・品質・透明性・アカウンタビリティを重視。 | [[01_企業別/NTTデータ/企業研究/技術変化・開発方法|技術変化・開発方法]] |
+| Design Strategy for AI-Native | https://www.nttdata.com/global/en/-/media/nttdataglobal/1_files/services/adm/design-strategy-for-ai-native_0518_fix.pdf | 公式技術PDF | 2026 | AI-Native開発の英語版。Three Lines Model、AI-Generated、AI-Verified、AI-Explainableの成熟度を整理。 | [[01_企業別/NTTデータ/企業研究/技術変化・開発方法|技術変化・開発方法]] |
+| GitHubとのビジネス連携によりシステム開発への生成AI適用を推進 | https://www.nttdata.com/global/ja/news/topics/2024/102400/ | 公式トピックス | 2024 | GitHubとの連携により、生成AIをシステム開発に適用。国内でGitHub Copilot 5,000ユーザー利用を目指し、開発生産性16.5%向上を掲げる。 | [[01_企業別/NTTデータ/企業研究/技術変化・開発方法|技術変化・開発方法]]、[[01_企業別/NTTデータ/企業研究/最近のニュース|最近のニュース]] |
+| 生成AIが開発支援を実現！グローバルで推進するGitHub Copilot | https://www.nttdata.com/jp/ja/trends/data-insight/2024/1223/ | 公式技術記事 | 2024 | 100以上のプロジェクト、2,000以上のユーザーでGitHub Copilotを採用。2027年度までにソフトウェア開発工程全体の生産性50%向上を目標。 | [[01_企業別/NTTデータ/企業研究/技術変化・開発方法|技術変化・開発方法]] |
+| OpenAIとのグローバルでの戦略的提携を開始 | https://www.nttdata.com/global/ja/news/release/2025/042400/ | 公式プレスリリース | 2025-2027年度 | OpenAIとグローバル戦略提携。ChatGPT Enterprise提供、業界特化型AIエージェント、OpenAI関連ビジネスで2027年度末までに累計1,000億円規模の売上を目指す。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]]、[[01_企業別/NTTデータ/企業研究/最近のニュース|最近のニュース]] |
+| 金融機関向けに共同利用型のAI基盤を構築開始 | https://www.nttdata.com/global/ja/news/topics/2026/051900/ | 公式トピックス | 2026年度末提供予定 | 金融機関向け共同利用型AI基盤を構築。AIガバナンス、データ統合、マルチベンダー、共創基盤を設計思想として提示。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]]、[[01_企業別/NTTデータ/企業研究/最近のニュース|最近のニュース]] |
+| NTT DATAのコンサルティング | https://www.nttdata.com/jp/ja/services/consulting/ | 公式サービスページ | 確認日: 2026-06-17 | Foresightを起点に経営課題を提言し、実現・成果創出までエンドツーエンドで伴走すると説明。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]] |
+| Human Resource | https://www.nttdata.com/global/en/about-us/sustainability/employee/human-resouce | 公式サステナビリティ | 確認日: 2026-06-17 | 中長期の事業活動を支える高度専門人材のパイプライン、デジタル技術・グローバル人材の採用、専門性別キャリアパスを説明。 | [[01_企業別/NTTデータ/企業研究/採用情報|採用情報]]、[[01_企業別/NTTデータ/企業研究/長期展望|長期展望]] |
+| 2025年度決算説明会資料 | https://www.nttdata.com/global/en/-/media/nttdataglobal/1_files/investors/financial-results/2024/fy2024_pre_4q.pdf | IR資料 | 2025年度決算、2026年3月期方針 | Strategy 05「Be the Best Place to Work」に基づき、変化に対応しデジタル業界をリードできる高度専門人材を育成。FY2024に生成AI能力を持つ人材を約15,000人育成。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]]、[[01_企業別/NTTデータ/企業研究/採用情報|採用情報]] |
+| AI | https://www.nttdata.com/global/en/services/ai | 公式サービスページ | 確認日: 2026-06-17 | AIを企業全体に統合し、人間が制御と結果責任を持つ形で、業務変革・イノベーション・顧客体験・成長を支援すると説明。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]] |
+| Impact of AI on the IT industry: Talent transformation in the AI era | https://www.nttdata.com/global/en/-/media/nttdataglobal/1_files/insights/generative-ai/ntt-data-insead-ai-talent-transformation.pdf | 公式レポート | 2026 | ITサービス業界の価値創造・組織設計・人材戦略がAIで変化すると整理。タスク、職務、プロセス、組織、価値提案の5層で変化を見る。 | [[01_企業別/NTTデータ/企業研究/長期展望|長期展望]]、[[01_企業別/NTTデータ/企業分析|企業分析]] |
+| 求める人財像 | https://nttdata-recruit.com/recruit/hr.html | 新卒採用ページ | 確認日: 2026-06-17 | 求める人財像として、考導力、変革力、共創力と強い意志・情熱を提示。 | [[01_企業別/NTTデータ/企業研究/採用情報|採用情報]]、[[01_企業別/NTTデータ/企業分析|企業分析]] |
 
 ## 確認できた事実
 
@@ -69,18 +69,18 @@ related_extract:
 ## 注意点
 
 - AI-Native開発やOpenAI提携は重要な材料だが、NTTデータの長期展望はAIだけに限定されない。信頼、インフラ、半導体、エネルギー、業界共通基盤、コンサルティング、グローバル人材も合わせて見る。
-- `02_企業研究/` では、公式発信として確認できる事実と会社が示す方向性に留める。
-- 「この変化から、求められる人材はこうなる」という見立ては、`01_選考対策/NTTデータ/企業分析.md` に仮説として切り出す。
+- `01_企業別/企業名/企業研究/` では、公式発信として確認できる事実と会社が示す方向性に留める。
+- 「この変化から、求められる人材はこうなる」という見立ては、`01_企業別/NTTデータ/企業分析.md` に仮説として切り出す。
 - ワンキャリア、口コミ、OB訪問情報は今回の事実出典には使っていない。
 
 ## 企業研究へ反映すること
 
-- [x] `02_企業研究/企業別/NTTデータ/長期展望.md`
-- [x] `02_企業研究/企業別/NTTデータ/技術変化・開発方法.md`
-- [x] `02_企業研究/企業別/NTTデータ/最近のニュース.md`
-- [x] `02_企業研究/企業別/NTTデータ/出典.md`
+- [x] `01_企業別/NTTデータ/企業研究/長期展望.md`
+- [x] `01_企業別/NTTデータ/企業研究/技術変化・開発方法.md`
+- [x] `01_企業別/NTTデータ/企業研究/最近のニュース.md`
+- [x] `01_企業別/NTTデータ/企業研究/出典.md`
 
 ## 選考対策へ切り出すこと
 
-- [x] `01_選考対策/NTTデータ/企業分析.md`
-- [ ] `01_選考対策/NTTデータ/面接対策.md`
+- [x] `01_企業別/NTTデータ/企業分析.md`
+- [ ] `01_企業別/NTTデータ/面接対策.md`

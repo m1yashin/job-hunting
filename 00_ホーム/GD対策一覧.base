@@ -1,6 +1,8 @@
 filters:
   and:
-    - file.inFolder("01_選考対策")
+    - or:
+        - file.inFolder("01_企業別")
+        - file.inFolder("02_共通対策/GD")
     - file.ext == "md"
     - file.name != "AGENTS"
     - or:

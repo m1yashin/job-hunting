@@ -24,15 +24,15 @@ NRIについて、中期経営計画だけでなく、2030年に向けた事業�
 
 | 種類 | 資料名 | URL | 確認日 | 主に使うノート |
 | --- | --- | --- | --- | --- |
-| IR | Integrated Report 2025 Growth Story for 2030 | https://ir.nri.com/en/ir/library/report/main/012/teaserItems1/0/linkList/0/link/ar2025_e_view5.pdf | 2026-06-17 | [[02_企業研究/企業別/NRI/長期展望]]、[[02_企業研究/企業別/NRI/技術変化・開発方法]] |
-| IR | NRI Business Outline, Update: May 2026 | https://ir.nri.com/en/ir/library/outline/main/03/teaserItems1/0/linkList/0/link/BusinessOutline_e.pdf | 2026-06-17 | [[02_企業研究/企業別/NRI/事業分析]]、[[02_企業研究/企業別/NRI/長期展望]] |
-| IR | Business and Strengths of IT Platform Services | https://ir.nri.com/en/ir/library/outline/main/04/teaserItems1/05/linkList/0/link/250310pre_1_e.pdf | 2026-06-17 | [[02_企業研究/企業別/NRI/技術変化・開発方法]] |
-| プレスリリース | AI Co-Creation Model | https://www.nri.com/en/news/newsrelease/20251211_1.html | 2026-06-17 | [[02_企業研究/企業別/NRI/長期展望]]、[[02_企業研究/企業別/NRI/採用情報]] |
-| プレスリリース | AI Consulting Service | https://www.nri.com/en/news/newsrelease/files/900013864.pdf | 2026-06-17 | [[02_企業研究/企業別/NRI/技術変化・開発方法]] |
-| 技術レポート | The Power of Generative AI in IT Departments | https://www.nri.com/content/900013174.pdf | 2026-06-17 | [[02_企業研究/企業別/NRI/技術変化・開発方法]] |
-| 知的資産創造 | AIの汎用技術への進化と3つの波 | https://www.nri.com/jp/knowledge/publication/chitekishisan_202602/03.html | 2026-06-17 | [[02_企業研究/企業別/NRI/長期展望]] |
-| プレスリリース | 業界・タスク特化型LLMの構築手法 | https://www.nri.com/jp/news/newsrelease/20260327_1.html | 2026-06-17 | [[02_企業研究/企業別/NRI/技術変化・開発方法]]、[[02_企業研究/企業別/NRI/最近のニュース]] |
-| 採用情報 | 部門紹介 | https://working.nri.co.jp/recruit/contents/business/field/ | 2026-06-17 | [[02_企業研究/企業別/NRI/採用情報]]、[[01_選考対策/NRI/企業分析]] |
+| IR | Integrated Report 2025 Growth Story for 2030 | https://ir.nri.com/en/ir/library/report/main/012/teaserItems1/0/linkList/0/link/ar2025_e_view5.pdf | 2026-06-17 | [[01_企業別/NRI/企業研究/長期展望]]、[[01_企業別/NRI/企業研究/技術変化・開発方法]] |
+| IR | NRI Business Outline, Update: May 2026 | https://ir.nri.com/en/ir/library/outline/main/03/teaserItems1/0/linkList/0/link/BusinessOutline_e.pdf | 2026-06-17 | [[01_企業別/NRI/企業研究/事業分析]]、[[01_企業別/NRI/企業研究/長期展望]] |
+| IR | Business and Strengths of IT Platform Services | https://ir.nri.com/en/ir/library/outline/main/04/teaserItems1/05/linkList/0/link/250310pre_1_e.pdf | 2026-06-17 | [[01_企業別/NRI/企業研究/技術変化・開発方法]] |
+| プレスリリース | AI Co-Creation Model | https://www.nri.com/en/news/newsrelease/20251211_1.html | 2026-06-17 | [[01_企業別/NRI/企業研究/長期展望]]、[[01_企業別/NRI/企業研究/採用情報]] |
+| プレスリリース | AI Consulting Service | https://www.nri.com/en/news/newsrelease/files/900013864.pdf | 2026-06-17 | [[01_企業別/NRI/企業研究/技術変化・開発方法]] |
+| 技術レポート | The Power of Generative AI in IT Departments | https://www.nri.com/content/900013174.pdf | 2026-06-17 | [[01_企業別/NRI/企業研究/技術変化・開発方法]] |
+| 知的資産創造 | AIの汎用技術への進化と3つの波 | https://www.nri.com/jp/knowledge/publication/chitekishisan_202602/03.html | 2026-06-17 | [[01_企業別/NRI/企業研究/長期展望]] |
+| プレスリリース | 業界・タスク特化型LLMの構築手法 | https://www.nri.com/jp/news/newsrelease/20260327_1.html | 2026-06-17 | [[01_企業別/NRI/企業研究/技術変化・開発方法]]、[[01_企業別/NRI/企業研究/最近のニュース]] |
+| 採用情報 | 部門紹介 | https://working.nri.co.jp/recruit/contents/business/field/ | 2026-06-17 | [[01_企業別/NRI/企業研究/採用情報]]、[[01_企業別/NRI/企業分析]] |
 
 ## 確認できた事実
 
@@ -78,7 +78,7 @@ NRIについて、中期経営計画だけでなく、2030年に向けた事業�
 
 ## 選考対策へ切り出す材料
 
-選考用の解釈・仮説は `01_選考対策/NRI/企業分析.md` に分ける。
+選考用の解釈・仮説は `01_企業別/NRI/企業分析.md` に分ける。
 
 - NRIの強みは、単なるAI導入ではなく、戦略、業務、システム開発、運用、セキュリティまでを接続する点にある。
 - AI時代のNRIで求められる人材像は、技術単体ではなく、業務・業界知識、要件定義、設計品質、AI活用、セキュリティ、共創をつなげられる人材と仮説化できる。
